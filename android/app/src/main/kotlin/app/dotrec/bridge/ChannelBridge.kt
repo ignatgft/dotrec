@@ -40,23 +40,27 @@ object ChannelBridge {
             .setStreamHandler(object : EventChannel.StreamHandler {
                 override fun onListen(args: Any?, sink: EventChannel.EventSink) {
                     sink.success(RecorderStateStore.toMap(RecorderStateStore.state.value))
-                    val job = scope.launch {
+                    val stateJob = scope.launch {
                         RecorderStateStore.state.collectLatest { s ->
-                            if (s is RecorderState.Failed && s.code == "saved_placeholder") return@collectLatest
                             sink.success(RecorderStateStore.toMap(s))
                         }
                     }
-                    sinkRef = job
+                    val resultJob = scope.launch {
+                        app.dotrec.recorder.RecordingEvents.results.collectLatest { m ->
+                            sink.success(m)
+                        }
+                    }
+                    sinkJobs = listOf(stateJob, resultJob)
                 }
 
                 override fun onCancel(args: Any?) {
-                    sinkRef?.cancel()
-                    sinkRef = null
+                    sinkJobs.forEach { it.cancel() }
+                    sinkJobs = emptyList()
                 }
             })
     }
 
-    private var sinkRef: kotlinx.coroutines.Job? = null
+    private var sinkJobs: List<kotlinx.coroutines.Job> = emptyList()
 
     private fun handleRecorder(
         activity: Activity,
@@ -66,26 +70,27 @@ object ChannelBridge {
     ) {
         when (call.method) {
             "start" -> {
-                val cur = RecorderStateStore.state.value
-                if (cur is RecorderState.Recording || cur is RecorderState.Starting) {
+                // Повтор после ошибки: Failed виден в UI, сбрасываем для нового старта.
+                if (RecorderStateStore.state.value is RecorderState.Failed) {
+                    runCatching { RecorderStateStore.set(RecorderState.Idle) }
+                }
+                if (RecorderStateStore.state.value !is RecorderState.Idle) {
                     result.error("already_running", null, null)
                     return
                 }
                 if (freeBytes() < 200L * 1024 * 1024) {
+                    runCatching { RecorderStateStore.set(RecorderState.Starting) }
                     runCatching { RecorderStateStore.set(RecorderState.Failed("low_storage")) }
-                    runCatching { RecorderStateStore.set(RecorderState.Idle) }
                     result.error("low_storage", null, null)
                     return
                 }
                 @Suppress("UNCHECKED_CAST")
                 val args = (call.arguments as? Map<String, Any?>) ?: emptyMap()
                 runCatching { settings.saveAll(args) }
-                val countdown = (args["countdownSec"] as? Number)?.toInt() ?: 0
-                // Запуск через прозрачную ConsentActivity (системное согласие).
+                // Сервис сам читает SettingsStore; запуск через прозрачную
+                // ConsentActivity (системное согласие, токен одноразовый).
                 val consent = Intent(activity, ConsentActivity::class.java)
                 activity.startActivity(consent)
-                // Countdown донесём сервису следующим шагом M1; пока сохраняем локально.
-                pendingCountdown = countdown
                 result.success(null)
             }
             "stop" -> {
@@ -136,8 +141,6 @@ object ChannelBridge {
             else -> result.notImplemented()
         }
     }
-
-    private var pendingCountdown: Int = 0
 
     private fun handleLibrary(activity: Activity, call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {

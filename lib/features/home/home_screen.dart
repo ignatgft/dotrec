@@ -267,6 +267,10 @@ class HomeScreen extends ConsumerWidget {
   String _errorText(String code) => switch (code) {
     'low_storage' => 'Мало места. Освободите хотя бы 200 МБ',
     'consent_denied' => 'Запись не началась. Доступ к экрану не выдан',
+    'audio_error' => 'Нет доступа к микрофону. Откройте настройки приложения',
+    'projection_stopped' => 'Запись остановлена системой',
+    'encoder_error' => 'Кодер не поддержал параметры',
+    'io_error' => 'Не удалось сохранить файл',
     'not_running' => 'Запись не идёт',
     _ => 'Ошибка записи: $code',
   };

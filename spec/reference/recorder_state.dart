@@ -24,10 +24,35 @@ sealed class RecorderState {
   }
 }
 
-class Idle extends RecorderState { const Idle(); }
-class Countdown extends RecorderState { const Countdown(this.secondsLeft); final int secondsLeft; }
-class Starting extends RecorderState { const Starting(); }
-class Recording extends RecorderState { const Recording(this.elapsed); final Duration elapsed; }
-class Paused extends RecorderState { const Paused(this.elapsed); final Duration elapsed; }
-class Saving extends RecorderState { const Saving(); }
-class Failed extends RecorderState { const Failed(this.code, [this.message]); final String code; final String? message; }
+class Idle extends RecorderState {
+  const Idle();
+}
+
+class Countdown extends RecorderState {
+  const Countdown(this.secondsLeft);
+  final int secondsLeft;
+}
+
+class Starting extends RecorderState {
+  const Starting();
+}
+
+class Recording extends RecorderState {
+  const Recording(this.elapsed);
+  final Duration elapsed;
+}
+
+class Paused extends RecorderState {
+  const Paused(this.elapsed);
+  final Duration elapsed;
+}
+
+class Saving extends RecorderState {
+  const Saving();
+}
+
+class Failed extends RecorderState {
+  const Failed(this.code, [this.message]);
+  final String code;
+  final String? message;
+}

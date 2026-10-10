@@ -37,6 +37,9 @@
             android:name=".recorder.RecorderService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+        <receiver
+            android:name=".entry.RecordingActionReceiver"
+            android:exported="false" />
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

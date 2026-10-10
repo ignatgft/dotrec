@@ -6,7 +6,7 @@ Flutter (интерфейс) + Kotlin (нативное ядро записи). 
 
 Исходная спецификация агента лежит в `spec/` (`AGENTS.md` — главный файл).
 
-## Статус: v0.1.0-beta (M0 + каркас M1)
+## Статус: v0.2.0-beta (M0 + ядро M1)
 
 - [x] T-01. Проект: `app.dotrec`, minSdk 29, targetSdk 35, Kotlin 2.x
 - [x] T-02. Тема `DotTheme.light/dark` из токенов, шрифт Doto, Система/Светлая/Тёмная
@@ -16,9 +16,17 @@ Flutter (интерфейс) + Kotlin (нативное ядро записи). 
 - [x] T-05. Контракт каналов v1: Dart-модели + тесты сериализации
 - [x] T-06. Чистая логика: `BitrateCalc`, `SizeCalc`, `FileNamer` + тесты
 - [x] T-07. `RecorderStateStore` (StateFlow), `SettingsStore`
-- [~] T-08. `ConsentActivity` + `RecorderService`: **каркас с симуляцией состояний**.
-  Реальный пайплайн MediaProjection + MediaRecorder — задача M1
+- [x] T-08. `ConsentActivity` + `RecorderService`: реальный пайплайн
+  MediaProjection + MediaRecorder + VirtualDisplay, foreground service,
+  MediaStore `Movies/DotRec/`, одноразовый токен согласия
+- [x] T-09. Чек-лист освобождения, `onStop` колбэк, resize при повороте
+- [x] T-10. Пауза/продолжение, отсчёт 3-2-1 (Нет/3с/5с)
+- [x] T-11. Уведомление записи (хронометр, Пауза/Стоп) + «Запись сохранена»
+  (Открыть/Поделиться/Удалить)
+- [x] T-12. Микрофон: запрос в момент включения, `setAudioSource(MIC)`
+- [x] T-13. Проверка места: блок старта <200 МБ, автостоп при <100 МБ
 - [x] T-14. Мост каналов `ChannelBridge` + `EventChannel` с текущим состоянием
+  и одноразовым событием `saved`
 - [x] T-19 (частично). Библиотека: список/открыть/поделиться/удалить через MediaStore
 
 Отклонения от спеки (честно):
@@ -41,7 +49,10 @@ flutter test
 flutter build apk --debug
 ```
 
-Kotlin: `cd android && ./gradlew testDebugUnitTest lintDebug` (после M1).
+Kotlin: `cd android && ./gradlew :app:testDebugUnitTest` (17 тестов зелёные).
+Ручной тест-план из `spec/docs/09-testing-qa.md` на устройстве — pending
+(нет подключённого устройства): запись 30 с 1080p·60, паузы, поворот,
+отказ в согласии, мало места, 20 циклов старт/стоп.
 
 ## Подпись релиза
 
