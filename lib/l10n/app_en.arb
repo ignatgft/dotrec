@@ -1,0 +1,34 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-10-10T00:00:00.000",
+  "appTitle": "DotRec",
+  "start": "Start recording",
+  "stop": "Stop",
+  "pause": "Pause",
+  "resume": "Resume",
+  "saved": "Recording saved",
+  "open": "Open",
+  "share": "Share",
+  "delete": "Delete",
+  "err_space": "Low storage. Free up at least 200 MB",
+  "err_consent": "Recording didn't start. Screen access wasn't granted",
+  "err_mic": "No microphone access. Open app settings",
+  "fps_cap": "Your screen supports up to {n} Hz",
+  "@fps_cap": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "audio_blocked": "Some apps blocked audio capture",
+  "empty_lib_title": "Your recordings will appear here",
+  "ready": "READY",
+  "paused": "PAUSED",
+  "saving": "SAVING",
+  "settings": "Settings",
+  "library": "Recordings",
+  "presetFast": "Fast",
+  "presetBalanced": "Balanced",
+  "presetQuality": "Quality",
+  "presetCustom": "Custom",
+  "begin": "Start"
+}

@@ -1,0 +1,229 @@
+package app.dotrec.bridge
+
+import android.app.Activity
+import android.content.ContentUris
+import android.content.Intent
+import android.os.Build
+import android.os.Environment
+import android.os.StatFs
+import android.provider.MediaStore
+import android.provider.Settings
+import androidx.core.net.toUri
+import app.dotrec.entry.ConsentActivity
+import app.dotrec.recorder.RecorderService
+import app.dotrec.recorder.RecorderState
+import app.dotrec.recorder.RecorderStateStore
+import app.dotrec.settings.SettingsStore
+import app.dotrec.util.DeviceCaps
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+/** Мост Flutter ↔ Kotlin. Контракт каналов v1. */
+object ChannelBridge {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    fun register(activity: Activity, engine: FlutterEngine) {
+        val settings = SettingsStore(activity)
+        MethodChannel(engine.dartExecutor.binaryMessenger, "app.dotrec/recorder")
+            .setMethodCallHandler { call, result -> handleRecorder(activity, settings, call, result) }
+        MethodChannel(engine.dartExecutor.binaryMessenger, "app.dotrec/library")
+            .setMethodCallHandler { call, result -> handleLibrary(activity, call, result) }
+        EventChannel(engine.dartExecutor.binaryMessenger, "app.dotrec/recorder_state")
+            .setStreamHandler(object : EventChannel.StreamHandler {
+                override fun onListen(args: Any?, sink: EventChannel.EventSink) {
+                    sink.success(RecorderStateStore.toMap(RecorderStateStore.state.value))
+                    val job = scope.launch {
+                        RecorderStateStore.state.collectLatest { s ->
+                            if (s is RecorderState.Failed && s.code == "saved_placeholder") return@collectLatest
+                            sink.success(RecorderStateStore.toMap(s))
+                        }
+                    }
+                    sinkRef = job
+                }
+
+                override fun onCancel(args: Any?) {
+                    sinkRef?.cancel()
+                    sinkRef = null
+                }
+            })
+    }
+
+    private var sinkRef: kotlinx.coroutines.Job? = null
+
+    private fun handleRecorder(
+        activity: Activity,
+        settings: SettingsStore,
+        call: MethodCall,
+        result: MethodChannel.Result,
+    ) {
+        when (call.method) {
+            "start" -> {
+                val cur = RecorderStateStore.state.value
+                if (cur is RecorderState.Recording || cur is RecorderState.Starting) {
+                    result.error("already_running", null, null)
+                    return
+                }
+                if (freeBytes() < 200L * 1024 * 1024) {
+                    runCatching { RecorderStateStore.set(RecorderState.Failed("low_storage")) }
+                    runCatching { RecorderStateStore.set(RecorderState.Idle) }
+                    result.error("low_storage", null, null)
+                    return
+                }
+                @Suppress("UNCHECKED_CAST")
+                val args = (call.arguments as? Map<String, Any?>) ?: emptyMap()
+                runCatching { settings.saveAll(args) }
+                val countdown = (args["countdownSec"] as? Number)?.toInt() ?: 0
+                // Запуск через прозрачную ConsentActivity (системное согласие).
+                val consent = Intent(activity, ConsentActivity::class.java)
+                activity.startActivity(consent)
+                // Countdown донесём сервису следующим шагом M1; пока сохраняем локально.
+                pendingCountdown = countdown
+                result.success(null)
+            }
+            "stop" -> {
+                activity.startService(
+                    Intent(activity, RecorderService::class.java).setAction(RecorderService.ACTION_STOP),
+                )
+                result.success(null)
+            }
+            "pause" -> {
+                activity.startService(
+                    Intent(activity, RecorderService::class.java).setAction(RecorderService.ACTION_PAUSE),
+                )
+                result.success(null)
+            }
+            "resume" -> {
+                activity.startService(
+                    Intent(activity, RecorderService::class.java).setAction(RecorderService.ACTION_RESUME),
+                )
+                result.success(null)
+            }
+            "getDeviceCaps" -> {
+                val display = if (Build.VERSION.SDK_INT >= 30) {
+                    activity.display
+                } else {
+                    @Suppress("DEPRECATION")
+                    activity.windowManager.defaultDisplay
+                }
+                result.success(DeviceCaps.collect(activity, display))
+            }
+            "getSettings" -> result.success(settings.getAll())
+            "saveSettings" -> {
+                @Suppress("UNCHECKED_CAST")
+                val args = (call.arguments as? Map<String, Any?>) ?: emptyMap()
+                try {
+                    settings.saveAll(args)
+                    result.success(null)
+                } catch (_: IllegalArgumentException) {
+                    result.error("invalid_settings", null, null)
+                }
+            }
+            "openAppSettings" -> {
+                activity.startActivity(
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${activity.packageName}".toUri()),
+                )
+                result.success(null)
+            }
+            "requestAddTile" -> result.success(false)
+            else -> result.notImplemented()
+        }
+    }
+
+    private var pendingCountdown: Int = 0
+
+    private fun handleLibrary(activity: Activity, call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "list" -> result.success(listDotRec(activity))
+            "open" -> {
+                val uri = ((call.arguments as? Map<*, *>)?.get("uri") as? String) ?: run {
+                    result.success(null)
+                    return
+                }
+                val open = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri.toUri(), "video/mp4")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                activity.startActivity(Intent.createChooser(open, null))
+                result.success(null)
+            }
+            "share" -> {
+                val uri = ((call.arguments as? Map<*, *>)?.get("uri") as? String) ?: run {
+                    result.success(null)
+                    return
+                }
+                val share = Intent(Intent.ACTION_SEND).apply {
+                    type = "video/mp4"
+                    putExtra(Intent.EXTRA_STREAM, uri.toUri())
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                activity.startActivity(Intent.createChooser(share, null))
+                result.success(null)
+            }
+            "delete" -> {
+                val uri = ((call.arguments as? Map<*, *>)?.get("uri") as? String) ?: run {
+                    result.success(false)
+                    return
+                }
+                val rows = activity.contentResolver.delete(uri.toUri(), null, null)
+                result.success(rows > 0)
+            }
+            else -> result.notImplemented()
+        }
+    }
+
+    private fun listDotRec(activity: Activity): List<Map<String, Any?>> {
+        val out = mutableListOf<Map<String, Any?>>()
+        val proj = arrayOf(
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.SIZE,
+            MediaStore.Video.Media.DATE_ADDED,
+        )
+        // TODO(verify): столбец DURATION доступен с API 29 — minSdk 29 ок.
+        val cur = activity.contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            proj,
+            "${MediaStore.Video.Media.DISPLAY_NAME} LIKE ?",
+            arrayOf("DotRec_%"),
+            "${MediaStore.Video.Media.DATE_ADDED} DESC",
+        ) ?: return out
+        cur.use {
+            val idI = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+            val nI = it.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val dI = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            val sI = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
+            val cI = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+            while (it.moveToNext()) {
+                val uri = ContentUris.withAppendedId(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    it.getLong(idI),
+                ).toString()
+                out += mapOf(
+                    "uri" to uri,
+                    "name" to it.getString(nI),
+                    "durationMs" to it.getLong(dI),
+                    "sizeBytes" to it.getLong(sI),
+                    "createdAtMs" to it.getLong(cI) * 1000,
+                )
+            }
+        }
+        return out
+    }
+
+    private fun freeBytes(): Long = try {
+        StatFs(Environment.getDataDirectory().path).availableBytes
+    } catch (_: Exception) {
+        0L
+    }
+
+    fun dispose() = scope.cancel()
+}

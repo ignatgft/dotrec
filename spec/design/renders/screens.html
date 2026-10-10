@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DotRec — рендеры экранов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--page:#e4e4e4;--bg:#F1F1F1;--surface:#fff;--raised:#fff;--line:#DCDCDC;--fg:#101010;--muted:#6B6B6B;--onfg:#fff;--rec:#D71921}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0a0a0a;--bg:#000;--surface:#151515;--raised:#1F1F1F;--line:#2B2B2B;--fg:#fff;--muted:#8C8C8C;--onfg:#000}}
+:root[data-theme="dark"]{--page:#0a0a0a;--bg:#000;--surface:#151515;--raised:#1F1F1F;--line:#2B2B2B;--fg:#fff;--muted:#8C8C8C;--onfg:#000}
+*{box-sizing:border-box;margin:0}
+body{background:var(--page);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px;padding-top:max(20px,env(safe-area-inset-top));line-height:1.4}
+.dot{font-family:'Doto',ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:.04em}
+header.top{display:flex;gap:12px;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto 18px;flex-wrap:wrap}
+header.top h1{font-size:22px}
+header.top p{color:var(--muted);font-size:14px;max-width:60ch}
+button.tg{font:inherit;font-size:14px;padding:10px 18px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;min-height:44px}
+button.tg:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+h2.sec{max-width:1200px;margin:28px auto 12px;font-size:16px;color:var(--muted);font-weight:600}
+.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px;justify-items:center}
+figure{width:270px}
+figcaption{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+.phone{width:270px;height:560px;background:var(--bg);border:1px solid var(--line);border-radius:34px;padding:16px 14px;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.sb{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:0 6px 10px}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;min-height:34px}
+.hd .t{font-size:13px}
+.ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--fg)}
+.ico svg,.rnd svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.stat{text-align:center;font-size:40px;line-height:1.1;margin-top:6px}
+.sub{text-align:center;font-size:12px;color:var(--muted);margin-top:2px}
+.rb{width:112px;height:112px;border-radius:50%;border:2px solid var(--fg);margin:14px auto 6px;display:flex;align-items:center;justify-content:center}
+.rb i{display:block;width:68px;height:68px;border-radius:50%;background:var(--rec)}
+.rb.rec i{width:42px;height:42px;border-radius:9px}
+.rb.pz i{display:flex;align-items:center;justify-content:center;color:#fff}
+.rb.cd{border-style:dashed}
+.rb.cd span{font-size:44px}
+.cap{text-align:center;font-size:12px;color:var(--muted)}
+.lb{font-size:11px;color:var(--muted);margin:10px 4px 4px}
+.seg{display:flex;gap:4px}
+.seg div{flex:1;text-align:center;font-size:12px;padding:8px 0;border-radius:12px;background:var(--surface);border:.5px solid var(--line);color:var(--muted)}
+.seg div.on{background:var(--fg);color:var(--onfg);border-color:var(--fg)}
+.seg div.off{opacity:.4}
+.seg.dim{opacity:.45}
+.tg-row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.rnd{width:44px;height:44px;border-radius:50%;background:var(--surface);border:.5px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--fg)}
+.rnd.on{background:var(--fg);color:var(--onfg);border-color:var(--fg)}
+.hint{font-size:11px;color:var(--muted);margin:6px 4px 0}
+.card{background:var(--surface);border:.5px solid var(--line);border-radius:20px;padding:4px 12px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:.5px solid var(--line);font-size:13px}
+.row:last-child{border-bottom:0}
+.row small{display:block;color:var(--muted);font-size:11px}
+.sw{width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--muted)}
+.sw.on{background:var(--fg)}
+.sw.on::after{left:19px;background:var(--onfg)}
+.val{font-size:13px}
+.btn{display:block;text-align:center;background:var(--fg);color:var(--onfg);border-radius:999px;padding:15px;font-size:15px;margin-top:auto}
+.lines{margin:18px 4px;display:grid;gap:14px;font-size:13px}
+.lines div{display:flex;gap:10px;align-items:center}
+.lines b{width:8px;height:8px;border-radius:50%;background:var(--fg);flex:none}
+.lg{display:flex;gap:6px;justify-content:center;margin:34px 0 12px}
+.lg i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.lg i:last-child{background:var(--rec)}
+.thumbs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.th{aspect-ratio:9/16;background:var(--surface);border:.5px solid var(--line);border-radius:14px;position:relative}
+.th span{position:absolute;left:8px;bottom:8px;font-size:11px}
+.th.sel{outline:2px solid var(--fg)}
+.tl{height:44px;border-radius:12px;background:var(--surface);border:.5px solid var(--line);position:relative;margin:10px 0}
+.tl::before{content:"";position:absolute;left:18%;right:22%;top:-2px;bottom:-2px;border:2px solid var(--fg);border-radius:12px}
+.pv{flex:1;background:var(--surface);border:.5px solid var(--line);border-radius:18px;margin:6px 0;display:flex;align-items:center;justify-content:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips span{font-size:11px;padding:6px 10px;border-radius:12px;border:.5px solid var(--line);background:var(--surface)}
+.comp{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px}
+.tile{border-radius:28px;padding:12px 14px;display:flex;align-items:center;gap:10px;background:var(--surface);border:.5px solid var(--line);font-size:13px;min-height:56px}
+.tile.on{background:var(--fg);color:var(--onfg)}
+.rd{width:10px;height:10px;border-radius:50%;background:var(--rec);flex:none}
+.wd{background:var(--bg);border:.5px solid var(--line);border-radius:22px;padding:12px;display:flex;align-items:center;gap:12px}
+.wd .r{width:44px;height:44px;border-radius:50%;border:2px solid var(--fg);display:flex;align-items:center;justify-content:center;flex:none}
+.wd .r i{width:20px;height:20px;border-radius:50%;background:var(--rec)}
+.wd small{display:block;font-size:11px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:10px;background:var(--fg);color:var(--onfg);border-radius:999px;padding:10px 16px}
+.pill svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nt{background:var(--surface);border:.5px solid var(--line);border-radius:22px;padding:12px 14px;font-size:13px}
+.nt .h{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:4px}
+.nt .a{display:flex;gap:14px;margin-top:8px;font-size:12px}
+.stack{display:grid;gap:10px;width:100%}
+@media (prefers-reduced-motion:no-preference){.rb.rec{animation:pulse 2s ease-in-out infinite}}
+@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--rec) 22%,transparent)}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+<symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 8a5 5 0 0 1 0 8"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+<symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol>
+<symbol id="i-cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.5 15.5M14.5 14.5L20 20M8.5 8.5L12 12"/></symbol>
+</svg>
+
+<header class="top">
+  <div>
+    <h1 class="dot">DotRec</h1>
+    <p>Рендеры экранов по docs/06-ux-ui-spec.md. Тема следует системной, кнопка справа переключает вручную. Цвета и размеры совпадают с design/tokens.json.</p>
+  </div>
+  <button class="tg" id="tg" type="button">Тема: система</button>
+</header>
+
+<h2 class="sec">Основные экраны (v1)</h2>
+<div class="grid">
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="lg"><i></i><i></i><i></i></div>
+  <div class="dot" style="font-size:22px;text-align:center;line-height:1.2">Запись экрана<br>без лишнего</div>
+  <div class="lines">
+    <div><b></b>Работает без интернета</div>
+    <div><b></b>Нет рекламы и водяных знаков</div>
+    <div><b></b>Файлы в Movies/DotRec</div>
+  </div>
+  <div class="btn">Начать</div>
+</div><figcaption>Онбординг</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot t">REC</span><span style="display:flex"><span class="ico"><svg><use href="#i-list"/></svg></span><span class="ico"><svg><use href="#i-gear"/></svg></span></span></div>
+  <div class="stat dot">READY</div>
+  <div class="sub">1080p · 60 FPS · 20 Мбит/с</div>
+  <div class="rb"><i></i></div>
+  <div class="cap">Начать запись</div>
+  <div class="lb">Пресет</div>
+  <div class="seg"><div>Быстро</div><div class="on">Баланс</div><div>Качество</div></div>
+  <div class="lb">Разрешение</div>
+  <div class="seg"><div>720</div><div class="on">1080</div><div>1440</div></div>
+  <div class="lb">FPS</div>
+  <div class="seg"><div>30</div><div class="on">60</div><div class="off">90</div></div>
+  <div class="hint">Экран поддерживает до 60 Гц</div>
+  <div class="tg-row"><span class="rnd"><svg><use href="#i-mic"/></svg></span><span class="rnd on"><svg><use href="#i-vol"/></svg></span></div>
+</div><figcaption>Главная: готов</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot t">REC</span><span style="display:flex"><span class="ico"><svg><use href="#i-list"/></svg></span><span class="ico"><svg><use href="#i-gear"/></svg></span></span></div>
+  <div class="stat dot">00:42</div>
+  <div class="sub">1080p · 60 FPS · ~85 МБ в минуту</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px"><span class="rnd"><svg><use href="#i-pause"/></svg></span><div class="rb rec"><i></i></div><span style="width:44px"></span></div>
+  <div class="cap">Остановить</div>
+  <div class="lb">Пресет</div>
+  <div class="seg dim"><div>Быстро</div><div class="on">Баланс</div><div>Качество</div></div>
+  <div class="lb">Разрешение</div>
+  <div class="seg dim"><div>720</div><div class="on">1080</div><div>1440</div></div>
+  <div class="lb">FPS</div>
+  <div class="seg dim"><div>30</div><div class="on">60</div><div class="off">90</div></div>
+  <div class="tg-row"><span class="rnd"><svg><use href="#i-mic"/></svg></span><span class="rnd on"><svg><use href="#i-vol"/></svg></span></div>
+</div><figcaption>Главная: идёт запись</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot t">REC</span><span style="display:flex"><span class="ico"><svg><use href="#i-list"/></svg></span><span class="ico"><svg><use href="#i-gear"/></svg></span></span></div>
+  <div class="stat dot">PAUSED</div>
+  <div class="sub">00:42 записано</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px"><span class="rnd"><svg><use href="#i-stop"/></svg></span><div class="rb pz"><i><svg style="width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><use href="#i-pause"/></svg></i></div><span style="width:44px"></span></div>
+  <div class="cap">Продолжить</div>
+</div><figcaption>Главная: пауза</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot t">REC</span><span></span></div>
+  <div class="stat dot" style="margin-top:60px">READY</div>
+  <div class="rb cd" style="margin-top:30px"><span class="dot">3</span></div>
+  <div class="cap">Запись начнётся через 3 с</div>
+  <div class="btn" style="background:var(--surface);color:var(--fg);border:.5px solid var(--line)">Отмена</div>
+</div><figcaption>Обратный отсчёт</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot" style="font-size:20px">Настройки</span><span></span></div>
+  <div class="lb">Видео</div>
+  <div class="card">
+    <div class="row"><span>Разрешение</span><span class="val dot">1080</span></div>
+    <div class="row"><span>FPS<small>Экран поддерживает до 60 Гц</small></span><span class="val dot">60</span></div>
+    <div class="row"><span>Битрейт</span><span class="val dot">20</span></div>
+    <div class="row"><span>Кодек</span><span class="val">H.264</span></div>
+  </div>
+  <div class="lb">Звук</div>
+  <div class="card">
+    <div class="row"><span>Микрофон</span><span class="sw"></span></div>
+    <div class="row"><span>Звук системы</span><span class="sw on"></span></div>
+  </div>
+  <div class="lb">Запись</div>
+  <div class="card">
+    <div class="row"><span>Обратный отсчёт</span><span class="val">3 с</span></div>
+    <div class="row"><span>Плавающая плашка</span><span class="sw"></span></div>
+  </div>
+</div><figcaption>Настройки</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot" style="font-size:20px">Записи</span><span class="ico"><svg><use href="#i-gear"/></svg></span></div>
+  <div class="thumbs" style="margin-top:8px">
+    <div class="th"><span class="dot">01:01</span></div>
+    <div class="th"><span class="dot">00:18</span></div>
+    <div class="th"><span class="dot">05:12</span></div>
+    <div class="th"><span class="dot">00:44</span></div>
+  </div>
+</div><figcaption>Записи</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot" style="font-size:20px">Записи</span><span></span></div>
+  <div style="margin:auto 0;text-align:center">
+    <div style="width:84px;height:140px;border:2px dashed var(--line);border-radius:16px;margin:0 auto 16px"></div>
+    <div class="dot" style="font-size:16px">Здесь появятся<br>ваши записи</div>
+  </div>
+  <div class="btn">Начать запись</div>
+</div><figcaption>Записи: пусто</figcaption></figure>
+
+</div>
+
+<h2 class="sec">Точки входа</h2>
+<div class="comp">
+  <div class="stack">
+    <div class="tile"><svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><use href="#i-video"/></svg><span>Запись</span></div>
+    <div class="tile on"><span class="rd"></span><span class="dot">00:42</span></div>
+    <figcaption style="text-align:left">Плитка шторки: выкл и вкл</figcaption>
+  </div>
+  <div class="stack">
+    <div class="wd"><div class="r"><i></i></div><div><span class="dot" style="font-size:14px">1080·60</span><small>Тап — запись</small></div></div>
+    <div class="wd"><div class="r"><i style="border-radius:5px"></i></div><div><span class="dot" style="font-size:14px">REC</span><small>Идёт запись</small></div></div>
+    <figcaption style="text-align:left">Виджет 2×1</figcaption>
+  </div>
+  <div class="stack">
+    <div><span class="pill"><span class="rd"></span><span class="dot">00:42</span><svg><use href="#i-pause"/></svg><svg><use href="#i-stop"/></svg></span></div>
+    <figcaption style="text-align:left">Плавающая плашка (опция)</figcaption>
+  </div>
+  <div class="stack">
+    <div class="nt"><div class="h"><span>DotRec</span><span>сейчас</span></div><b>Идёт запись</b> <span class="dot">00:42</span><div class="a"><span>Пауза</span><span>Стоп</span></div></div>
+    <div class="nt"><div class="h"><span>DotRec</span><span>сейчас</span></div><b>Запись сохранена</b><div class="a"><span>Открыть</span><span>Поделиться</span><span>Удалить</span></div></div>
+    <figcaption style="text-align:left">Уведомления</figcaption>
+  </div>
+</div>
+
+<h2 class="sec">Расширения из каталога (docs/11), пример оформления</h2>
+<div class="grid">
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot" style="font-size:20px">Обрезка</span><span class="ico"><svg><use href="#i-cut"/></svg></span></div>
+  <div class="pv"><span class="dot" style="font-size:22px">00:18</span></div>
+  <div class="tl"></div>
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span class="dot">00:11</span><span class="dot">00:49</span></div>
+  <div class="chips" style="margin:12px 0"><span>Без перекодирования</span><span>Длительность 00:38</span></div>
+  <div class="btn" style="margin-top:6px">Сохранить копию</div>
+</div><figcaption>FX-POST-01 Обрезка</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot" style="font-size:20px">Дополнительно</span><span></span></div>
+  <div class="card">
+    <div class="row"><span>Режим «Игра»<small>Фиксирует «Качество», подсказывает «Не беспокоить»</small></span><span class="sw on"></span></div>
+    <div class="row"><span>Остановка встряхиванием</span><span class="sw"></span></div>
+    <div class="row"><span>Остановка при блокировке экрана</span><span class="sw on"></span></div>
+    <div class="row"><span>Оценка размера файла</span><span class="sw on"></span></div>
+    <div class="row"><span>Отклик вибрацией</span><span class="sw on"></span></div>
+  </div>
+  <div class="card">
+    <div class="row"><span>Проверка устройства<small>Кодеки, частоты, звук системы</small></span><span class="val">›</span></div>
+  </div>
+</div><figcaption>Дополнительно: переключатели</figcaption></figure>
+
+<figure><div class="phone">
+  <div class="sb"><span>9:41</span><span>100%</span></div>
+  <div class="hd"><span class="dot" style="font-size:20px">Проверка устройства</span><span></span></div>
+  <div class="card">
+    <div class="row"><span>Экран</span><span class="val dot">1080×2400</span></div>
+    <div class="row"><span>Частоты</span><span class="val dot">60 · 90</span></div>
+    <div class="row"><span>H.264</span><span class="val">Аппаратный</span></div>
+    <div class="row"><span>HEVC</span><span class="val">Аппаратный</span></div>
+    <div class="row"><span>Звук системы</span><span class="val">Доступен</span></div>
+    <div class="row"><span>Свободно</span><span class="val dot">48 ГБ</span></div>
+  </div>
+  <div class="hint">Часть приложений запрещает захват звука, это не ошибка DotRec.</div>
+</div><figcaption>FX-REL-03 Проверка устройства</figcaption></figure>
+
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById('tg');
+  var modes=['system','light','dark'],i=0;
+  var names={system:'Тема: система',light:'Тема: светлая',dark:'Тема: тёмная'};
+  btn.addEventListener('click',function(){
+    i=(i+1)%3;var m=modes[i];
+    if(m==='system'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',m)}
+    btn.textContent=names[m];
+  });
+})();
+</script>
+</body>
+</html>

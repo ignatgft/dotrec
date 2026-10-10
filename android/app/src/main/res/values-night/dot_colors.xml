@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dot_bg">#000000</color>
+    <color name="dot_surface">#151515</color>
+    <color name="dot_line">#2B2B2B</color>
+    <color name="dot_fg">#FFFFFF</color>
+    <color name="dot_muted">#8C8C8C</color>
+    <color name="dot_onfg">#000000</color>
+    <color name="dot_record">#D71921</color>
+</resources>
