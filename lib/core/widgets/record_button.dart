@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/tokens.dart';
 
@@ -8,7 +10,9 @@ import '../theme/tokens.dart';
 enum RecordVisualState { ready, countdown, recording, paused, saving, failed }
 
 /// Большая круглая кнопка записи 120 dp.
-class RecordButton extends StatelessWidget {
+/// T-26: морфинг 220 мс, пульс кольца раз в 2 с при записи, хаптик на тап.
+/// Уважает `disableAnimations`.
+class RecordButton extends StatefulWidget {
   const RecordButton({
     super.key,
     required this.visual,
@@ -23,22 +27,76 @@ class RecordButton extends StatelessWidget {
   final String? semanticsLabel;
 
   @override
+  State<RecordButton> createState() => _RecordButtonState();
+}
+
+class _RecordButtonState extends State<RecordButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: DotTokens.pulseMs),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPulse();
+  }
+
+  @override
+  void didUpdateWidget(RecordButton old) {
+    super.didUpdateWidget(old);
+    if (old.visual != widget.visual) _syncPulse();
+  }
+
+  void _syncPulse() {
+    final bool noAnim = MediaQuery.disableAnimationsOf(context);
+    if (widget.visual == RecordVisualState.recording && !noAnim) {
+      if (!_pulse.isAnimating) unawaited(_pulse.repeat());
+    } else {
+      _pulse.stop();
+      _pulse.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final DotColors dot = context.dot;
+    final bool pulsing =
+        widget.visual == RecordVisualState.recording &&
+        !MediaQuery.disableAnimationsOf(context);
     return Semantics(
       button: true,
-      label: semanticsLabel ?? _defaultLabel(),
+      label: widget.semanticsLabel ?? _defaultLabel(),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap == null
+            ? null
+            : () {
+                unawaited(HapticFeedback.lightImpact());
+                widget.onTap!();
+              },
         behavior: HitTestBehavior.opaque,
         child: SizedBox(
           width: DotTokens.recordButton,
           height: DotTokens.recordButton,
-          child: CustomPaint(
-            painter: _RingPainter(
-              color: dot.fg,
-              saving: visual == RecordVisualState.saving,
-            ),
+          child: AnimatedBuilder(
+            animation: _pulse,
+            builder: (BuildContext context, Widget? child) {
+              return CustomPaint(
+                painter: _RingPainter(
+                  color: dot.fg,
+                  saving: widget.visual == RecordVisualState.saving,
+                  pulse: pulsing ? _pulse.value : 0,
+                ),
+                child: child,
+              );
+            },
             child: Center(child: _inner(dot)),
           ),
         ),
@@ -46,9 +104,9 @@ class RecordButton extends StatelessWidget {
     );
   }
 
-  String _defaultLabel() => switch (visual) {
+  String _defaultLabel() => switch (widget.visual) {
     RecordVisualState.ready => 'Начать запись, кнопка',
-    RecordVisualState.countdown => 'Отсчёт $countdownLeft',
+    RecordVisualState.countdown => 'Отсчёт ${widget.countdownLeft}',
     RecordVisualState.recording => 'Остановить запись, кнопка',
     RecordVisualState.paused => 'Продолжить запись, кнопка',
     RecordVisualState.saving => 'Сохранение записи',
@@ -56,7 +114,7 @@ class RecordButton extends StatelessWidget {
   };
 
   Widget _inner(DotColors dot) {
-    switch (visual) {
+    switch (widget.visual) {
       case RecordVisualState.ready:
       case RecordVisualState.failed:
         return AnimatedContainer(
@@ -69,8 +127,8 @@ class RecordButton extends StatelessWidget {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 600),
           child: Text(
-            '$countdownLeft',
-            key: ValueKey<int>(countdownLeft),
+            '${widget.countdownLeft}',
+            key: ValueKey<int>(widget.countdownLeft),
             style: const TextStyle(
               fontFamily: DotTokens.dotFamily,
               fontSize: 44,
@@ -118,10 +176,11 @@ class RecordButton extends StatelessWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.color, required this.saving});
+  _RingPainter({required this.color, required this.saving, this.pulse = 0});
 
   final Color color;
   final bool saving;
+  final double pulse;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -136,6 +195,17 @@ class _RingPainter extends CustomPainter {
       }
       return;
     }
+    if (pulse > 0) {
+      // Пульс кольца раз в 2 с: расширяющееся затухающее кольцо.
+      canvas.drawCircle(
+        c,
+        r + pulse * 10,
+        Paint()
+          ..color = color.withValues(alpha: (1 - pulse) * 0.5)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = DotTokens.ring,
+      );
+    }
     canvas.drawCircle(
       c,
       r,
@@ -148,5 +218,5 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.color != color || old.saving != saving;
+      old.color != color || old.saving != saving || old.pulse != pulse;
 }

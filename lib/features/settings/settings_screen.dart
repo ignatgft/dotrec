@@ -132,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: DotTokens.sm),
                 DotSwitch(
                   value: cfg.systemAudio,
-                  label: t.sysAudioV11,
+                  label: t.sysAudioLabel,
                   onChanged: (bool v) => upd(cfg.copyWith(systemAudio: v)),
                 ),
               ],
@@ -241,7 +241,7 @@ class SettingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${t.aboutLine} 0.4.0-beta.',
+                  '${t.aboutLine} 0.5.0-beta.',
                   style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
                 ),
                 TextButton(

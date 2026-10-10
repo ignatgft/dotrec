@@ -37,7 +37,9 @@ class RecorderService : Service() {
     private var projection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
     private var recorder: MediaRecorder? = null
+    private var codec: CodecPipeline? = null
     private var session: OutputWriter.Session? = null
+    private var usedSysAudio = false
 
     private val main = Handler(Looper.getMainLooper())
 
@@ -182,6 +184,9 @@ class RecorderService : Service() {
             return
         }
         val mic = settings["mic"] as? Boolean ?: false
+        // T-24: звук системы — пайплайн MediaCodec + MediaMuxer, иначе MediaRecorder.
+        val sysAudio = (settings["systemAudio"] as? Boolean) == true
+        usedSysAudio = sysAudio
 
         // Токен Android 14+ одноразовый: получаем проекцию здесь, не кешируем data.
         val mpm = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
@@ -207,21 +212,44 @@ class RecorderService : Service() {
         }
         session = s
 
-        val rec = try {
-            buildRecorder(cfg, mic, s.pfd.fileDescriptor)
-        } catch (_: Exception) {
-            null
-        }
-        if (rec == null) {
-            fail("encoder_error")
-            return
-        }
-        recorder = rec
-        try {
-            rec.prepare()
-        } catch (_: Exception) {
-            fail("encoder_error")
-            return
+        val surface: android.view.Surface
+        if (sysAudio) {
+            val pipe = CodecPipeline()
+            try {
+                surface = pipe.configure(
+                    proj,
+                    cfg.w,
+                    cfg.h,
+                    cfg.fps,
+                    cfg.bitrateBps,
+                    cfg.mime,
+                    mic,
+                    s.pfd.fileDescriptor,
+                )
+            } catch (_: Exception) {
+                runCatching { pipe.release() }
+                fail("audio_error")
+                return
+            }
+            codec = pipe
+        } else {
+            val rec = try {
+                buildRecorder(cfg, mic, s.pfd.fileDescriptor)
+            } catch (_: Exception) {
+                null
+            }
+            if (rec == null) {
+                fail("encoder_error")
+                return
+            }
+            recorder = rec
+            try {
+                rec.prepare()
+            } catch (_: Exception) {
+                fail("encoder_error")
+                return
+            }
+            surface = rec.surface
         }
         // MediaProjection.createVirtualDisplay: порядок (flags, surface).
         val vd = try {
@@ -231,7 +259,7 @@ class RecorderService : Service() {
                 cfg.h,
                 densityDpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                rec.surface,
+                surface,
                 null,
                 main,
             )
@@ -244,7 +272,7 @@ class RecorderService : Service() {
         }
         virtualDisplay = vd
         try {
-            rec.start()
+            codec?.start() ?: recorder?.start()
         } catch (_: Exception) {
             fail("encoder_error")
             return
@@ -359,7 +387,7 @@ class RecorderService : Service() {
         val cur = RecorderStateStore.state.value
         if (cur is RecorderState.Recording) {
             recordedMs += SystemClock.elapsedRealtime() - segmentStart
-            runCatching { recorder?.pause() }
+            runCatching { codec?.pause() ?: recorder?.pause() }
             runCatching { RecorderStateStore.set(RecorderState.Paused(recordedMs)) }
             runCatching { RecordWidgetProvider.updateAll(this) }
             runCatching { OverlayPill.update(recordedMs, true) }
@@ -370,7 +398,7 @@ class RecorderService : Service() {
     private fun resumeRecording() {
         val cur = RecorderStateStore.state.value
         if (cur is RecorderState.Paused) {
-            runCatching { recorder?.resume() }
+            runCatching { codec?.resume() ?: recorder?.resume() }
             segmentStart = SystemClock.elapsedRealtime()
             runCatching { RecorderStateStore.set(RecorderState.Recording(cur.elapsedMs)) }
             runCatching { RecordWidgetProvider.updateAll(this) }
@@ -400,11 +428,16 @@ class RecorderService : Service() {
         runCatching { RecorderStateStore.set(RecorderState.Saving) }
         var stopped = false
         try {
-            try {
-                recorder?.stop()
-                stopped = true
+            stopped = try {
+                val c = codec
+                if (c != null) {
+                    c.stop()
+                } else {
+                    recorder?.stop()
+                    recorder != null
+                }
             } catch (_: Exception) {
-                stopped = false
+                false
             }
             try {
                 virtualDisplay?.release()
@@ -425,7 +458,9 @@ class RecorderService : Service() {
                 val size = OutputWriter.sizeBytes(this, s.uri)
                 RecordingEvents.saved(s.uri.toString(), totalMs, size)
                 runCatching {
-                    NotificationFactory.notifySaved(this, s.uri)
+                    // FR-AUD-04: при звуке системы честно предупреждаем:
+                    // часть приложений могла запретить захват.
+                    NotificationFactory.notifySaved(this, s.uri, usedSysAudio)
                 }
                 runCatching { RecorderStateStore.set(RecorderState.Idle) }
             } else if (s != null) {
@@ -442,6 +477,7 @@ class RecorderService : Service() {
         projection = null
         virtualDisplay = null
         recorder = null
+        codec = null
         session = null
         pendingData = null
     }
@@ -458,6 +494,10 @@ class RecorderService : Service() {
     }
 
     private fun releaseAll() {
+        try {
+            codec?.release()
+        } catch (_: Exception) {
+        }
         try {
             recorder?.release()
         } catch (_: Exception) {
@@ -480,6 +520,7 @@ class RecorderService : Service() {
         projection = null
         virtualDisplay = null
         recorder = null
+        codec = null
         session = null
         pendingData = null
     }

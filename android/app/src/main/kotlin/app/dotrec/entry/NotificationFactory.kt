@@ -26,8 +26,8 @@ object NotificationFactory {
         )
     }
 
-    /** Итоговое уведомление «Запись сохранена» (FR-LIB-01). */
-    fun saved(context: Context, uri: android.net.Uri): Notification {
+    /** Итоговое уведомление «Запись сохранена» (FR-LIB-01, FR-AUD-04). */
+    fun saved(context: Context, uri: android.net.Uri, audioNote: Boolean = false): Notification {
         ensureChannels(context)
         val open = PendingIntent.getActivity(
             context, 10,
@@ -59,6 +59,16 @@ object NotificationFactory {
         return NotificationCompat.Builder(context, CHANNEL_RESULTS)
             .setSmallIcon(R.drawable.ic_stat_rec)
             .setContentTitle("Запись сохранена")
+            .apply {
+                if (audioNote) {
+                    setContentText("Часть приложений могла запретить захват звука")
+                    setStyle(
+                        NotificationCompat.BigTextStyle().bigText(
+                            "Часть приложений могла запретить захват звука",
+                        ),
+                    )
+                }
+            }
             .setContentIntent(open)
             .setAutoCancel(true)
             .addAction(0, "Открыть", open)
@@ -67,9 +77,9 @@ object NotificationFactory {
             .build()
     }
 
-    fun notifySaved(context: Context, uri: android.net.Uri) {
+    fun notifySaved(context: Context, uri: android.net.Uri, audioNote: Boolean = false) {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.notify(uri.toString().hashCode(), saved(context, uri))
+        nm.notify(uri.toString().hashCode(), saved(context, uri, audioNote))
     }
 
     fun recording(context: Context, paused: Boolean): Notification {

@@ -151,14 +151,31 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: DotTokens.xl),
             Center(
-              child: Text(
-                status,
-                style: const TextStyle(
-                  fontFamily: DotTokens.dotFamily,
-                  fontSize: 44,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              // T-27: TalkBack объявляет таймер раз в 10 с, а не каждую секунду.
+              child: s is Recording
+                  ? Semantics(
+                      liveRegion: true,
+                      excludeSemantics: true,
+                      label: DotTimer.format(
+                        Duration(seconds: s.elapsed.inSeconds ~/ 10 * 10),
+                      ),
+                      child: Text(
+                        status,
+                        style: const TextStyle(
+                          fontFamily: DotTokens.dotFamily,
+                          fontSize: 44,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      status,
+                      style: const TextStyle(
+                        fontFamily: DotTokens.dotFamily,
+                        fontSize: 44,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
             ),
             Center(
               child: Text(
