@@ -178,6 +178,16 @@ object ChannelBridge {
                 )
                 result.success(null)
             }
+            // Экран настроек батареи для гайда (только текст-подсказка + переход,
+            // без запроса IGNORE_BATTERY_OPTIMIZATIONS).
+            "openBatterySettings" -> {
+                runCatching {
+                    activity.startActivity(
+                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                    )
+                }
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }

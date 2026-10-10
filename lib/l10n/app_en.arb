@@ -30,5 +30,62 @@
   "presetBalanced": "Balanced",
   "presetQuality": "Quality",
   "presetCustom": "Custom",
-  "begin": "Start"
+  "begin": "Start",
+  "presetLabel": "Preset",
+  "resolutionLabel": "Resolution",
+  "micLabel": "Microphone",
+  "sysAudioLabel": "System audio",
+  "videoLabel": "Video",
+  "bitrateLabel": "Bitrate: {n} Mbps",
+  "@bitrateLabel": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "codecLabel": "Codec",
+  "hevcMissing": "No hardware HEVC on this device",
+  "audioLabel": "Audio",
+  "sysAudioV11": "System audio (v1.1)",
+  "recordingLabel": "Recording",
+  "countdownLabel": "Countdown",
+  "noneLabel": "Off",
+  "countdownSec": "{n} s",
+  "@countdownSec": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "appearanceLabel": "Appearance",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "language": "Language",
+  "langSystem": "System",
+  "quickAccess": "Quick access",
+  "quickAccessBody": "The tile and widget start recording without opening the app.",
+  "addTileBtn": "Add tile",
+  "tileAdded": "Tile added",
+  "tileUnavailable": "Requires Android 13+",
+  "aboutLine": "DotRec works offline.",
+  "overlayNeedPermission": "Requires the “Display over other apps” permission.",
+  "openPermission": "Open permission",
+  "errorLabel": "Error",
+  "onboardingTitle": "Screen recording without the clutter",
+  "ob1": "Works without internet",
+  "ob2": "No ads or watermarks",
+  "ob3": "Files in Movies/DotRec",
+  "guidesTitle": "Guides & permissions",
+  "guides": "Guides",
+  "openSettings": "Open settings",
+  "guideCaptureTitle": "Screen access",
+  "guideCaptureBody": "When you start recording, Android shows a system screen-access dialog. On Android 14+ consent is asked on every recording — a system limitation.",
+  "guideMicTitle": "Microphone",
+  "guideMicBody": "1. Turn on the Microphone switch. 2. Allow access in the system dialog. 3. If you denied it, open app settings and enable the microphone manually.",
+  "guideNotifTitle": "Notifications",
+  "guideNotifBody": "The notification with timer and Pause/Stop buttons appears on first recording. If it's missing, allow notifications in app settings.",
+  "guideOverlayTitle": "Floating pill",
+  "guideOverlayBody": "The pill is off by default. 1. Enable it in settings. 2. Allow “Display over other apps” on the system screen. The pill should not appear in recordings.",
+  "guideBatteryTitle": "Battery & background",
+  "guideBatteryBody": "Some firmwares (Xiaomi, Samsung) kill background recording to save battery. Open battery settings, find DotRec and allow background activity.",
+  "guideTileTitle": "Quick settings tile",
+  "guideTileBody": "1. Open quick settings and tap Edit. 2. Drag the “Record” tile into the active area. On Android 13+ use the button below."
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'platform/library_channel.dart';
 import 'platform/models/device_caps.dart';
@@ -76,3 +77,22 @@ final AsyncNotifierProvider<LibraryNotifier, List<RecordingItem>>
 libraryProvider = AsyncNotifierProvider<LibraryNotifier, List<RecordingItem>>(
   LibraryNotifier.new,
 );
+
+/// Код языка интерфейса: 'system' или en/ru/es/de/fr/pt/uk.
+/// Хранится только в Dart (SharedPreferences), контракт каналов не меняется.
+class AppLocaleNotifier extends AsyncNotifier<String> {
+  @override
+  Future<String> build() async {
+    final SharedPreferences p = await SharedPreferences.getInstance();
+    return p.getString('app_locale') ?? 'system';
+  }
+
+  Future<void> set(String code) async {
+    state = AsyncData(code);
+    final SharedPreferences p = await SharedPreferences.getInstance();
+    await p.setString('app_locale', code);
+  }
+}
+
+final AsyncNotifierProvider<AppLocaleNotifier, String> appLocaleProvider =
+    AsyncNotifierProvider<AppLocaleNotifier, String>(AppLocaleNotifier.new);

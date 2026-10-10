@@ -86,4 +86,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get begin => 'Start';
+
+  @override
+  String get presetLabel => 'Preset';
+
+  @override
+  String get resolutionLabel => 'Resolution';
+
+  @override
+  String get micLabel => 'Microphone';
+
+  @override
+  String get sysAudioLabel => 'System audio';
+
+  @override
+  String get videoLabel => 'Video';
+
+  @override
+  String bitrateLabel(int n) {
+    return 'Bitrate: $n Mbps';
+  }
+
+  @override
+  String get codecLabel => 'Codec';
+
+  @override
+  String get hevcMissing => 'No hardware HEVC on this device';
+
+  @override
+  String get audioLabel => 'Audio';
+
+  @override
+  String get sysAudioV11 => 'System audio (v1.1)';
+
+  @override
+  String get recordingLabel => 'Recording';
+
+  @override
+  String get countdownLabel => 'Countdown';
+
+  @override
+  String get noneLabel => 'Off';
+
+  @override
+  String countdownSec(int n) {
+    return '$n s';
+  }
+
+  @override
+  String get appearanceLabel => 'Appearance';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get langSystem => 'System';
+
+  @override
+  String get quickAccess => 'Quick access';
+
+  @override
+  String get quickAccessBody =>
+      'The tile and widget start recording without opening the app.';
+
+  @override
+  String get addTileBtn => 'Add tile';
+
+  @override
+  String get tileAdded => 'Tile added';
+
+  @override
+  String get tileUnavailable => 'Requires Android 13+';
+
+  @override
+  String get aboutLine => 'DotRec works offline.';
+
+  @override
+  String get overlayNeedPermission =>
+      'Requires the “Display over other apps” permission.';
+
+  @override
+  String get openPermission => 'Open permission';
+
+  @override
+  String get errorLabel => 'Error';
+
+  @override
+  String get onboardingTitle => 'Screen recording without the clutter';
+
+  @override
+  String get ob1 => 'Works without internet';
+
+  @override
+  String get ob2 => 'No ads or watermarks';
+
+  @override
+  String get ob3 => 'Files in Movies/DotRec';
+
+  @override
+  String get guidesTitle => 'Guides & permissions';
+
+  @override
+  String get guides => 'Guides';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String get guideCaptureTitle => 'Screen access';
+
+  @override
+  String get guideCaptureBody =>
+      'When you start recording, Android shows a system screen-access dialog. On Android 14+ consent is asked on every recording — a system limitation.';
+
+  @override
+  String get guideMicTitle => 'Microphone';
+
+  @override
+  String get guideMicBody =>
+      '1. Turn on the Microphone switch. 2. Allow access in the system dialog. 3. If you denied it, open app settings and enable the microphone manually.';
+
+  @override
+  String get guideNotifTitle => 'Notifications';
+
+  @override
+  String get guideNotifBody =>
+      'The notification with timer and Pause/Stop buttons appears on first recording. If it\'s missing, allow notifications in app settings.';
+
+  @override
+  String get guideOverlayTitle => 'Floating pill';
+
+  @override
+  String get guideOverlayBody =>
+      'The pill is off by default. 1. Enable it in settings. 2. Allow “Display over other apps” on the system screen. The pill should not appear in recordings.';
+
+  @override
+  String get guideBatteryTitle => 'Battery & background';
+
+  @override
+  String get guideBatteryBody =>
+      'Some firmwares (Xiaomi, Samsung) kill background recording to save battery. Open battery settings, find DotRec and allow background activity.';
+
+  @override
+  String get guideTileTitle => 'Quick settings tile';
+
+  @override
+  String get guideTileBody =>
+      '1. Open quick settings and tap Edit. 2. Drag the “Record” tile into the active area. On Android 13+ use the button below.';
 }

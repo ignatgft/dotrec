@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/tokens.dart';
+import '../../l10n/app_localizations.dart';
 import '../../platform/models/recording_item.dart';
 import '../../providers.dart';
 
@@ -30,11 +31,12 @@ class LibraryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<RecordingItem>> lib = ref.watch(libraryProvider);
+    final AppLocalizations t = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Записи')),
+      appBar: AppBar(title: Text(t.library)),
       body: lib.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (Object e, _) => Center(child: Text('Ошибка: $e')),
+        error: (Object e, _) => Center(child: Text('${t.errorLabel}: $e')),
         data: (List<RecordingItem> items) {
           if (items.isEmpty) {
             return Center(
@@ -63,11 +65,11 @@ class LibraryScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: DotTokens.lg),
-                    const Text('Здесь появятся ваши записи'),
+                    Text(t.empty_lib_title),
                     const SizedBox(height: DotTokens.lg),
                     FilledButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Начать запись'),
+                      child: Text(t.start),
                     ),
                   ],
                 ),
@@ -166,21 +168,21 @@ class LibraryScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Открыть'),
+              title: Text(AppLocalizations.of(c)!.open),
               onTap: () {
                 Navigator.of(m).pop();
                 ref.read(libraryChannelProvider).open(it.uri);
               },
             ),
             ListTile(
-              title: const Text('Поделиться'),
+              title: Text(AppLocalizations.of(c)!.share),
               onTap: () {
                 Navigator.of(m).pop();
                 ref.read(libraryChannelProvider).share(it.uri);
               },
             ),
             ListTile(
-              title: const Text('Удалить'),
+              title: Text(AppLocalizations.of(c)!.delete),
               onTap: () async {
                 Navigator.of(m).pop();
                 final bool ok = await ref

@@ -21,6 +21,8 @@ class DotApp extends ConsumerWidget {
       'dark' => ThemeMode.dark,
       _ => ThemeMode.system,
     };
+    final String localeCode =
+        ref.watch(appLocaleProvider).valueOrNull ?? 'system';
     return MaterialApp(
       onGenerateTitle: (BuildContext c) => AppLocalizations.of(c)!.appTitle,
       theme: DotTheme.light(),
@@ -28,6 +30,7 @@ class DotApp extends ConsumerWidget {
       themeMode: mode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: localeCode == 'system' ? null : Locale(localeCode),
       home: const _Root(),
     );
   }

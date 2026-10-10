@@ -4,9 +4,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_segmented.dart';
 import '../../core/widgets/dot_widgets.dart';
+import '../../l10n/app_localizations.dart';
 import '../../platform/models/device_caps.dart';
 import '../../platform/models/record_settings.dart';
 import '../../providers.dart';
+import '../guides/guides_screen.dart';
+
+const List<String> _localeCodes = [
+  'system',
+  'en',
+  'ru',
+  'es',
+  'de',
+  'fr',
+  'pt',
+  'uk',
+];
+
+const Map<String, String> _localeNames = {
+  'en': 'English',
+  'ru': 'Русский',
+  'es': 'Español',
+  'de': 'Deutsch',
+  'fr': 'Français',
+  'pt': 'Português',
+  'uk': 'Українська',
+};
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -17,22 +40,25 @@ class SettingsScreen extends ConsumerWidget {
         ref.watch(settingsProvider).valueOrNull ?? const RecordSettings();
     final DeviceCaps dc =
         ref.watch(deviceCapsProvider).valueOrNull ?? const DeviceCaps();
+    final String localeCode =
+        ref.watch(appLocaleProvider).valueOrNull ?? 'system';
+    final AppLocalizations t = AppLocalizations.of(context)!;
 
     Future<void> upd(RecordSettings n) =>
         ref.read(settingsProvider.notifier).save(n);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Настройки')),
+      appBar: AppBar(title: Text(t.settings)),
       body: ListView(
         padding: const EdgeInsets.all(DotTokens.lg),
         children: [
-          const Text('Видео', style: TextStyle(fontSize: 13)),
+          Text(t.videoLabel, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: DotTokens.sm),
           DotCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Разрешение'),
+                Text(t.resolutionLabel),
                 const SizedBox(height: DotTokens.sm),
                 DotSegmented<int>(
                   values: DotTokens.resolutions,
@@ -52,7 +78,7 @@ class SettingsScreen extends ConsumerWidget {
                   onSelected: (int v) => upd(cfg.withCustom(fps: v)),
                 ),
                 const SizedBox(height: DotTokens.lg),
-                Text('Битрейт: ${cfg.bitrateMbps} Мбит/с'),
+                Text(t.bitrateLabel(cfg.bitrateMbps)),
                 Slider(
                   min: 0,
                   max: (DotTokens.bitrates.length - 1).toDouble(),
@@ -69,7 +95,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: DotTokens.sm),
-                const Text('Кодек'),
+                Text(t.codecLabel),
                 DotSegmented<String>(
                   values: const ['h264', 'hevc'],
                   selected: cfg.codec,
@@ -82,7 +108,7 @@ class SettingsScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: DotTokens.sm),
                     child: Text(
-                      'Устройство без аппаратного HEVC',
+                      t.hevcMissing,
                       style: TextStyle(
                         fontSize: 12,
                         color: context.dot.fgMuted,
@@ -93,70 +119,70 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: DotTokens.lg),
-          const Text('Звук', style: TextStyle(fontSize: 13)),
+          Text(t.audioLabel, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: DotTokens.sm),
           DotCard(
             child: Column(
               children: [
                 DotSwitch(
                   value: cfg.mic,
-                  label: 'Микрофон',
+                  label: t.micLabel,
                   onChanged: (bool v) => upd(cfg.copyWith(mic: v)),
                 ),
                 const SizedBox(height: DotTokens.sm),
                 DotSwitch(
                   value: cfg.systemAudio,
-                  label: 'Звук системы (v1.1)',
+                  label: t.sysAudioV11,
                   onChanged: (bool v) => upd(cfg.copyWith(systemAudio: v)),
                 ),
               ],
             ),
           ),
           const SizedBox(height: DotTokens.lg),
-          const Text('Запись', style: TextStyle(fontSize: 13)),
+          Text(t.recordingLabel, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: DotTokens.sm),
           DotCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Обратный отсчёт'),
+                Text(t.countdownLabel),
                 const SizedBox(height: DotTokens.sm),
                 DotSegmented<int>(
                   values: DotTokens.countdownOptions,
                   selected: cfg.countdownSec,
-                  labelOf: (int v) => v == 0 ? 'Нет' : '$v с',
+                  labelOf: (int v) => v == 0 ? t.noneLabel : t.countdownSec(v),
                   onSelected: (int v) => upd(cfg.copyWith(countdownSec: v)),
                 ),
                 const SizedBox(height: DotTokens.sm),
                 DotSwitch(
                   value: cfg.overlayPill,
-                  label: 'Плавающая плашка',
+                  label: t.guideOverlayTitle,
                   onChanged: (bool v) => upd(cfg.copyWith(overlayPill: v)),
                 ),
                 if (cfg.overlayPill) ...[
                   const SizedBox(height: DotTokens.sm),
                   Text(
-                    'Требуется разрешение «Поверх других окон».',
+                    t.overlayNeedPermission,
                     style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
                   ),
                   TextButton(
                     onPressed: () =>
                         ref.read(recorderChannelProvider).openOverlaySettings(),
-                    child: const Text('Открыть разрешение'),
+                    child: Text(t.openPermission),
                   ),
                 ],
               ],
             ),
           ),
           const SizedBox(height: DotTokens.lg),
-          const Text('Быстрый доступ', style: TextStyle(fontSize: 13)),
+          Text(t.quickAccess, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: DotTokens.sm),
           DotCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Плитка в шторке и виджет запускают запись без открытия приложения.',
+                  t.quickAccessBody,
                   style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
                 ),
                 const SizedBox(height: DotTokens.sm),
@@ -168,40 +194,65 @@ class SettingsScreen extends ConsumerWidget {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(
-                            ok
-                                ? 'Плитка добавлена'
-                                : 'Недоступно: требуется Android 13+',
-                          ),
+                          content: Text(ok ? t.tileAdded : t.tileUnavailable),
                         ),
                       );
                     }
                   },
-                  child: const Text('Добавить плитку в шторку'),
+                  child: Text(t.addTileBtn),
                 ),
               ],
             ),
           ),
           const SizedBox(height: DotTokens.lg),
-          const Text('Вид', style: TextStyle(fontSize: 13)),
+          Text(t.appearanceLabel, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: DotTokens.sm),
           DotCard(
-            child: DotSegmented<String>(
-              values: const ['system', 'light', 'dark'],
-              selected: cfg.themeMode,
-              labelOf: (String v) => switch (v) {
-                'light' => 'Светлая',
-                'dark' => 'Тёмная',
-                _ => 'Система',
-              },
-              onSelected: (String v) => upd(cfg.copyWith(themeMode: v)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DotSegmented<String>(
+                  values: const ['system', 'light', 'dark'],
+                  selected: cfg.themeMode,
+                  labelOf: (String v) => switch (v) {
+                    'light' => t.themeLight,
+                    'dark' => t.themeDark,
+                    _ => t.langSystem,
+                  },
+                  onSelected: (String v) => upd(cfg.copyWith(themeMode: v)),
+                ),
+                const SizedBox(height: DotTokens.lg),
+                Text(t.language),
+                const SizedBox(height: DotTokens.sm),
+                DotSegmented<String>(
+                  values: _localeCodes,
+                  selected: localeCode,
+                  labelOf: (String v) =>
+                      v == 'system' ? t.langSystem : _localeNames[v]!,
+                  onSelected: (String v) =>
+                      ref.read(appLocaleProvider.notifier).set(v),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: DotTokens.lg),
           DotCard(
-            child: Text(
-              'DotRec работает офлайн. Версия 0.3.0-beta.',
-              style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${t.aboutLine} 0.4.0-beta.',
+                  style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const GuidesScreen(),
+                    ),
+                  ),
+                  child: Text(t.guidesTitle),
+                ),
+              ],
             ),
           ),
         ],

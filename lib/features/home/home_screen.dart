@@ -7,10 +7,12 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_segmented.dart';
 import '../../core/widgets/dot_widgets.dart';
 import '../../core/widgets/record_button.dart';
+import '../../l10n/app_localizations.dart';
 import '../../platform/models/device_caps.dart';
 import '../../platform/models/record_settings.dart';
 import '../../platform/models/recorder_state.dart';
 import '../../providers.dart';
+import '../guides/guides_screen.dart';
 import '../library/library_screen.dart';
 import '../settings/settings_screen.dart';
 
@@ -38,11 +40,12 @@ class HomeScreen extends ConsumerWidget {
       final RecorderState? s = next.valueOrNull;
       if (s is Failed &&
           (s.code == 'audio_error' || s.code == 'consent_denied')) {
+        final AppLocalizations lt = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_errorText(s.code)),
+            content: Text(_errorText(lt, s.code)),
             action: SnackBarAction(
-              label: 'Настройки',
+              label: lt.settings,
               onPressed: () =>
                   ref.read(recorderChannelProvider).openAppSettings(),
             ),
@@ -56,6 +59,7 @@ class HomeScreen extends ConsumerWidget {
     final RecorderState s = st.valueOrNull ?? const Idle();
     final RecordSettings cfg = settings.valueOrNull ?? const RecordSettings();
     final DeviceCaps dc = caps.valueOrNull ?? const DeviceCaps();
+    final AppLocalizations t = AppLocalizations.of(context)!;
     final bool busy =
         s is Recording ||
         s is Paused ||
@@ -64,17 +68,17 @@ class HomeScreen extends ConsumerWidget {
         s is Countdown;
 
     final String status = switch (s) {
-      Idle() => 'READY',
+      Idle() => t.ready,
       Countdown(secondsLeft: final n) => '00:0$n',
       Starting() => '···',
       Recording(elapsed: final e) => DotTimer.format(e),
-      Paused() => 'PAUSED',
-      Saving() => 'SAVING',
+      Paused() => t.paused,
+      Saving() => t.saving,
       Failed() => 'ERROR',
-      Saved() => 'READY',
+      Saved() => t.ready,
     };
     final String sub =
-        '${cfg.resolution}p · ${cfg.fps} FPS · ${cfg.bitrateMbps} Мбит/с';
+        '${cfg.resolution}p · ${cfg.fps} FPS · ${cfg.bitrateMbps} Mbps';
 
     return Scaffold(
       body: SafeArea(
@@ -93,7 +97,24 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  tooltip: 'Записи',
+                  tooltip: t.guides,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const GuidesScreen(),
+                    ),
+                  ),
+                  icon: SvgPicture.asset(
+                    DotIcons.info,
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(
+                      context.dot.fg,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: t.library,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const LibraryScreen(),
@@ -110,7 +131,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Настройки',
+                  tooltip: t.settings,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const SettingsScreen(),
@@ -151,7 +172,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 if (s is Recording || s is Paused)
                   IconButton.filled(
-                    tooltip: s is Paused ? 'Продолжить' : 'Пауза',
+                    tooltip: s is Paused ? t.resume : t.pause,
                     onPressed: () {
                       final RecorderChannelReader r = RecorderChannelReader(
                         ref,
@@ -186,9 +207,7 @@ class HomeScreen extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.only(top: DotTokens.sm),
                 child: Text(
-                  s is Recording || s is Paused
-                      ? 'Остановить'
-                      : 'Начать запись',
+                  s is Recording || s is Paused ? t.stop : t.start,
                   style: const TextStyle(fontSize: 13),
                 ),
               ),
@@ -198,22 +217,22 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(top: DotTokens.sm),
                   child: Text(
-                    _errorText(s.code),
+                    _errorText(t, s.code),
                     style: TextStyle(color: context.dot.fg),
                   ),
                 ),
               ),
             const SizedBox(height: DotTokens.xl),
-            const Text('Пресет', style: TextStyle(fontSize: 13)),
+            Text(t.presetLabel, style: const TextStyle(fontSize: 13)),
             const SizedBox(height: DotTokens.sm),
             DotSegmented<String>(
               values: const ['fast', 'balanced', 'quality', 'custom'],
               selected: cfg.preset,
               labelOf: (String p) => switch (p) {
-                'fast' => 'Быстро',
-                'balanced' => 'Баланс',
-                'quality' => 'Качество',
-                _ => 'Свой',
+                'fast' => t.presetFast,
+                'balanced' => t.presetBalanced,
+                'quality' => t.presetQuality,
+                _ => t.presetCustom,
               },
               onSelected: busy
                   ? (_) {}
@@ -222,7 +241,7 @@ class HomeScreen extends ConsumerWidget {
                         .save(RecordSettings.presetNamed(p)),
             ),
             const SizedBox(height: DotTokens.lg),
-            const Text('Разрешение', style: TextStyle(fontSize: 13)),
+            Text(t.resolutionLabel, style: const TextStyle(fontSize: 13)),
             const SizedBox(height: DotTokens.sm),
             DotSegmented<int>(
               values: DotTokens.resolutions,
@@ -250,7 +269,7 @@ class HomeScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(top: DotTokens.sm),
               child: Text(
-                'Экран поддерживает до ${dc.maxRefreshHz} Гц',
+                t.fps_cap(dc.maxRefreshHz),
                 style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
               ),
             ),
@@ -260,7 +279,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 DotSwitch(
                   value: cfg.mic,
-                  label: 'Микрофон',
+                  label: t.micLabel,
                   onChanged: busy
                       ? null
                       : (bool v) => ref
@@ -269,7 +288,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 DotSwitch(
                   value: cfg.systemAudio,
-                  label: 'Звук системы',
+                  label: t.sysAudioLabel,
                   onChanged: busy
                       ? null
                       : (bool v) => ref
@@ -284,15 +303,15 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  String _errorText(String code) => switch (code) {
-    'low_storage' => 'Мало места. Освободите хотя бы 200 МБ',
-    'consent_denied' => 'Запись не началась. Доступ к экрану не выдан',
-    'audio_error' => 'Нет доступа к микрофону. Откройте настройки приложения',
-    'projection_stopped' => 'Запись остановлена системой',
-    'encoder_error' => 'Кодер не поддержал параметры',
-    'io_error' => 'Не удалось сохранить файл',
-    'not_running' => 'Запись не идёт',
-    _ => 'Ошибка записи: $code',
+  String _errorText(AppLocalizations t, String code) => switch (code) {
+    'low_storage' => t.err_space,
+    'consent_denied' => t.err_consent,
+    'audio_error' => t.err_mic,
+    'projection_stopped' => t.audio_blocked,
+    'encoder_error' => t.errorLabel,
+    'io_error' => t.errorLabel,
+    'not_running' => t.errorLabel,
+    _ => '${t.errorLabel}: $code',
   };
 }
 

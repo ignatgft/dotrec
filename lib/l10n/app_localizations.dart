@@ -5,8 +5,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_pt.dart';
 import 'app_localizations_ru.dart';
+import 'app_localizations_uk.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,8 +99,13 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('ru'),
     Locale('en'),
+    Locale('ru'),
+    Locale('es'),
+    Locale('de'),
+    Locale('fr'),
+    Locale('pt'),
+    Locale('uk'),
   ];
 
   /// No description provided for @appTitle.
@@ -247,6 +257,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start'**
   String get begin;
+
+  /// No description provided for @presetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset'**
+  String get presetLabel;
+
+  /// No description provided for @resolutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get resolutionLabel;
+
+  /// No description provided for @micLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get micLabel;
+
+  /// No description provided for @sysAudioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'System audio'**
+  String get sysAudioLabel;
+
+  /// No description provided for @videoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get videoLabel;
+
+  /// No description provided for @bitrateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitrate: {n} Mbps'**
+  String bitrateLabel(int n);
+
+  /// No description provided for @codecLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Codec'**
+  String get codecLabel;
+
+  /// No description provided for @hevcMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No hardware HEVC on this device'**
+  String get hevcMissing;
+
+  /// No description provided for @audioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get audioLabel;
+
+  /// No description provided for @sysAudioV11.
+  ///
+  /// In en, this message translates to:
+  /// **'System audio (v1.1)'**
+  String get sysAudioV11;
+
+  /// No description provided for @recordingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get recordingLabel;
+
+  /// No description provided for @countdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown'**
+  String get countdownLabel;
+
+  /// No description provided for @noneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get noneLabel;
+
+  /// No description provided for @countdownSec.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} s'**
+  String countdownSec(int n);
+
+  /// No description provided for @appearanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearanceLabel;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @langSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get langSystem;
+
+  /// No description provided for @quickAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick access'**
+  String get quickAccess;
+
+  /// No description provided for @quickAccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The tile and widget start recording without opening the app.'**
+  String get quickAccessBody;
+
+  /// No description provided for @addTileBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tile'**
+  String get addTileBtn;
+
+  /// No description provided for @tileAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Tile added'**
+  String get tileAdded;
+
+  /// No description provided for @tileUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires Android 13+'**
+  String get tileUnavailable;
+
+  /// No description provided for @aboutLine.
+  ///
+  /// In en, this message translates to:
+  /// **'DotRec works offline.'**
+  String get aboutLine;
+
+  /// No description provided for @overlayNeedPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires the “Display over other apps” permission.'**
+  String get overlayNeedPermission;
+
+  /// No description provided for @openPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Open permission'**
+  String get openPermission;
+
+  /// No description provided for @errorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorLabel;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen recording without the clutter'**
+  String get onboardingTitle;
+
+  /// No description provided for @ob1.
+  ///
+  /// In en, this message translates to:
+  /// **'Works without internet'**
+  String get ob1;
+
+  /// No description provided for @ob2.
+  ///
+  /// In en, this message translates to:
+  /// **'No ads or watermarks'**
+  String get ob2;
+
+  /// No description provided for @ob3.
+  ///
+  /// In en, this message translates to:
+  /// **'Files in Movies/DotRec'**
+  String get ob3;
+
+  /// No description provided for @guidesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guides & permissions'**
+  String get guidesTitle;
+
+  /// No description provided for @guides.
+  ///
+  /// In en, this message translates to:
+  /// **'Guides'**
+  String get guides;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
+  /// No description provided for @guideCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen access'**
+  String get guideCaptureTitle;
+
+  /// No description provided for @guideCaptureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you start recording, Android shows a system screen-access dialog. On Android 14+ consent is asked on every recording — a system limitation.'**
+  String get guideCaptureBody;
+
+  /// No description provided for @guideMicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get guideMicTitle;
+
+  /// No description provided for @guideMicBody.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Turn on the Microphone switch. 2. Allow access in the system dialog. 3. If you denied it, open app settings and enable the microphone manually.'**
+  String get guideMicBody;
+
+  /// No description provided for @guideNotifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get guideNotifTitle;
+
+  /// No description provided for @guideNotifBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The notification with timer and Pause/Stop buttons appears on first recording. If it\'s missing, allow notifications in app settings.'**
+  String get guideNotifBody;
+
+  /// No description provided for @guideOverlayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating pill'**
+  String get guideOverlayTitle;
+
+  /// No description provided for @guideOverlayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The pill is off by default. 1. Enable it in settings. 2. Allow “Display over other apps” on the system screen. The pill should not appear in recordings.'**
+  String get guideOverlayBody;
+
+  /// No description provided for @guideBatteryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery & background'**
+  String get guideBatteryTitle;
+
+  /// No description provided for @guideBatteryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Some firmwares (Xiaomi, Samsung) kill background recording to save battery. Open battery settings, find DotRec and allow background activity.'**
+  String get guideBatteryBody;
+
+  /// No description provided for @guideTileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick settings tile'**
+  String get guideTileTitle;
+
+  /// No description provided for @guideTileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Open quick settings and tap Edit. 2. Drag the “Record” tile into the active area. On Android 13+ use the button below.'**
+  String get guideTileBody;
 }
 
 class _AppLocalizationsDelegate
@@ -259,8 +551,15 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'ru'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'de',
+    'en',
+    'es',
+    'fr',
+    'pt',
+    'ru',
+    'uk',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -269,10 +568,20 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'pt':
+      return AppLocalizationsPt();
     case 'ru':
       return AppLocalizationsRu();
+    case 'uk':
+      return AppLocalizationsUk();
   }
 
   throw FlutterError(

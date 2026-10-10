@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Первый запуск: один экран, офлайн, без сбора данных (FR-ONB-01).
 class OnboardingScreen extends StatelessWidget {
@@ -10,6 +11,7 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations t = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -26,25 +28,22 @@ class OnboardingScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: DotTokens.xl),
-              const Text(
-                'Запись экрана без лишнего',
-                style: TextStyle(
+              Text(
+                t.onboardingTitle,
+                style: const TextStyle(
                   fontFamily: DotTokens.dotFamily,
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: DotTokens.lg),
-              _row(context, 'Работает без интернета'),
-              _row(context, 'Нет рекламы и водяных знаков'),
-              _row(context, 'Файлы хранятся в Movies/DotRec'),
+              _row(context, t.ob1),
+              _row(context, t.ob2),
+              _row(context, t.ob3),
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton(
-                  onPressed: onDone,
-                  child: const Text('Начать'),
-                ),
+                child: FilledButton(onPressed: onDone, child: Text(t.begin)),
               ),
             ],
           ),
