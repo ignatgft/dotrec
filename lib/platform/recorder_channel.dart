@@ -55,6 +55,9 @@ class RecorderChannel {
     return v ?? false;
   }
 
+  Future<void> openOverlaySettings() =>
+      _method.invokeMethod<void>('openOverlaySettings');
+
   /// При подписке Kotlin сразу отдаёт текущее состояние, затем изменения.
   Stream<RecorderState> get state => _events.receiveBroadcastStream().map(
     (dynamic e) => RecorderState.fromMap(Map<Object?, Object?>.from(e as Map)),

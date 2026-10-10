@@ -20,6 +20,8 @@ import android.os.Looper
 import android.os.StatFs
 import android.os.SystemClock
 import app.dotrec.entry.NotificationFactory
+import app.dotrec.entry.OverlayPill
+import app.dotrec.entry.RecordWidgetProvider
 import app.dotrec.settings.SettingsStore
 import app.dotrec.util.BitrateCalc
 import app.dotrec.util.SizeCalc
@@ -83,6 +85,7 @@ class RecorderService : Service() {
             if (cur is RecorderState.Recording) {
                 val elapsed = recordedMs + (SystemClock.elapsedRealtime() - segmentStart)
                 runCatching { RecorderStateStore.set(RecorderState.Recording(elapsed)) }
+                runCatching { OverlayPill.update(elapsed, false) }
                 tickCount++
                 // NFR-REL-02: при критически малом месте — остановить и сохранить.
                 if (tickCount % 5 == 0 && freeBytes() < MIN_FREE_CRITICAL) {
@@ -248,6 +251,10 @@ class RecorderService : Service() {
         }
         segmentStart = SystemClock.elapsedRealtime()
         runCatching { RecorderStateStore.set(RecorderState.Recording(0)) }
+        runCatching { RecordWidgetProvider.updateAll(this) }
+        if ((settings["overlayPill"] as? Boolean) == true) {
+            runCatching { OverlayPill.show(this) }
+        }
         ticking = true
         main.post(ticker)
     }
@@ -354,6 +361,8 @@ class RecorderService : Service() {
             recordedMs += SystemClock.elapsedRealtime() - segmentStart
             runCatching { recorder?.pause() }
             runCatching { RecorderStateStore.set(RecorderState.Paused(recordedMs)) }
+            runCatching { RecordWidgetProvider.updateAll(this) }
+            runCatching { OverlayPill.update(recordedMs, true) }
             startForegroundNotif(paused = true)
         }
     }
@@ -364,6 +373,8 @@ class RecorderService : Service() {
             runCatching { recorder?.resume() }
             segmentStart = SystemClock.elapsedRealtime()
             runCatching { RecorderStateStore.set(RecorderState.Recording(cur.elapsedMs)) }
+            runCatching { RecordWidgetProvider.updateAll(this) }
+            runCatching { OverlayPill.update(cur.elapsedMs, false) }
             startForegroundNotif(paused = false)
         }
     }
@@ -424,6 +435,8 @@ class RecorderService : Service() {
                 runCatching { RecorderStateStore.set(RecorderState.Failed(reason ?: "unknown")) }
             }
         } finally {
+            runCatching { OverlayPill.hide() }
+            runCatching { RecordWidgetProvider.updateAll(this) }
             finishService()
         }
         projection = null
@@ -437,6 +450,8 @@ class RecorderService : Service() {
         main.removeCallbacks(countdownStep)
         main.removeCallbacks(ticker)
         ticking = false
+        runCatching { OverlayPill.hide() }
+        runCatching { RecordWidgetProvider.updateAll(this) }
         releaseAll()
         runCatching { RecorderStateStore.set(RecorderState.Failed(code)) }
         finishService()

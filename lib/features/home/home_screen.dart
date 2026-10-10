@@ -30,6 +30,26 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // FR-ONB-03: при отказе в разрешении объясняем и ведём в настройки.
+    ref.listen<AsyncValue<RecorderState>>(recorderStateProvider, (
+      _,
+      AsyncValue<RecorderState> next,
+    ) {
+      final RecorderState? s = next.valueOrNull;
+      if (s is Failed &&
+          (s.code == 'audio_error' || s.code == 'consent_denied')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_errorText(s.code)),
+            action: SnackBarAction(
+              label: 'Настройки',
+              onPressed: () =>
+                  ref.read(recorderChannelProvider).openAppSettings(),
+            ),
+          ),
+        );
+      }
+    });
     final AsyncValue<RecorderState> st = ref.watch(recorderStateProvider);
     final AsyncValue<RecordSettings> settings = ref.watch(settingsProvider);
     final AsyncValue<DeviceCaps> caps = ref.watch(deviceCapsProvider);

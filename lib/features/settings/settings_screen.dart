@@ -133,6 +133,52 @@ class SettingsScreen extends ConsumerWidget {
                   label: 'Плавающая плашка',
                   onChanged: (bool v) => upd(cfg.copyWith(overlayPill: v)),
                 ),
+                if (cfg.overlayPill) ...[
+                  const SizedBox(height: DotTokens.sm),
+                  Text(
+                    'Требуется разрешение «Поверх других окон».',
+                    style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        ref.read(recorderChannelProvider).openOverlaySettings(),
+                    child: const Text('Открыть разрешение'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: DotTokens.lg),
+          const Text('Быстрый доступ', style: TextStyle(fontSize: 13)),
+          const SizedBox(height: DotTokens.sm),
+          DotCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Плитка в шторке и виджет запускают запись без открытия приложения.',
+                  style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
+                ),
+                const SizedBox(height: DotTokens.sm),
+                FilledButton.tonal(
+                  onPressed: () async {
+                    final bool ok = await ref
+                        .read(recorderChannelProvider)
+                        .requestAddTile();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ok
+                                ? 'Плитка добавлена'
+                                : 'Недоступно: требуется Android 13+',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Добавить плитку в шторку'),
+                ),
               ],
             ),
           ),
@@ -154,7 +200,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: DotTokens.lg),
           DotCard(
             child: Text(
-              'DotRec работает офлайн. Версия 0.1.0-beta.',
+              'DotRec работает офлайн. Версия 0.3.0-beta.',
               style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
             ),
           ),

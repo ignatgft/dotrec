@@ -9,6 +9,7 @@ import android.os.StatFs
 import android.provider.MediaStore
 import android.provider.Settings
 import androidx.core.net.toUri
+import app.dotrec.R
 import app.dotrec.entry.ConsentActivity
 import app.dotrec.recorder.RecorderService
 import app.dotrec.recorder.RecorderState
@@ -137,7 +138,46 @@ object ChannelBridge {
                 )
                 result.success(null)
             }
-            "requestAddTile" -> result.success(false)
+            // Кнопка «Добавить плитку» (Android 13+, docs/04).
+            "requestAddTile" -> {
+                if (Build.VERSION.SDK_INT >= 33) {
+                    try {
+                        val sbm = activity.getSystemService(
+                            android.app.StatusBarManager::class.java,
+                        )
+                        val component = android.content.ComponentName(
+                            activity,
+                            app.dotrec.entry.RecordTileService::class.java,
+                        )
+                        sbm.requestAddTileService(
+                            component,
+                            activity.getString(R.string.tile_label),
+                            android.graphics.drawable.Icon.createWithResource(
+                                activity,
+                                R.drawable.ic_tile_rec,
+                            ),
+                            activity.mainExecutor,
+                        ) { r ->
+                            result.success(
+                                r == android.app.StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED,
+                            )
+                        }
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
+                } else {
+                    result.success(false)
+                }
+            }
+            "openOverlaySettings" -> {
+                activity.startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        "package:${activity.packageName}".toUri(),
+                    ),
+                )
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }

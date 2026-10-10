@@ -74,81 +74,84 @@ class LibraryScreen extends ConsumerWidget {
               ),
             );
           }
-          return GridView.builder(
-            padding: const EdgeInsets.all(DotTokens.lg),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: DotTokens.md,
-              crossAxisSpacing: DotTokens.md,
-              childAspectRatio: 9 / 16,
-            ),
-            itemCount: items.length,
-            itemBuilder: (BuildContext c, int i) {
-              final RecordingItem it = items[i];
-              return GestureDetector(
-                onTap: () => ref.read(libraryChannelProvider).open(it.uri),
-                onLongPress: () => _menu(c, ref, it),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: context.dot.surface,
-                    borderRadius: BorderRadius.circular(DotTokens.radiusCard),
-                    border: Border.all(
-                      color: context.dot.line,
-                      width: DotTokens.hairline,
+          return RefreshIndicator(
+            onRefresh: () => ref.read(libraryProvider.notifier).refresh(),
+            child: GridView.builder(
+              padding: const EdgeInsets.all(DotTokens.lg),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: DotTokens.md,
+                crossAxisSpacing: DotTokens.md,
+                childAspectRatio: 9 / 16,
+              ),
+              itemCount: items.length,
+              itemBuilder: (BuildContext c, int i) {
+                final RecordingItem it = items[i];
+                return GestureDetector(
+                  onTap: () => ref.read(libraryChannelProvider).open(it.uri),
+                  onLongPress: () => _menu(c, ref, it),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.dot.surface,
+                      borderRadius: BorderRadius.circular(DotTokens.radiusCard),
+                      border: Border.all(
+                        color: context.dot.line,
+                        width: DotTokens.hairline,
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.topRight,
-                          padding: const EdgeInsets.all(DotTokens.sm),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: context.dot.bg,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _fmtDur(it.duration),
-                              style: const TextStyle(
-                                fontFamily: DotTokens.dotFamily,
-                                fontSize: 12,
+                            alignment: Alignment.topRight,
+                            padding: const EdgeInsets.all(DotTokens.sm),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: context.dot.bg,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                _fmtDur(it.duration),
+                                style: const TextStyle(
+                                  fontFamily: DotTokens.dotFamily,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(DotTokens.sm),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              it.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            Text(
-                              _fmtSize(it.sizeBytes),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: context.dot.fgMuted,
+                        Padding(
+                          padding: const EdgeInsets.all(DotTokens.sm),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                it.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12),
                               ),
-                            ),
-                          ],
+                              Text(
+                                _fmtSize(it.sizeBytes),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: context.dot.fgMuted,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),
