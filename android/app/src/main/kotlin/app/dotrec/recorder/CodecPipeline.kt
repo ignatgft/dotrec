@@ -155,6 +155,12 @@ class CodecPipeline {
         micRec?.startRecording()
         videoThread = Thread(::videoLoop, "DotRecVideo").apply { start() }
         audioThread = Thread(::audioLoop, "DotRecAudio").apply { start() }
+        app.dotrec.link.LinkServer.onKeyframeRequested = {
+            requestKeyframe()
+        }
+        app.dotrec.link.LinkServer.onBitrateChanged = { bps ->
+            setBitrate(bps)
+        }
     }
 
     fun pause() {
@@ -201,6 +207,8 @@ class CodecPipeline {
         playbackRec = null
         micRec = null
         surface = null
+        app.dotrec.link.LinkServer.onKeyframeRequested = null
+        app.dotrec.link.LinkServer.onBitrateChanged = null
         return ok
     }
 
@@ -222,6 +230,8 @@ class CodecPipeline {
         playbackRec = null
         micRec = null
         surface = null
+        app.dotrec.link.LinkServer.onKeyframeRequested = null
+        app.dotrec.link.LinkServer.onBitrateChanged = null
     }
 
     // ---------- video ----------
@@ -420,6 +430,11 @@ class CodecPipeline {
         dup.position(info.offset)
         dup.limit(info.offset + info.size)
         dup.get(bytes)
+
+        if (app.dotrec.link.LinkServer.isClientConnected()) {
+            app.dotrec.link.LinkServer.broadcastAudio(bytes, info.presentationTimeUs)
+        }
+
         val out = MediaCodec.BufferInfo().apply {
             set(bytes.size, 0, info.presentationTimeUs, info.flags)
         }

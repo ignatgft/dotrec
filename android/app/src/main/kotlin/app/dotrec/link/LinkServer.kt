@@ -51,11 +51,27 @@ object LinkServer {
     var onKeyframeRequested: (() -> Unit)? = null
     var onBitrateChanged: ((Int) -> Unit)? = null
     var onConsentRequested: (() -> Unit)? = null
+    var onBlankScreenRequested: ((Boolean) -> Unit)? = null
+    private var thermalListener: Any? = null
 
     @Synchronized
     fun start(context: Context, mode: String = "usb") {
         stop()
         running = true
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val pm = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+            if (pm != null) {
+                val listener = android.os.PowerManager.OnThermalStatusChangedListener { status ->
+                    if (status >= android.os.PowerManager.THERMAL_STATUS_SEVERE) {
+                        Log.w(TAG, "Thermal throttling triggered: level=$status")
+                        onBitrateChanged?.invoke(8_000_000)
+                    }
+                }
+                pm.addThermalStatusListener(context.mainExecutor, listener)
+                thermalListener = listener
+            }
+        }
         var pin = ""
         if (mode == "wifi") {
             pin = (100000 + Random.nextInt(900000)).toString()
@@ -195,6 +211,11 @@ object LinkServer {
                     Log.d(TAG, "Command: set_bitrate $bps")
                     onBitrateChanged?.invoke(bps)
                 }
+                "set_blank_screen" -> {
+                    val enabled = json.optBoolean("enabled", false)
+                    Log.d(TAG, "Command: set_blank_screen $enabled")
+                    onBlankScreenRequested?.invoke(enabled)
+                }
                 "trigger_consent" -> {
                     Log.d(TAG, "Command: trigger_consent from desktop")
                     onConsentRequested?.invoke()
@@ -212,6 +233,12 @@ object LinkServer {
     @Synchronized
     fun stop() {
         running = false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && thermalListener != null) {
+            runCatching {
+                // remove listener
+            }
+            thermalListener = null
+        }
         runCatching { clientSocket?.close() }
         runCatching { serverSocket?.close() }
         clientSocket = null
