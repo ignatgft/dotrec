@@ -10,6 +10,7 @@ import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
+import android.os.Build
 import android.os.SystemClock
 import android.view.Surface
 import java.io.FileDescriptor
@@ -69,6 +70,9 @@ class CodecPipeline {
             setInteger(MediaFormat.KEY_BIT_RATE, bitrateBps)
             setInteger(MediaFormat.KEY_FRAME_RATE, fps)
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setInteger(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES, 1)
+            }
         }
         val venc = MediaCodec.createEncoderByType(mime)
         venc.configure(vf, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
@@ -277,13 +281,21 @@ class CodecPipeline {
             videoTrack = muxer?.addTrack(fmt) ?: -1
             maybeStartMuxer()
         }
-        if (app.dotrec.link.LinkServer.isClientConnected()) {
-            val csd0 = try { fmt.getByteBuffer("csd-0") } catch (_: Exception) { null }
-            if (csd0 != null) {
-                val b = ByteArray(csd0.remaining())
-                csd0.duplicate().get(b)
-                app.dotrec.link.LinkServer.broadcastConfig(b)
-            }
+        val csd0 = try { fmt.getByteBuffer("csd-0") } catch (_: Exception) { null }
+        val csd1 = try { fmt.getByteBuffer("csd-1") } catch (_: Exception) { null }
+        val sps = if (csd0 != null) {
+            val b = ByteArray(csd0.remaining())
+            csd0.duplicate().get(b)
+            b
+        } else ByteArray(0)
+        val pps = if (csd1 != null) {
+            val b = ByteArray(csd1.remaining())
+            csd1.duplicate().get(b)
+            b
+        } else ByteArray(0)
+        val combined = sps + pps
+        if (combined.isNotEmpty()) {
+            app.dotrec.link.LinkServer.broadcastConfig(combined)
         }
     }
 

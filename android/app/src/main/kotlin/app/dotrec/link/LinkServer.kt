@@ -44,6 +44,7 @@ object LinkServer {
     @Volatile private var clientSocket: Socket? = null
     @Volatile private var clientOutput: OutputStream? = null
     @Volatile private var running = false
+    @Volatile private var cachedConfig: ByteArray? = null
 
     private var currentPin = ""
     private var pinExpiresAt = 0L
@@ -60,16 +61,18 @@ object LinkServer {
         running = true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val pm = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
-            if (pm != null) {
-                val listener = android.os.PowerManager.OnThermalStatusChangedListener { status ->
-                    if (status >= android.os.PowerManager.THERMAL_STATUS_SEVERE) {
-                        Log.w(TAG, "Thermal throttling triggered: level=$status")
-                        onBitrateChanged?.invoke(8_000_000)
+            runCatching {
+                val pm = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+                if (pm != null) {
+                    val listener = android.os.PowerManager.OnThermalStatusChangedListener { status ->
+                        if (status >= android.os.PowerManager.THERMAL_STATUS_SEVERE) {
+                            Log.w(TAG, "Thermal throttling triggered: level=$status")
+                            onBitrateChanged?.invoke(8_000_000)
+                        }
                     }
+                    pm.addThermalStatusListener(context.mainExecutor, listener)
+                    thermalListener = listener
                 }
-                pm.addThermalStatusListener(context.mainExecutor, listener)
-                thermalListener = listener
             }
         }
         var pin = ""
@@ -182,6 +185,20 @@ object LinkServer {
             out.write((resp.toString() + "\n").toByteArray())
             out.flush()
 
+            // Передаем SPS/PPS конфигурационный кадр, если он уже известен, и запрашиваем IDR
+            cachedConfig?.let { cfg ->
+                try {
+                    LinkProtocol.writeFrame(
+                        out,
+                        LinkProtocol.TYPE_CONFIG,
+                        LinkProtocol.FLAG_KEYFRAME,
+                        0L,
+                        cfg,
+                    )
+                } catch (_: Exception) {}
+            }
+            onKeyframeRequested?.invoke()
+
             // 4. Поток чтения входящих команд
             while (running && !socket.isClosed) {
                 val frame = LinkProtocol.readFrame(socket.getInputStream()) ?: break
@@ -233,6 +250,7 @@ object LinkServer {
     @Synchronized
     fun stop() {
         running = false
+        cachedConfig = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && thermalListener != null) {
             runCatching {
                 // remove listener
@@ -248,6 +266,7 @@ object LinkServer {
     }
 
     fun broadcastConfig(spsPps: ByteArray) {
+        cachedConfig = spsPps
         val out = clientOutput ?: return
         try {
             LinkProtocol.writeFrame(

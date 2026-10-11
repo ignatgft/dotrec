@@ -335,13 +335,25 @@ class BrowserSourceServer {
       if (!isWebCodecsSupported || !decoder) return;
       const data = new Uint8Array(event.data);
       try {
+        let isKey = false;
+        let isConfig = false;
+        for (let i = 0; i < Math.min(data.length - 4, 32); i++) {
+          if (data[i] === 0 && data[i+1] === 0 && (data[i+2] === 1 || (data[i+2] === 0 && data[i+3] === 1))) {
+            const nalType = (data[i+2] === 1 ? data[i+3] : data[i+4]) & 0x1f;
+            if (nalType === 5) isKey = true;
+            if (nalType === 7 || nalType === 8) isConfig = true;
+            break;
+          }
+        }
         const chunk = new EncodedVideoChunk({
-          type: (data[4] & 0x1f) === 5 || (data[0] & 0x1f) === 5 ? 'key' : 'delta',
+          type: (isKey || isConfig) ? 'key' : 'delta',
           timestamp: performance.now() * 1000,
           data: data
         });
         decoder.decode(chunk);
-      } catch (err) {}
+      } catch (err) {
+        console.warn('Decode error:', err);
+      }
     };
 
     ws.onclose = () => {
