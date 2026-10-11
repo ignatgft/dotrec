@@ -12,9 +12,6 @@ void main(List<String> args) {
       : Directory('${Directory.current.path}/desktop');
 
   final distDir = Directory('${projectDir.path}/build/dist/DotRec-Link-v1.0.0-windows-x64');
-  if (distDir.existsSync()) {
-    distDir.deleteSync(recursive: true);
-  }
   distDir.createSync(recursive: true);
 
   final assetsDir = Directory('${distDir.path}/assets/fonts');

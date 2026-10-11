@@ -54,7 +54,13 @@ void main(List<String> args) async {
 
   // Start Browser Source Server (WebCodecs hardware player)
   stdout.writeln('[3/4] Запуск локального сервера Browser Source...');
-  await browserServer.start(port: 48212, linkClient: linkClient);
+  await browserServer.start(
+    port: 48212,
+    linkClient: linkClient,
+    obsService: obsService,
+    adbService: adb,
+    recordingService: recordingService,
+  );
   stdout.writeln('  [✓] Студийный плеер: ${browserServer.url}');
   stdout.writeln('  [✓] Чистый поток для OBS Studio: ${browserServer.obsUrl}');
   stdout.writeln('      (Используйте этот URL в OBS Studio как Browser Source: 1080x2400)');
@@ -206,7 +212,36 @@ void main(List<String> args) async {
 }
 
 void _launchAppWindow(String url) {
-  // Try launching Edge in borderless standalone app window
+  // 1. Приоритет: Нативный исполняемый файл DotRec Link App (pywebview / WebView2)
+  final nativeExeCandidates = [
+    r'desktop\build\dist\DotRec-Link-v1.0.0-windows-x64\DotRec-Link-App.exe',
+    r'build\dist\DotRec-Link-v1.0.0-windows-x64\DotRec-Link-App.exe',
+    r'DotRec-Link-App.exe',
+    '${File(Platform.resolvedExecutable).parent.path}\\DotRec-Link-App.exe',
+    '${File(Platform.resolvedExecutable).parent.path}\\build\\dist\\DotRec-Link-v1.0.0-windows-x64\\DotRec-Link-App.exe',
+  ];
+  for (final path in nativeExeCandidates) {
+    if (File(path).existsSync()) {
+      stdout.writeln('  [✓] Запуск нативного приложения DotRec Link ($path)...');
+      Process.start(path, [url]);
+      return;
+    }
+  }
+
+  // 2. Нативный скрипт через Python pywebview
+  final scriptCandidates = [
+    r'desktop\bin\native_window.py',
+    r'bin\native_window.py',
+  ];
+  for (final script in scriptCandidates) {
+    if (File(script).existsSync()) {
+      stdout.writeln('  [✓] Запуск нативного окна WebView2 (native_window.py)...');
+      Process.start('python', [script, url]);
+      return;
+    }
+  }
+
+  // 3. Запасной вариант: запуск Edge в режиме изолированного веб-приложения (--app)
   const edgePath = r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe';
   const edgePath64 = r'C:\Program Files\Microsoft\Edge\Application\msedge.exe';
 
@@ -218,9 +253,8 @@ void _launchAppWindow(String url) {
   }
 
   if (exe != null) {
-    Process.start(exe, ['--app=$url', '--window-size=1200,800']);
+    Process.start(exe, ['--app=$url', '--window-size=1280,860']);
   } else {
-    // Fallback to default browser
     Process.start('cmd', ['/c', 'start', '', url]);
   }
 }

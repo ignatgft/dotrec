@@ -35,6 +35,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#MyDistDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyDistDir}\DotRec-Link-App.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\README.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\config.default.json"; DestDir: "{app}"; Flags: ignoreversion
@@ -42,9 +43,10 @@ Source: "{#MyDistDir}\manifest.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\DotRec-Link-App.exe"
+Name: "{group}\DotRec Link Service (Console)"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\DotRec-Link-App.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\DotRec-Link-App.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
