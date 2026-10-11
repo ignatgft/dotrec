@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/app_settings.dart';
 import '../models/device_info.dart';
 import '../models/link_stats.dart';
 import '../models/stream_preset.dart';
 import '../../services/adb_service.dart';
 import '../../services/browser_source_server.dart';
+import '../../services/hotkey_service.dart';
 import '../../services/link_client.dart';
 import '../../services/obs_service.dart';
 import '../../services/recording_service.dart';
+import '../../services/tray_service.dart';
 
 // ADB Service
 final adbServiceProvider = Provider<AdbService>((ref) {
@@ -89,6 +92,74 @@ final obsServiceProvider = Provider<ObsService>((ref) {
 final obsStatusProvider = StreamProvider<ObsStatus>((ref) {
   final obs = ref.watch(obsServiceProvider);
   return obs.statusStream;
+});
+
+// Tray Service
+final trayServiceProvider = Provider<TrayService>((ref) {
+  final service = TrayService();
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+// Hotkey Service
+final hotkeyServiceProvider = Provider<HotkeyService>((ref) {
+  final service = HotkeyService();
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+// App Settings Notifier
+class SettingsNotifier extends StateNotifier<AppSettings> {
+  SettingsNotifier() : super(const AppSettings());
+
+  void update(AppSettings Function(AppSettings current) updater) {
+    state = updater(state);
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    state = state.copyWith(themeMode: mode);
+  }
+
+  void setMinimizeToTray(bool value) {
+    state = state.copyWith(minimizeToTray: value);
+  }
+
+  void setLaunchOnStartup(bool value) {
+    state = state.copyWith(launchOnStartup: value);
+  }
+
+  void setTrayNotifications(bool value) {
+    state = state.copyWith(trayNotifications: value);
+  }
+
+  void setAutoReconnect(bool value) {
+    state = state.copyWith(autoReconnect: value);
+  }
+
+  void setRecordingsPath(String path) {
+    state = state.copyWith(recordingsPath: path);
+  }
+
+  void setScreenshotsPath(String path) {
+    state = state.copyWith(screenshotsPath: path);
+  }
+
+  void setOverlayVisibility({bool? fps, bool? bitrate, bool? latency}) {
+    state = state.copyWith(
+      showFpsOverlay: fps ?? state.showFpsOverlay,
+      showBitrateOverlay: bitrate ?? state.showBitrateOverlay,
+      showLatencyOverlay: latency ?? state.showLatencyOverlay,
+    );
+  }
+
+  void resetToDefaults() {
+    state = const AppSettings();
+  }
+}
+
+final appSettingsProvider =
+    StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
+  return SettingsNotifier();
 });
 
 // Desktop Navigation Tab

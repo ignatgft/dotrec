@@ -48,6 +48,36 @@ class DesktopHomeShell extends ConsumerWidget {
             ),
           );
         },
+        const SingleActivator(
+          LogicalKeyboardKey.comma,
+          control: true,
+        ): () {
+          ref.read(activeTabProvider.notifier).state = DesktopTab.settings;
+        },
+        const SingleActivator(
+          LogicalKeyboardKey.digit1,
+          control: true,
+        ): () {
+          ref.read(activeTabProvider.notifier).state = DesktopTab.mirror;
+        },
+        const SingleActivator(
+          LogicalKeyboardKey.digit2,
+          control: true,
+        ): () {
+          ref.read(activeTabProvider.notifier).state = DesktopTab.connection;
+        },
+        const SingleActivator(
+          LogicalKeyboardKey.digit3,
+          control: true,
+        ): () {
+          ref.read(activeTabProvider.notifier).state = DesktopTab.obs;
+        },
+        const SingleActivator(
+          LogicalKeyboardKey.digit4,
+          control: true,
+        ): () {
+          ref.read(activeTabProvider.notifier).state = DesktopTab.settings;
+        },
       },
       child: Focus(
         autofocus: true,

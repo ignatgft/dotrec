@@ -365,14 +365,28 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                                     : Colors.white,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              '${stats.fps.toInt()} FPS  ·  ${stats.latencyMs} МС  ·  ${stats.bitrateMbps} МБИТ/С',
-                              style: const TextStyle(
-                                fontFamily: DotTokens.dotFamily,
-                                fontSize: 12,
-                                color: Color(0xFF8C8C8C),
-                              ),
+                            Builder(
+                              builder: (context) {
+                                final settings = ref.watch(appSettingsProvider);
+                                final parts = <String>[];
+                                if (settings.showFpsOverlay) parts.add('${stats.fps.toInt()} FPS');
+                                if (settings.showLatencyOverlay) parts.add('${stats.latencyMs} МС');
+                                if (settings.showBitrateOverlay) parts.add('${stats.bitrateMbps} МБИТ/С');
+                                if (parts.isEmpty) return const SizedBox.shrink();
+                                return Row(
+                                  children: [
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      parts.join('  ·  '),
+                                      style: const TextStyle(
+                                        fontFamily: DotTokens.dotFamily,
+                                        fontSize: 12,
+                                        color: Color(0xFF8C8C8C),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),
