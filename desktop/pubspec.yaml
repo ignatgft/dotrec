@@ -1,0 +1,25 @@
+name: dotrec_link_desktop
+description: "DotRec Link — настольный клиент для USB/Wi-Fi зеркалирования экрана и интеграции с OBS."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Doto
+      fonts:
+        - asset: assets/fonts/Doto-Variable.ttf
