@@ -4,7 +4,9 @@ import '../models/device_info.dart';
 import '../models/link_stats.dart';
 import '../models/stream_preset.dart';
 import '../../services/adb_service.dart';
+import '../../services/browser_source_server.dart';
 import '../../services/link_client.dart';
+import '../../services/obs_service.dart';
 import '../../services/recording_service.dart';
 
 // ADB Service
@@ -65,6 +67,28 @@ final linkStatsProvider = StreamProvider<LinkStats>((ref) {
 // Recording Service
 final recordingServiceProvider = Provider<RecordingService>((ref) {
   return RecordingService();
+});
+
+// Browser Source Server
+final browserSourceServerProvider = Provider<BrowserSourceServer>((ref) {
+  final server = BrowserSourceServer();
+  final client = ref.watch(linkClientProvider);
+  server.start(port: 48212, linkClient: client);
+  ref.onDispose(server.stop);
+  return server;
+});
+
+// OBS Service
+final obsServiceProvider = Provider<ObsService>((ref) {
+  final service = ObsService();
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+// OBS Status
+final obsStatusProvider = StreamProvider<ObsStatus>((ref) {
+  final obs = ref.watch(obsServiceProvider);
+  return obs.statusStream;
 });
 
 // Desktop Navigation Tab
