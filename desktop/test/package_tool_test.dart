@@ -28,6 +28,7 @@ void main() {
       expect(File('${distDir.path}/README.txt').existsSync(), isTrue);
       expect(File('${distDir.path}/LICENSE.txt').existsSync(), isTrue);
       expect(File('${distDir.path}/config.default.json').existsSync(), isTrue);
+      expect(File('${distDir.path}/DotRec-Link.exe').existsSync(), isTrue);
       expect(
           File('${distDir.path}/assets/fonts/Doto-Variable.ttf').existsSync(),
           isTrue);

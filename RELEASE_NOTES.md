@@ -53,7 +53,9 @@
 | `app-arm64-v8a-release.apk` | **Рекомендуется** для 99% современных смартфонов | Android 10+ (arm64-v8a) |
 | `app-armeabi-v7a-release.apk` | Для 32-битных устаревших телефонов | Android 10+ (armeabi-v7a) |
 | `app-x86_64-release.apk` | Для эмуляторов и планшетов на Intel/AMD | Android 10+ (x86_64) |
-| `DotRec-Link-v1.0.0-windows-x64.zip` | Портативный клиент для ПК | Windows 10/11 x64 |
+| `DotRec-Link-Setup-v1.0.0.exe` | **Установщик для Windows** (Мастер установки, ярлыки на рабочем столе и в меню Пуск) | Windows 10/11 x64 |
+| `dotrec-link.exe` | Автономный исполняемый файл без установки | Windows 10/11 x64 |
+| `DotRec-Link-v1.0.0-windows-x64.zip` | Портативный архив (распаковать и запустить) | Windows 10/11 x64 |
 
 ---
 
