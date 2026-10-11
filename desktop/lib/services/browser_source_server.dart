@@ -144,43 +144,139 @@ class BrowserSourceServer {
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>DotRec Link OBS Source</title>
+  <title>DotRec Link</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 100%; height: 100%;
-      background: transparent;
+      background: #0A0A0A;
+      color: #E0E0E0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+    #header {
+      height: 48px;
+      background: #121212;
+      border-bottom: 1px solid #242424;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      font-size: 13px;
+    }
+    .brand-dot {
+      width: 8px; height: 8px;
+      background: #D71921;
+      border-radius: 50%;
+    }
+    .stats-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: monospace;
+      font-size: 12px;
+      background: #1A1A1A;
+      padding: 4px 12px;
+      border-radius: 16px;
+      border: 1px solid #2B2B2B;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #FFB300;
+    }
+    .status-dot.live {
+      background: #00E676;
+    }
+    #viewport {
+      flex: 1;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #050505;
     }
     canvas {
-      width: 100%; height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.8);
     }
-    #status {
+    #waiting-overlay {
       position: absolute;
-      top: 10px; left: 10px;
-      color: #fff;
-      font-family: monospace;
-      font-size: 11px;
-      background: rgba(0,0,0,0.6);
-      padding: 4px 8px;
-      border-radius: 4px;
-      display: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: #888;
+      font-size: 14px;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid #333;
+      border-top-color: #D71921;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div id="status">Connecting...</div>
-  <canvas id="canvas"></canvas>
+  <div id="header">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span>DOTREC LINK</span>
+    </div>
+    <div class="stats-badge">
+      <div id="status-dot" class="status-dot"></div>
+      <span id="status-text">ОЖИДАНИЕ...</span>
+      <span id="fps-text">-- FPS</span>
+    </div>
+    <div style="font-size: 11px; color: #666; font-family: monospace;">
+      F10: Полный экран
+    </div>
+  </div>
+
+  <div id="viewport">
+    <div id="waiting-overlay">
+      <div class="spinner"></div>
+      <span>Ожидание подключения экрана телефона...</span>
+    </div>
+    <canvas id="canvas"></canvas>
+  </div>
+
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const statusEl = document.getElementById('status');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const fpsText = document.getElementById('fps-text');
+    const waitingOverlay = document.getElementById('waiting-overlay');
     const token = '$token';
     const wsUrl = `ws://\${location.host}/ws?token=\${token}`;
+
+    let frameCount = 0;
+    let lastTime = performance.now();
+    setInterval(() => {
+      const now = performance.now();
+      const fps = Math.round((frameCount * 1000) / (now - lastTime));
+      fpsText.textContent = `\${fps} FPS`;
+      frameCount = 0;
+      lastTime = now;
+    }, 1000);
 
     const ws = new WebSocket(wsUrl);
     ws.binaryType = 'arraybuffer';
@@ -191,19 +287,20 @@ class BrowserSourceServer {
     if (isWebCodecsSupported) {
       decoder = new VideoDecoder({
         output: (frame) => {
+          waitingOverlay.style.display = 'none';
           if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
             canvas.width = frame.displayWidth;
             canvas.height = frame.displayHeight;
           }
           ctx.drawImage(frame, 0, 0);
           frame.close();
+          frameCount++;
         },
         error: (e) => {
           console.error('WebCodecs Error:', e);
         }
       });
 
-      // Default H.264 AVC Baseline profile
       try {
         decoder.configure({
           codec: 'avc1.42001f',
@@ -215,7 +312,8 @@ class BrowserSourceServer {
     }
 
     ws.onopen = () => {
-      statusEl.textContent = '● Live';
+      statusDot.classList.add('live');
+      statusText.textContent = 'В ЭФИРЕ';
     };
 
     ws.onmessage = (event) => {
@@ -228,15 +326,24 @@ class BrowserSourceServer {
           data: data
         });
         decoder.decode(chunk);
-      } catch (err) {
-        // Continue streaming next frames
-      }
+      } catch (err) {}
     };
 
     ws.onclose = () => {
-      statusEl.textContent = 'Disconnected';
-      statusEl.style.display = 'block';
+      statusDot.classList.remove('live');
+      statusText.textContent = 'ОТКЛЮЧЕНО';
+      waitingOverlay.style.display = 'flex';
     };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F10') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
   </script>
 </body>
 </html>''';

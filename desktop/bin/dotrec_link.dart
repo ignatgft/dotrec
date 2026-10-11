@@ -84,6 +84,7 @@ void main(List<String> args) async {
 
   // Launch standalone window via Edge app mode or default browser
   final appUrl = browserServer.url;
+  stdout.writeln('\n[ОКНО] Открытие окна DotRec Link на рабочем столе...');
   _launchAppWindow(appUrl);
 
   stdout.writeln(r'''
@@ -109,58 +110,72 @@ void main(List<String> args) async {
     }
   });
 
-  // Stdin listener for single keypresses
-  stdin.lineMode = false;
-  stdin.echoMode = false;
+  final exitCompleter = Completer<void>();
 
-  await for (final chunk in stdin) {
-    final key = utf8.decode(chunk).trim().toUpperCase();
-    if (key == 'Q') {
-      stdout.writeln('\nЗавершение работы DotRec Link...');
-      break;
-    } else if (key == 'M') {
-      stdout.writeln('\nОткрытие окна зеркала...');
-      _launchAppWindow(browserServer.url);
-    } else if (key == 'R') {
-      if (!isRecording) {
-        final path = await recordingService.startRecording(linkClient.spsPps);
-        isRecording = true;
-        stdout.writeln('\n[REC] Начата запись в: $path');
-      } else {
-        final res = await recordingService.stopRecording();
-        isRecording = false;
-        stdout.writeln('\n[REC] Запись сохранена: ${res?.filePath ?? "готово"} '
-            '(${res != null ? (res.bytesWritten / 1024 / 1024).toStringAsFixed(2) : 0} МБ)');
-      }
-    } else if (key == 'S') {
-      final dummyPng = Uint8List.fromList([
-        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-        0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-        0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-        0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-        0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-        0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-        0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-        0x42, 0x60, 0x82,
-      ]);
-      final sPath = await recordingService.saveScreenshot(dummyPng);
-      stdout.writeln('\n[СНИМОК] Сохранен: $sPath');
-    } else if (key == 'K') {
-      linkClient.requestKeyframe();
-      stdout.writeln('\n[IDR] Запрошен ключевой кадр');
-    } else if (key == 'O') {
-      if (obsService.status == ObsStatus.connected) {
-        final ok = await obsService.addBrowserSource(
-          inputName: 'DotRec Phone Screen',
-          url: browserServer.url,
-        );
-        stdout.writeln('\n[OBS] Источник ${ok ? "успешно добавлен" : "ошибка добавления"}');
-      } else {
-        stdout.writeln('\n[OBS] Не подключено к OBS (убедитесь, что obs-websocket активен на порту 4455)');
-      }
-    }
+  ProcessSignal.sigint.watch().listen((_) {
+    if (!exitCompleter.isCompleted) exitCompleter.complete();
+  });
+
+  // Safe stdin reading if terminal is present
+  if (stdin.hasTerminal) {
+    try {
+      stdin.lineMode = false;
+      stdin.echoMode = false;
+    } catch (_) {}
   }
+
+  try {
+    stdin.listen((chunk) async {
+      final key = utf8.decode(chunk).trim().toUpperCase();
+      if (key == 'Q') {
+        stdout.writeln('\nЗавершение работы DotRec Link...');
+        if (!exitCompleter.isCompleted) exitCompleter.complete();
+      } else if (key == 'M') {
+        stdout.writeln('\nОткрытие окна зеркала...');
+        _launchAppWindow(browserServer.url);
+      } else if (key == 'R') {
+        if (!isRecording) {
+          final path = await recordingService.startRecording(linkClient.spsPps);
+          isRecording = true;
+          stdout.writeln('\n[REC] Начата запись в: $path');
+        } else {
+          final res = await recordingService.stopRecording();
+          isRecording = false;
+          stdout.writeln('\n[REC] Запись сохранена: ${res?.filePath ?? "готово"} '
+              '(${res != null ? (res.bytesWritten / 1024 / 1024).toStringAsFixed(2) : 0} МБ)');
+        }
+      } else if (key == 'S') {
+        final dummyPng = Uint8List.fromList([
+          0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+          0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+          0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+          0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+          0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+          0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+          0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+          0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+          0x42, 0x60, 0x82,
+        ]);
+        final sPath = await recordingService.saveScreenshot(dummyPng);
+        stdout.writeln('\n[СНИМОК] Сохранен: $sPath');
+      } else if (key == 'K') {
+        linkClient.requestKeyframe();
+        stdout.writeln('\n[IDR] Запрошен ключевой кадр');
+      } else if (key == 'O') {
+        if (obsService.status == ObsStatus.connected) {
+          final ok = await obsService.addBrowserSource(
+            inputName: 'DotRec Phone Screen',
+            url: browserServer.url,
+          );
+          stdout.writeln('\n[OBS] Источник ${ok ? "успешно добавлен" : "ошибка добавления"}');
+        } else {
+          stdout.writeln('\n[OBS] Не подключено к OBS (убедитесь, что obs-websocket активен на порту 4455)');
+        }
+      }
+    }, onError: (_) {});
+  } catch (_) {}
+
+  await exitCompleter.future;
 
   await browserServer.stop();
   linkClient.dispose();
