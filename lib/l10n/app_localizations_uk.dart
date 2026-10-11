@@ -274,4 +274,25 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get linkConnected => 'Підключено';
+
+  @override
+  String get deviceCheckTitle => 'Перевірка пристрою';
+
+  @override
+  String get deviceCheckBtn => 'Перевірити пристрій';
+
+  @override
+  String get screenResolution => 'Роздільність екрана';
+
+  @override
+  String get refreshRates => 'Частота оновлення';
+
+  @override
+  String get hevcSupport => 'Апаратний HEVC';
+
+  @override
+  String get freeStorage => 'Вільна пам\'ять';
+
+  @override
+  String get fileSizeEstimate => 'Орієнтовний розмір';
 }

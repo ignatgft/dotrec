@@ -52,8 +52,15 @@ class ConsentActivity : Activity() {
     private fun requestCapture() {
         try {
             val mpm = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            val intentToLaunch = if (Build.VERSION.SDK_INT >= 34) {
+                val cfg = android.media.projection.MediaProjectionConfig.createConfigForUserChoice()
+                mpm.createScreenCaptureIntent(cfg)
+            } else {
+                @Suppress("DEPRECATION")
+                mpm.createScreenCaptureIntent()
+            }
             @Suppress("DEPRECATION")
-            startActivityForResult(mpm.createScreenCaptureIntent(), REQ_CAPTURE)
+            startActivityForResult(intentToLaunch, REQ_CAPTURE)
         } catch (_: Exception) {
             runCatching { RecorderStateStore.set(RecorderState.Failed("consent_denied")) }
             finish()

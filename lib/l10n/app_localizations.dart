@@ -611,6 +611,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connected'**
   String get linkConnected;
+
+  /// No description provided for @deviceCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device check'**
+  String get deviceCheckTitle;
+
+  /// No description provided for @deviceCheckBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Check device'**
+  String get deviceCheckBtn;
+
+  /// No description provided for @screenResolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen resolution'**
+  String get screenResolution;
+
+  /// No description provided for @refreshRates.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh rate'**
+  String get refreshRates;
+
+  /// No description provided for @hevcSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware HEVC'**
+  String get hevcSupport;
+
+  /// No description provided for @freeStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Free storage'**
+  String get freeStorage;
+
+  /// No description provided for @fileSizeEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated size'**
+  String get fileSizeEstimate;
 }
 
 class _AppLocalizationsDelegate

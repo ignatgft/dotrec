@@ -105,5 +105,12 @@
   "linkStartStream": "Start streaming",
   "linkStopStream": "Stop streaming",
   "linkWaiting": "Waiting for PC...",
-  "linkConnected": "Connected"
+  "linkConnected": "Connected",
+  "deviceCheckTitle": "Device check",
+  "deviceCheckBtn": "Check device",
+  "screenResolution": "Screen resolution",
+  "refreshRates": "Refresh rate",
+  "hevcSupport": "Hardware HEVC",
+  "freeStorage": "Free storage",
+  "fileSizeEstimate": "Estimated size"
 }

@@ -31,3 +31,20 @@ abstract final class SizeCalc {
     ];
   }
 }
+
+/// Оценка размера файла перед записью (docs/11).
+abstract final class FileSizeEstimator {
+  /// Оценка размера в мегабайтах за указанную продолжительность.
+  static double estimateMb({
+    required int bitrateMbps,
+    int durationSeconds = 60,
+  }) {
+    return (bitrateMbps * durationSeconds) / 8.0;
+  }
+
+  /// Читаемая строка для UI: «~90 МБ / мин».
+  static String estimatePerMinute(int bitrateMbps) {
+    final int mb = estimateMb(bitrateMbps: bitrateMbps, durationSeconds: 60).round();
+    return '~$mb МБ / мин';
+  }
+}

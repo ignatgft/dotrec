@@ -36,9 +36,10 @@ object OutputWriter {
         return Session(uri, pfd)
     }
 
-    /** Успех: снять IS_PENDING. Провал без валидного файла: удалить запись. */
+    /** Успех: снять IS_PENDING. Провал: удалить только если файл пуст, иначе спасти (crash recovery). */
     fun finish(context: Context, uri: Uri, success: Boolean) {
-        if (success) {
+        val size = sizeBytes(context, uri)
+        if (success || size > 100 * 1024) {
             val done = ContentValues().apply {
                 put(MediaStore.Video.Media.IS_PENDING, 0)
             }

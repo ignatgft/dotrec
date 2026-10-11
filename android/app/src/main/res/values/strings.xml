@@ -2,4 +2,6 @@
 <resources>
     <string name="tile_label">Запись</string>
     <string name="widget_desc">Запись экрана DotRec</string>
+    <string name="shortcut_record_now">Запись сейчас</string>
+    <string name="shortcut_record_now_long">Быстрый старт записи экрана</string>
 </resources>

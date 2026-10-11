@@ -34,4 +34,15 @@ class LibraryChannel {
 
   Future<void> open(String uri) =>
       _method.invokeMethod<void>('open', {'uri': uri});
+
+  Future<String?> trim({
+    required String uri,
+    required int startMs,
+    required int endMs,
+  }) =>
+      _method.invokeMethod<String>('trim', {
+        'uri': uri,
+        'startMs': startMs,
+        'endMs': endMs,
+      });
 }

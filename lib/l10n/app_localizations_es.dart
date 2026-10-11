@@ -273,4 +273,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get linkConnected => 'Conectado';
+
+  @override
+  String get deviceCheckTitle => 'Comprobar dispositivo';
+
+  @override
+  String get deviceCheckBtn => 'Comprobar';
+
+  @override
+  String get screenResolution => 'Resolución de pantalla';
+
+  @override
+  String get refreshRates => 'Frecuencia de actualización';
+
+  @override
+  String get hevcSupport => 'HEVC por hardware';
+
+  @override
+  String get freeStorage => 'Almacenamiento libre';
+
+  @override
+  String get fileSizeEstimate => 'Tamaño estimado';
 }

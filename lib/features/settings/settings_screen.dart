@@ -5,6 +5,7 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_segmented.dart';
 import '../../core/widgets/dot_widgets.dart';
 import '../../l10n/app_localizations.dart';
+import '../../platform/logic/size_calc.dart';
 import '../../platform/models/device_caps.dart';
 import '../../platform/models/record_settings.dart';
 import '../../providers.dart';
@@ -231,6 +232,75 @@ class SettingsScreen extends ConsumerWidget {
                       v == 'system' ? t.langSystem : _localeNames[v]!,
                   onSelected: (String v) =>
                       ref.read(appLocaleProvider.notifier).set(v),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: DotTokens.lg),
+          Text(t.deviceCheckTitle, style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: DotTokens.sm),
+          DotCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(t.screenResolution),
+                    Text(
+                      '${dc.screenWidth} × ${dc.screenHeight}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                Divider(color: context.dot.line, height: DotTokens.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(t.refreshRates),
+                    Text(
+                      '${dc.supportedRefreshHz.join(', ')} Гц',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                Divider(color: context.dot.line, height: DotTokens.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(t.hevcSupport),
+                    Text(
+                      dc.hevcSupported ? 'Да' : 'Нет',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: dc.hevcSupported
+                            ? const Color(0xFF00C853)
+                            : context.dot.fgMuted,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(color: context.dot.line, height: DotTokens.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(t.freeStorage),
+                    Text(
+                      '${(dc.freeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} ГБ',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                Divider(color: context.dot.line, height: DotTokens.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(t.fileSizeEstimate),
+                    Text(
+                      FileSizeEstimator.estimatePerMinute(cfg.bitrateMbps),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
               ],
             ),

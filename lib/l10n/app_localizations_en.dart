@@ -275,4 +275,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkConnected => 'Connected';
+
+  @override
+  String get deviceCheckTitle => 'Device check';
+
+  @override
+  String get deviceCheckBtn => 'Check device';
+
+  @override
+  String get screenResolution => 'Screen resolution';
+
+  @override
+  String get refreshRates => 'Refresh rate';
+
+  @override
+  String get hevcSupport => 'Hardware HEVC';
+
+  @override
+  String get freeStorage => 'Free storage';
+
+  @override
+  String get fileSizeEstimate => 'Estimated size';
 }

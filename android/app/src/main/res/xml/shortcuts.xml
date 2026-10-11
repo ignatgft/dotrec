@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="record_now"
+        android:enabled="true"
+        android:icon="@drawable/ic_tile_rec"
+        android:shortcutShortLabel="@string/shortcut_record_now"
+        android:shortcutLongLabel="@string/shortcut_record_now_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="app.dotrec"
+            android:targetClass="app.dotrec.entry.ConsentActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

@@ -275,4 +275,25 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get linkConnected => 'Подключён';
+
+  @override
+  String get deviceCheckTitle => 'Проверка устройства';
+
+  @override
+  String get deviceCheckBtn => 'Проверить устройство';
+
+  @override
+  String get screenResolution => 'Разрешение экрана';
+
+  @override
+  String get refreshRates => 'Частота обновления';
+
+  @override
+  String get hevcSupport => 'Аппаратный HEVC';
+
+  @override
+  String get freeStorage => 'Свободно памяти';
+
+  @override
+  String get fileSizeEstimate => 'Примерный размер';
 }

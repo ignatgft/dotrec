@@ -273,4 +273,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get linkConnected => 'Verbunden';
+
+  @override
+  String get deviceCheckTitle => 'Geräteprüfung';
+
+  @override
+  String get deviceCheckBtn => 'Gerät prüfen';
+
+  @override
+  String get screenResolution => 'Bildschirmauflösung';
+
+  @override
+  String get refreshRates => 'Bildwiederholfrequenz';
+
+  @override
+  String get hevcSupport => 'Hardware-HEVC';
+
+  @override
+  String get freeStorage => 'Freier Speicher';
+
+  @override
+  String get fileSizeEstimate => 'Geschätzte Dateigröße';
 }

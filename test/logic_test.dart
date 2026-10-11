@@ -120,6 +120,20 @@ void main() {
       expect(RecordSettings.presetNamed('fast').resolution, 720);
       expect(RecordSettings.presetNamed('balanced').fps, 60);
       expect(RecordSettings.presetNamed('quality').resolution, 1440);
+      expect(RecordSettings.presetNamed('game').preset, 'game');
+      expect(RecordSettings.presetNamed('game').systemAudio, isTrue);
+      expect(RecordSettings.presetNamed('game').mic, isFalse);
+    });
+  });
+
+  group('FileSizeEstimator', () {
+    test('оценка размера в МБ и строка в минуту', () {
+      // 8 Мбит/с = 1 МБ/с = 60 МБ/мин
+      expect(FileSizeEstimator.estimateMb(bitrateMbps: 8, durationSeconds: 60), 60.0);
+      expect(FileSizeEstimator.estimatePerMinute(8), '~60 МБ / мин');
+      // 20 Мбит/с = 2.5 МБ/с = 150 МБ/мин
+      expect(FileSizeEstimator.estimateMb(bitrateMbps: 20, durationSeconds: 60), 150.0);
+      expect(FileSizeEstimator.estimatePerMinute(20), '~150 МБ / мин');
     });
   });
 

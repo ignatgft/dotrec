@@ -105,5 +105,12 @@
   "linkStartStream": "Почати трансляцію",
   "linkStopStream": "Зупинити трансляцію",
   "linkWaiting": "Очікування ПК...",
-  "linkConnected": "Підключено"
+  "linkConnected": "Підключено",
+  "deviceCheckTitle": "Перевірка пристрою",
+  "deviceCheckBtn": "Перевірити пристрій",
+  "screenResolution": "Роздільність екрана",
+  "refreshRates": "Частота оновлення",
+  "hevcSupport": "Апаратний HEVC",
+  "freeStorage": "Вільна пам'ять",
+  "fileSizeEstimate": "Орієнтовний розмір"
 }

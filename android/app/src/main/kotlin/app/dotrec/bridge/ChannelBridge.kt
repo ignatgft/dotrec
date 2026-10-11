@@ -274,6 +274,46 @@ object ChannelBridge {
                 val rows = activity.contentResolver.delete(uri.toUri(), null, null)
                 result.success(rows > 0)
             }
+            "trim" -> {
+                val args = call.arguments as? Map<*, *>
+                val uriStr = args?.get("uri") as? String
+                val startMs = (args?.get("startMs") as? Number)?.toLong() ?: 0L
+                val endMs = (args?.get("endMs") as? Number)?.toLong() ?: 0L
+                if (uriStr == null) {
+                    result.success(null)
+                    return
+                }
+                val srcUri = uriStr.toUri()
+                val srcPfd = try {
+                    activity.contentResolver.openFileDescriptor(srcUri, "r")
+                } catch (_: Exception) {
+                    null
+                }
+                if (srcPfd == null) {
+                    result.success(null)
+                    return
+                }
+                val destSession = app.dotrec.recorder.OutputWriter.create(activity)
+                if (destSession == null) {
+                    runCatching { srcPfd.close() }
+                    result.success(null)
+                    return
+                }
+                Thread {
+                    val ok = app.dotrec.util.VideoTrimmer.trim(
+                        srcPfd.fileDescriptor,
+                        destSession.pfd.fileDescriptor,
+                        startMs * 1000L,
+                        endMs * 1000L,
+                    )
+                    runCatching { srcPfd.close() }
+                    runCatching { destSession.pfd.close() }
+                    app.dotrec.recorder.OutputWriter.finish(activity, destSession.uri, ok)
+                    activity.runOnUiThread {
+                        result.success(if (ok) destSession.uri.toString() else null)
+                    }
+                }.start()
+            }
             else -> result.notImplemented()
         }
     }

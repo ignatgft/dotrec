@@ -33,6 +33,7 @@ class RecordSettings {
     'fast',
     'balanced',
     'quality',
+    'game',
     'custom',
   ];
   static const List<String> allowedThemeModes = ['system', 'light', 'dark'];
@@ -110,6 +111,14 @@ class RecordSettings {
       fps: 60,
       bitrateMbps: 40,
       preset: 'quality',
+    ),
+    'game' => const RecordSettings(
+      resolution: 1080,
+      fps: 60,
+      bitrateMbps: 20,
+      systemAudio: true,
+      mic: false,
+      preset: 'game',
     ),
     'balanced' || _ => const RecordSettings(),
   };

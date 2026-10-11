@@ -272,4 +272,25 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get linkConnected => 'Conectado';
+
+  @override
+  String get deviceCheckTitle => 'Verificação do dispositivo';
+
+  @override
+  String get deviceCheckBtn => 'Verificar';
+
+  @override
+  String get screenResolution => 'Resolução da tela';
+
+  @override
+  String get refreshRates => 'Taxa de atualização';
+
+  @override
+  String get hevcSupport => 'HEVC por hardware';
+
+  @override
+  String get freeStorage => 'Armazenamento livre';
+
+  @override
+  String get fileSizeEstimate => 'Tamanho estimado';
 }
