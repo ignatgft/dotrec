@@ -33,11 +33,20 @@ class BrowserSourceServer {
     await stop();
 
     _token = 'dotrec_${_generateToken()}';
-    final server = await HttpServer.bind(
-      InternetAddress.loopbackIPv4,
-      port,
-      shared: false,
-    );
+    HttpServer server;
+    try {
+      server = await HttpServer.bind(
+        InternetAddress.loopbackIPv4,
+        port,
+        shared: false,
+      );
+    } on SocketException catch (_) {
+      server = await HttpServer.bind(
+        InternetAddress.loopbackIPv4,
+        0,
+        shared: false,
+      );
+    }
     _server = server;
     _port = server.port;
 
@@ -63,16 +72,22 @@ class BrowserSourceServer {
       return;
     }
 
+    final path = request.uri.path;
+    if (path == '/favicon.ico') {
+      request.response.statusCode = HttpStatus.noContent;
+      await request.response.close();
+      return;
+    }
+
     final reqToken = request.uri.queryParameters['token'];
-    if (reqToken != _token) {
+    // Allow loopback localhost requests without token, but validate if token is provided
+    if (reqToken != null && reqToken.isNotEmpty && reqToken != _token) {
       request.response.statusCode = HttpStatus.unauthorized;
       request.response.headers.contentType = ContentType.text;
       request.response.write('Unauthorized DotRec Link token');
       await request.response.close();
       return;
     }
-
-    final path = request.uri.path;
     if (path == '/ws') {
       if (WebSocketTransformer.isUpgradeRequest(request)) {
         final socket = await WebSocketTransformer.upgrade(request);
@@ -144,7 +159,7 @@ class BrowserSourceServer {
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>DotRec Link</title>
+  <title>DotRec Link OBS Source</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
