@@ -1,0 +1,106 @@
+DOTREC SOURCE-AVAILABLE COMMUNITY LICENSE (STORE DISTRIBUTION RESTRICTED)
+Version 1.0, October 2026
+
+Copyright (c) 2026 Ignat Gorborukov (ignatgft) <gorborukovignst@gmail.com>
+All rights reserved.
+
+================================================================================
+1. CORE PURPOSE AND PHILOSOPHY
+================================================================================
+DotRec is developed as a completely free, convenient, ad-free, watermark-free,
+and privacy-respecting screen recording application for Android.
+
+The source code is published openly on GitHub for public transparency, security
+auditing, learning, community contributions, and personal compilation.
+
+To safeguard users against fraudulent clones, scam apps, injected malware,
+ad-supported forks, paywalled repackages, and unauthorized marketplace exploitation,
+DISTRIBUTION OF THE SOFTWARE TO ANY APPLICATION STORE OR DIGITAL MARKETPLACE
+IS EXCLUSIVELY RESERVED FOR THE COPYRIGHT HOLDER.
+
+================================================================================
+2. PERMITTED USES (GRANT OF RIGHTS)
+================================================================================
+Subject to the terms and limitations set forth in this License, the Copyright
+Holder grants to any person obtaining a copy of this software and associated
+documentation files (the "Software"), free of charge, the non-exclusive right to:
+
+  (a) View, read, inspect, audit, study, and research the source code;
+  (b) Make personal modifications, bug fixes, enhancements, and submit pull
+      requests or issues back to the official DotRec repository;
+  (c) Compile and build executable binaries (e.g. APKs) locally on your own
+      machine solely for your own personal, private, non-commercial use on your
+      own personal devices;
+  (d) Share unmodified or modified source code strictly in source-code form
+      (such as public forks on GitHub), provided that:
+        (i)  This LICENSE file and all copyright notices remain fully intact;
+        (ii) It is made explicitly clear that the fork is not the official
+             DotRec application.
+
+================================================================================
+3. STRICT APPLICATION STORE & MARKETPLACE RESTRICTION
+================================================================================
+No person, organization, company, or third party—other than the Copyright Holder
+(ignatgft)—is granted any right or license to:
+
+  (a) Upload, publish, submit, distribute, host, make available, or offer for
+      download the Software, any compiled binaries, packages (including but not
+      limited to APK, AAB, APKS, XAPK, or any other binary package format), or
+      any derivative work, fork, or modification of the Software on ANY
+      application store, marketplace, catalog, repository, or distribution platform.
+
+      This restriction applies to all platforms and operating systems worldwide,
+      including without limitation:
+        - Google Play Store
+        - Apple App Store
+        - Amazon Appstore
+        - Samsung Galaxy Store
+        - Huawei AppGallery
+        - Xiaomi GetApps / Mi Store
+        - OPPO App Market / Vivo App Store
+        - RuStore, NashStore, RuMarket
+        - Microsoft Store
+        - F-Droid or any third-party F-Droid repository
+        - APKPure, APKMirror, Uptodown, Aptoide, or similar APK repositories
+        - Any other centralized or decentralized application distribution platform.
+
+  (b) Claim, advertise, or imply that any unauthorized third-party build or fork
+      is affiliated with, endorsed by, or represents the official DotRec project.
+
+================================================================================
+4. COMMERCIAL & MONETIZATION PROHIBITIONS
+================================================================================
+You may NOT:
+  (a) Sell, rent, lease, sub-license, monetize, or charge any fee for the Software,
+      source code, binaries, or any derivative work;
+  (b) Distribute the Software (or any derivative work) bundled with advertisements,
+      promotional banners, sponsored software, trackers, telemetry, or spyware;
+  (c) Gate any features of the Software behind a paywall, subscription, in-app
+      purchase, donation-lock, or paid license key.
+
+DotRec must remain genuinely free, clean, and uncompromised for every user.
+
+================================================================================
+5. TRADEMARK & BRANDING
+================================================================================
+The names "DotRec", "dotrec", the dot-matrix branding, logos, and associated visual
+assets are the property of the Copyright Holder. This License does not grant any
+trademark rights to use the project name or branding in any third-party product
+without prior express written permission.
+
+================================================================================
+6. RESERVATION OF RIGHTS
+================================================================================
+All rights not explicitly granted in this License are reserved exclusively by the
+Copyright Holder. Any exception or permission for store distribution or commercial
+partnership requires prior express written consent signed by the Copyright Holder.
+
+================================================================================
+7. DISCLAIMER OF WARRANTY & LIMITATION OF LIABILITY
+================================================================================
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

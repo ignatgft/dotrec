@@ -19,6 +19,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.StatFs
 import android.os.SystemClock
+import android.util.Log
 import app.dotrec.entry.NotificationFactory
 import app.dotrec.entry.OverlayPill
 import app.dotrec.entry.RecordWidgetProvider
@@ -126,6 +127,7 @@ class RecorderService : Service() {
 
     private fun startRecording(intent: Intent) {
         val cur = RecorderStateStore.state.value
+        Log.d(TAG, "startRecording state=$cur")
         if (cur is RecorderState.Recording || cur is RecorderState.Starting ||
             cur is RecorderState.Countdown || cur is RecorderState.Saving
         ) {
@@ -134,6 +136,7 @@ class RecorderService : Service() {
         runCatching { RecorderStateStore.set(RecorderState.Starting) }
         // СНАЧАЛА foreground с типом mediaProjection, только потом проекция.
         startForegroundNotif(paused = false)
+        Log.d(TAG, "foreground started, free=${freeBytes()}")
 
         val settings = SettingsStore(this).getAll()
         if (freeBytes() < MIN_FREE_START) {
@@ -278,6 +281,7 @@ class RecorderService : Service() {
             return
         }
         segmentStart = SystemClock.elapsedRealtime()
+        Log.d(TAG, "capture started ${cfg.w}x${cfg.h}@${cfg.fps} ${cfg.bitrateBps}bps ${cfg.mime} sysAudio=$sysAudio")
         runCatching { RecorderStateStore.set(RecorderState.Recording(0)) }
         runCatching { RecordWidgetProvider.updateAll(this) }
         if ((settings["overlayPill"] as? Boolean) == true) {
@@ -349,7 +353,7 @@ class RecorderService : Service() {
         return try {
             MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos
                 .firstOrNull { it.isEncoder && mime in it.supportedTypes }
-                ?.getCapabilitiesForType(mime) as? MediaCodecInfo.VideoCapabilities
+                ?.getCapabilitiesForType(mime)?.videoCapabilities
         } catch (_: Exception) {
             null
         }
@@ -385,9 +389,11 @@ class RecorderService : Service() {
 
     private fun pauseRecording() {
         val cur = RecorderStateStore.state.value
+        Log.d(TAG, "pause cur=$cur")
         if (cur is RecorderState.Recording) {
             recordedMs += SystemClock.elapsedRealtime() - segmentStart
             runCatching { codec?.pause() ?: recorder?.pause() }
+            Log.d(TAG, "paused at $recordedMs")
             runCatching { RecorderStateStore.set(RecorderState.Paused(recordedMs)) }
             runCatching { RecordWidgetProvider.updateAll(this) }
             runCatching { OverlayPill.update(recordedMs, true) }
@@ -397,6 +403,7 @@ class RecorderService : Service() {
 
     private fun resumeRecording() {
         val cur = RecorderStateStore.state.value
+        Log.d(TAG, "resume cur=$cur")
         if (cur is RecorderState.Paused) {
             runCatching { codec?.resume() ?: recorder?.resume() }
             segmentStart = SystemClock.elapsedRealtime()
@@ -427,6 +434,7 @@ class RecorderService : Service() {
         }
         runCatching { RecorderStateStore.set(RecorderState.Saving) }
         var stopped = false
+        Log.d(TAG, "stopRecording cur=$cur reason=$reason")
         try {
             stopped = try {
                 val c = codec
@@ -436,7 +444,8 @@ class RecorderService : Service() {
                     recorder?.stop()
                     recorder != null
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.d(TAG, "stop threw: $e")
                 false
             }
             try {
@@ -456,6 +465,7 @@ class RecorderService : Service() {
             if (s != null && stopped) {
                 OutputWriter.finish(this, s.uri, true)
                 val size = OutputWriter.sizeBytes(this, s.uri)
+                Log.d(TAG, "saved uri=${s.uri} size=$size ms=$totalMs")
                 RecordingEvents.saved(s.uri.toString(), totalMs, size)
                 runCatching {
                     // FR-AUD-04: при звуке системы честно предупреждаем:
@@ -483,6 +493,7 @@ class RecorderService : Service() {
     }
 
     private fun fail(code: String) {
+        Log.d(TAG, "fail($code)")
         main.removeCallbacks(countdownStep)
         main.removeCallbacks(ticker)
         ticking = false
@@ -561,6 +572,7 @@ class RecorderService : Service() {
     }
 
     companion object {
+        const val TAG = "DotRec"
         const val ACTION_START = "app.dotrec.action.START"
         const val ACTION_STOP = "app.dotrec.action.STOP"
         const val ACTION_PAUSE = "app.dotrec.action.PAUSE"

@@ -1,0 +1,61 @@
+# DotRec — App Store Listing Data (Google Play / App Stores)
+
+## App Title (max 30 characters)
+DotRec: Screen Recorder
+
+## Short Description (max 80 characters)
+Free, convenient screen recorder: no ads, no watermark, 100% offline.
+
+## Full Description (max 4000 characters)
+DotRec is a fast, minimalist, and genuinely free screen recording application designed for Android.
+
+Inspired by Nothing OS aesthetics: clean monochrome design, a single bold red accent reserved for recording, the iconic Doto dot-matrix typeface, and elegant rounded controls. Both light and dark themes are fully supported from day one.
+
+No advertisements, no watermarks, no paywalls, and no time limits. DotRec runs 100% offline and does not even declare the INTERNET permission!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEY FEATURES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+● 1-TAP RECORDING START:
+  • From the main app screen with tactile, responsive feedback;
+  • From the Android Quick Settings shade (tile with live duration counter);
+  • From your home screen using the stylish 2×1 widget (light & dark modes);
+  • Via the optional floating pill overlay that automatically hides from the final video.
+
+● SMART PRESETS & FULL MANUAL CONTROL:
+  • Instant presets tailored for everyday needs: Fast, Balanced, Quality;
+  • Custom mode for enthusiasts:
+    - Resolution: from lightweight 480p up to crisp 1080p+ (respecting your device display);
+    - Frame rate: 30, 60, 90, and 120 FPS (honestly capped by your screen refresh rate);
+    - Bitrate: smooth slider from 4 to 24 Mbps;
+    - Video codecs: hardware H.264 or highly efficient HEVC (H.265).
+
+● CRYSTAL-CLEAR AUDIO:
+  • Microphone audio capture for voiceovers, tutorials, and commentary;
+  • Internal system audio recording (AudioPlaybackCapture on Android 10+);
+  • Clean simultaneous mixing of microphone and internal app/game sound.
+
+● EFFORTLESS WORKFLOW:
+  • Countdown timer before recording (None / 3s / 5s);
+  • Pause and resume recording anytime;
+  • Interactive notification shade control with chronometer, Pause, and Stop actions;
+  • Instant "Recording saved" notification: preview, share, or delete in one tap.
+
+● IN-APP MEDIA LIBRARY:
+  • Videos saved cleanly to the standard Movies/DotRec folder;
+  • Built-in gallery with thumbnails, durations, and file sizes;
+  • Pull-to-refresh, open with any video player, or share with favorite apps.
+
+● UNCOMPROMISED PRIVACY & RELIABILITY:
+  • ZERO network permission — INTERNET is completely absent from the Android manifest;
+  • 0% analytics, 0% tracking, 0% telemetry;
+  • Low storage guard: prevents starting if free space < 200 MB, safely finalizes video before 100 MB threshold;
+  • Permissions requested strictly on demand (Microphone only when enabled, Overlay only when toggled).
+
+● ACCESSIBILITY & 7 LANGUAGES:
+  • TalkBack optimized with periodic timer announcements every 10 seconds;
+  • Responsive UI scaling up to 130%;
+  • Available in 7 languages: English, Русский, Español, Deutsch, Français, Português, Українська (system auto-detect or manual selector).
+
+Record gameplay highlights, bug repros, video calls, and tutorials cleanly and without distractions with DotRec!

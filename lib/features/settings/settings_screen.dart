@@ -241,7 +241,7 @@ class SettingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${t.aboutLine} 0.5.0-beta.',
+                  '${t.aboutLine} v1.0.0.',
                   style: TextStyle(fontSize: 12, color: context.dot.fgMuted),
                 ),
                 TextButton(
