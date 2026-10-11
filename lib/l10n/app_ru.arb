@@ -16,7 +16,9 @@
   "fps_cap": "Экран поддерживает до {n} Гц",
   "@fps_cap": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "audio_blocked": "Часть приложений запретила захват звука",
@@ -39,7 +41,9 @@
   "bitrateLabel": "Битрейт: {n} Мбит/с",
   "@bitrateLabel": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "codecLabel": "Кодек",
@@ -52,7 +56,9 @@
   "countdownSec": "{n} с",
   "@countdownSec": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "appearanceLabel": "Вид",
@@ -87,5 +93,17 @@
   "guideBatteryTitle": "Батарея и фон",
   "guideBatteryBody": "Некоторые прошивки (Xiaomi, Samsung) убивают фоновую запись для экономии батареи. Откройте настройки батареи, найдите DotRec и разрешите работу в фоне.",
   "guideTileTitle": "Плитка в шторке",
-  "guideTileBody": "1. Откройте шторку и нажмите «Изменить». 2. Перетащите плитку «Запись» в активную зону. На Android 13+ нажмите кнопку ниже — система сама предложит добавить плитку."
+  "guideTileBody": "1. Откройте шторку и нажмите «Изменить». 2. Перетащите плитку «Запись» в активную зону. На Android 13+ нажмите кнопку ниже — система сама предложит добавить плитку.",
+  "linkTitle": "Передача на ПК",
+  "linkMethod": "Способ",
+  "linkWifiPin": "Код пары для Wi‑Fi",
+  "linkPinHint": "Введите на ПК. Код действует 2 минуты",
+  "linkStreamQuality": "Качество потока",
+  "linkAudioToPc": "Звук на ПК",
+  "linkBlankScreen": "Гасить экран телефона",
+  "linkParallelRecord": "Писать на телефон параллельно",
+  "linkStartStream": "Начать трансляцию",
+  "linkStopStream": "Остановить трансляцию",
+  "linkWaiting": "Ожидание ПК...",
+  "linkConnected": "Подключён"
 }

@@ -267,6 +267,14 @@ class CodecPipeline {
             videoTrack = muxer?.addTrack(fmt) ?: -1
             maybeStartMuxer()
         }
+        if (app.dotrec.link.LinkServer.isClientConnected()) {
+            val csd0 = try { fmt.getByteBuffer("csd-0") } catch (_: Exception) { null }
+            if (csd0 != null) {
+                val b = ByteArray(csd0.remaining())
+                csd0.duplicate().get(b)
+                app.dotrec.link.LinkServer.broadcastConfig(b)
+            }
+        }
     }
 
     private fun writeVideo(buf: ByteBuffer, info: MediaCodec.BufferInfo, pts: Long) {
@@ -275,6 +283,12 @@ class CodecPipeline {
         dup.position(info.offset)
         dup.limit(info.offset + info.size)
         dup.get(bytes)
+
+        if (app.dotrec.link.LinkServer.isClientConnected()) {
+            val isKey = (info.flags and MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0
+            app.dotrec.link.LinkServer.broadcastVideo(bytes, isKey, pts)
+        }
+
         val out = MediaCodec.BufferInfo().apply {
             set(bytes.size, 0, pts, info.flags)
         }
@@ -285,6 +299,20 @@ class CodecPipeline {
                 muxer?.writeSampleData(videoTrack, ByteBuffer.wrap(bytes), out)
             }
         }
+    }
+
+    fun requestKeyframe() {
+        val b = android.os.Bundle().apply {
+            putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0)
+        }
+        runCatching { videoEnc?.setParameters(b) }
+    }
+
+    fun setBitrate(bitrateBps: Int) {
+        val b = android.os.Bundle().apply {
+            putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, bitrateBps)
+        }
+        runCatching { videoEnc?.setParameters(b) }
     }
 
     // ---------- audio ----------

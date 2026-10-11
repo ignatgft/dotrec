@@ -238,4 +238,40 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get guideTileBody =>
       '1. Відкрийте шторку та натисніть «Змінити». 2. Перетягніть плитку «Запис» в активну зону. На Android 13+ натисніть кнопку нижче — система сама запропонує додати плитку.';
+
+  @override
+  String get linkTitle => 'Передача на ПК';
+
+  @override
+  String get linkMethod => 'Спосіб';
+
+  @override
+  String get linkWifiPin => 'Код пари для Wi‑Fi';
+
+  @override
+  String get linkPinHint => 'Введіть на ПК. Код діє 2 хвилини';
+
+  @override
+  String get linkStreamQuality => 'Якість потоку';
+
+  @override
+  String get linkAudioToPc => 'Звук на ПК';
+
+  @override
+  String get linkBlankScreen => 'Гасити екран телефона';
+
+  @override
+  String get linkParallelRecord => 'Записувати на телефон паралельно';
+
+  @override
+  String get linkStartStream => 'Почати трансляцію';
+
+  @override
+  String get linkStopStream => 'Зупинити трансляцію';
+
+  @override
+  String get linkWaiting => 'Очікування ПК...';
+
+  @override
+  String get linkConnected => 'Підключено';
 }

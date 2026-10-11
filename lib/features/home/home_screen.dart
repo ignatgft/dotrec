@@ -14,6 +14,7 @@ import '../../platform/models/recorder_state.dart';
 import '../../providers.dart';
 import '../guides/guides_screen.dart';
 import '../library/library_screen.dart';
+import '../link/phone_link_screen.dart';
 import '../settings/settings_screen.dart';
 
 RecordVisualState _visualOf(RecorderState s) => switch (s) {
@@ -96,6 +97,19 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
+                IconButton(
+                  tooltip: t.linkTitle,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PhoneLinkScreen(),
+                    ),
+                  ),
+                  icon: Icon(
+                    Icons.devices,
+                    size: 22,
+                    color: context.dot.fg,
+                  ),
+                ),
                 IconButton(
                   tooltip: t.guides,
                   onPressed: () => Navigator.of(context).push(

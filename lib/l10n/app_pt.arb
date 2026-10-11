@@ -16,7 +16,9 @@
   "fps_cap": "Sua tela suporta até {n} Hz",
   "@fps_cap": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "audio_blocked": "Alguns apps bloquearam a captura de áudio",
@@ -39,7 +41,9 @@
   "bitrateLabel": "Bitrate: {n} Mbps",
   "@bitrateLabel": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "codecLabel": "Codec",
@@ -52,7 +56,9 @@
   "countdownSec": "{n} s",
   "@countdownSec": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "appearanceLabel": "Aparência",
@@ -87,5 +93,17 @@
   "guideBatteryTitle": "Bateria e segundo plano",
   "guideBatteryBody": "Algumas interfaces (Xiaomi, Samsung) encerram a gravação em segundo plano para economizar bateria. Abra as configurações de bateria, encontre o DotRec e permita a atividade em segundo plano.",
   "guideTileTitle": "Bloco rápido",
-  "guideTileBody": "1. Abra as configurações rápidas e toque em Editar. 2. Arraste o bloco “Gravar” para a área ativa. No Android 13+, use o botão abaixo."
+  "guideTileBody": "1. Abra as configurações rápidas e toque em Editar. 2. Arraste o bloco “Gravar” para a área ativa. No Android 13+, use o botão abaixo.",
+  "linkTitle": "Transmitir para o PC",
+  "linkMethod": "Método",
+  "linkWifiPin": "Código de pareamento Wi-Fi",
+  "linkPinHint": "Digite no PC. Válido por 2 minutos",
+  "linkStreamQuality": "Qualidade do fluxo",
+  "linkAudioToPc": "Áudio para o PC",
+  "linkBlankScreen": "Desligar tela do celular",
+  "linkParallelRecord": "Gravar no celular em paralelo",
+  "linkStartStream": "Iniciar transmissão",
+  "linkStopStream": "Parar transmissão",
+  "linkWaiting": "Aguardando o PC...",
+  "linkConnected": "Conectado"
 }

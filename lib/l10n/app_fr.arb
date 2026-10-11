@@ -16,7 +16,9 @@
   "fps_cap": "Votre écran prend en charge jusqu'à {n} Hz",
   "@fps_cap": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "audio_blocked": "Certaines apps ont bloqué la capture audio",
@@ -39,7 +41,9 @@
   "bitrateLabel": "Débit : {n} Mbit/s",
   "@bitrateLabel": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "codecLabel": "Codec",
@@ -52,7 +56,9 @@
   "countdownSec": "{n} s",
   "@countdownSec": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "appearanceLabel": "Apparence",
@@ -87,5 +93,17 @@
   "guideBatteryTitle": "Batterie et arrière-plan",
   "guideBatteryBody": "Certaines surcouches (Xiaomi, Samsung) arrêtent l'enregistrement en arrière-plan pour économiser la batterie. Ouvrez les paramètres de batterie, trouvez DotRec et autorisez l'activité en arrière-plan.",
   "guideTileTitle": "Tuile",
-  "guideTileBody": "1. Ouvrez les paramètres rapides et touchez Modifier. 2. Glissez la tuile «Enregistrer» dans la zone active. Sur Android 13+, utilisez le bouton ci-dessous."
+  "guideTileBody": "1. Ouvrez les paramètres rapides et touchez Modifier. 2. Glissez la tuile «Enregistrer» dans la zone active. Sur Android 13+, utilisez le bouton ci-dessous.",
+  "linkTitle": "Diffuser vers le PC",
+  "linkMethod": "Méthode",
+  "linkWifiPin": "Code de jumelage Wi-Fi",
+  "linkPinHint": "Entrez sur le PC. Valide 2 minutes",
+  "linkStreamQuality": "Qualité du flux",
+  "linkAudioToPc": "Audio vers le PC",
+  "linkBlankScreen": "Éteindre l écran du téléphone",
+  "linkParallelRecord": "Enregistrer en parallèle sur téléphone",
+  "linkStartStream": "Démarrer la diffusion",
+  "linkStopStream": "Arrêter la diffusion",
+  "linkWaiting": "En attente du PC...",
+  "linkConnected": "Connecté"
 }

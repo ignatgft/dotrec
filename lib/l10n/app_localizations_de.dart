@@ -237,4 +237,40 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get guideTileBody =>
       '1. Schnelleinstellungen öffnen und Bearbeiten tippen. 2. Die Kachel „Aufnahme“ in den aktiven Bereich ziehen. Ab Android 13 geht es auch über die Schaltfläche unten.';
+
+  @override
+  String get linkTitle => 'Übertragung auf PC';
+
+  @override
+  String get linkMethod => 'Methode';
+
+  @override
+  String get linkWifiPin => 'WLAN-Kopplungscode';
+
+  @override
+  String get linkPinHint => 'Auf dem PC eingeben. Code 2 Min. gültig';
+
+  @override
+  String get linkStreamQuality => 'Stream-Qualität';
+
+  @override
+  String get linkAudioToPc => 'Audio auf PC';
+
+  @override
+  String get linkBlankScreen => 'Telefondisplay ausschalten';
+
+  @override
+  String get linkParallelRecord => 'Parallel auf Telefon aufnehmen';
+
+  @override
+  String get linkStartStream => 'Stream starten';
+
+  @override
+  String get linkStopStream => 'Stream beenden';
+
+  @override
+  String get linkWaiting => 'Warten auf PC...';
+
+  @override
+  String get linkConnected => 'Verbunden';
 }

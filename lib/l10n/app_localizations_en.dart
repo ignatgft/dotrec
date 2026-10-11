@@ -239,4 +239,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guideTileBody =>
       '1. Open quick settings and tap Edit. 2. Drag the “Record” tile into the active area. On Android 13+ use the button below.';
+
+  @override
+  String get linkTitle => 'Stream to PC';
+
+  @override
+  String get linkMethod => 'Method';
+
+  @override
+  String get linkWifiPin => 'Wi-Fi pairing code';
+
+  @override
+  String get linkPinHint => 'Enter on PC. Code is valid for 2 minutes';
+
+  @override
+  String get linkStreamQuality => 'Stream quality';
+
+  @override
+  String get linkAudioToPc => 'Audio to PC';
+
+  @override
+  String get linkBlankScreen => 'Blank phone screen';
+
+  @override
+  String get linkParallelRecord => 'Record to phone in parallel';
+
+  @override
+  String get linkStartStream => 'Start streaming';
+
+  @override
+  String get linkStopStream => 'Stop streaming';
+
+  @override
+  String get linkWaiting => 'Waiting for PC...';
+
+  @override
+  String get linkConnected => 'Connected';
 }

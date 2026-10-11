@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'platform/library_channel.dart';
 import 'platform/models/device_caps.dart';
 import 'platform/models/record_settings.dart';
+import 'platform/models/link_state.dart';
 import 'platform/models/recorder_state.dart';
 import 'platform/models/recording_item.dart';
 import 'platform/recorder_channel.dart';
@@ -18,6 +19,15 @@ final Provider<LibraryChannel> libraryChannelProvider =
 final StreamProvider<RecorderState> recorderStateProvider =
     StreamProvider<RecorderState>((Ref ref) {
       return ref.watch(recorderChannelProvider).state;
+    });
+
+/// Состояние сервера DotRec Link (USB / Wi-Fi).
+final StreamProvider<LinkState> linkStateProvider =
+    StreamProvider<LinkState>((Ref ref) {
+      return ref
+          .watch(recorderChannelProvider)
+          .linkState
+          .map((Map<String, dynamic> m) => LinkState.fromMap(m));
     });
 
 /// Настройки: источник правды — Kotlin SettingsStore, Dart читает/пишет через канал.

@@ -61,6 +61,25 @@ class RecorderChannel {
   Future<void> openBatterySettings() =>
       _method.invokeMethod<void>('openBatterySettings');
 
+  Future<void> startLinkServer({String mode = 'usb'}) =>
+      _method.invokeMethod<void>('startLinkServer', {'mode': mode});
+
+  Future<void> stopLinkServer() =>
+      _method.invokeMethod<void>('stopLinkServer');
+
+  Future<Map<String, dynamic>> getLinkState() async {
+    final Map<Object?, Object?>? m = await _method
+        .invokeMethod<Map<Object?, Object?>>('getLinkState');
+    if (m == null) return {};
+    return Map<String, dynamic>.from(m);
+  }
+
+  /// Поток состояния сервера DotRec Link (USB / Wi-Fi)
+  Stream<Map<String, dynamic>> get linkState =>
+      const EventChannel('app.dotrec/link_state')
+          .receiveBroadcastStream()
+          .map((dynamic e) => Map<String, dynamic>.from(e as Map));
+
   /// При подписке Kotlin сразу отдаёт текущее состояние, затем изменения.
   Stream<RecorderState> get state => _events.receiveBroadcastStream().map(
     (dynamic e) => RecorderState.fromMap(Map<Object?, Object?>.from(e as Map)),

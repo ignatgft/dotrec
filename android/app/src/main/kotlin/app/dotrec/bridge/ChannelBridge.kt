@@ -59,9 +59,34 @@ object ChannelBridge {
                     sinkJobs = emptyList()
                 }
             })
+        EventChannel(engine.dartExecutor.binaryMessenger, "app.dotrec/link_state")
+            .setStreamHandler(object : EventChannel.StreamHandler {
+                override fun onListen(args: Any?, sink: EventChannel.EventSink) {
+                    val job = scope.launch {
+                        app.dotrec.link.LinkServer.state.collectLatest { st ->
+                            sink.success(mapOf(
+                                "status" to st.status,
+                                "mode" to st.mode,
+                                "pin" to st.pin,
+                                "pinTtlSec" to st.pinTtlSec,
+                                "clientName" to st.clientName,
+                                "streamActive" to st.streamActive,
+                                "latencyMs" to st.latencyMs,
+                            ))
+                        }
+                    }
+                    linkJobs = listOf(job)
+                }
+
+                override fun onCancel(args: Any?) {
+                    linkJobs.forEach { it.cancel() }
+                    linkJobs = emptyList()
+                }
+            })
     }
 
     private var sinkJobs: List<kotlinx.coroutines.Job> = emptyList()
+    private var linkJobs: List<kotlinx.coroutines.Job> = emptyList()
 
     private fun handleRecorder(
         activity: Activity,
@@ -187,6 +212,27 @@ object ChannelBridge {
                     )
                 }
                 result.success(null)
+            }
+            "startLinkServer" -> {
+                val mode = call.argument<String>("mode") ?: "usb"
+                app.dotrec.link.LinkServer.start(activity, mode)
+                result.success(null)
+            }
+            "stopLinkServer" -> {
+                app.dotrec.link.LinkServer.stop()
+                result.success(null)
+            }
+            "getLinkState" -> {
+                val st = app.dotrec.link.LinkServer.state.value
+                result.success(mapOf(
+                    "status" to st.status,
+                    "mode" to st.mode,
+                    "pin" to st.pin,
+                    "pinTtlSec" to st.pinTtlSec,
+                    "clientName" to st.clientName,
+                    "streamActive" to st.streamActive,
+                    "latencyMs" to st.latencyMs,
+                ))
             }
             else -> result.notImplemented()
         }

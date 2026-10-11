@@ -236,4 +236,40 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get guideTileBody =>
       '1. Abra as configurações rápidas e toque em Editar. 2. Arraste o bloco “Gravar” para a área ativa. No Android 13+, use o botão abaixo.';
+
+  @override
+  String get linkTitle => 'Transmitir para o PC';
+
+  @override
+  String get linkMethod => 'Método';
+
+  @override
+  String get linkWifiPin => 'Código de pareamento Wi-Fi';
+
+  @override
+  String get linkPinHint => 'Digite no PC. Válido por 2 minutos';
+
+  @override
+  String get linkStreamQuality => 'Qualidade do fluxo';
+
+  @override
+  String get linkAudioToPc => 'Áudio para o PC';
+
+  @override
+  String get linkBlankScreen => 'Desligar tela do celular';
+
+  @override
+  String get linkParallelRecord => 'Gravar no celular em paralelo';
+
+  @override
+  String get linkStartStream => 'Iniciar transmissão';
+
+  @override
+  String get linkStopStream => 'Parar transmissão';
+
+  @override
+  String get linkWaiting => 'Aguardando o PC...';
+
+  @override
+  String get linkConnected => 'Conectado';
 }

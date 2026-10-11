@@ -539,6 +539,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'1. Open quick settings and tap Edit. 2. Drag the “Record” tile into the active area. On Android 13+ use the button below.'**
   String get guideTileBody;
+
+  /// No description provided for @linkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stream to PC'**
+  String get linkTitle;
+
+  /// No description provided for @linkMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get linkMethod;
+
+  /// No description provided for @linkWifiPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi pairing code'**
+  String get linkWifiPin;
+
+  /// No description provided for @linkPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter on PC. Code is valid for 2 minutes'**
+  String get linkPinHint;
+
+  /// No description provided for @linkStreamQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Stream quality'**
+  String get linkStreamQuality;
+
+  /// No description provided for @linkAudioToPc.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio to PC'**
+  String get linkAudioToPc;
+
+  /// No description provided for @linkBlankScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Blank phone screen'**
+  String get linkBlankScreen;
+
+  /// No description provided for @linkParallelRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record to phone in parallel'**
+  String get linkParallelRecord;
+
+  /// No description provided for @linkStartStream.
+  ///
+  /// In en, this message translates to:
+  /// **'Start streaming'**
+  String get linkStartStream;
+
+  /// No description provided for @linkStopStream.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop streaming'**
+  String get linkStopStream;
+
+  /// No description provided for @linkWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for PC...'**
+  String get linkWaiting;
+
+  /// No description provided for @linkConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get linkConnected;
 }
 
 class _AppLocalizationsDelegate

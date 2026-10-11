@@ -16,7 +16,9 @@
   "fps_cap": "Dein Bildschirm unterstützt bis zu {n} Hz",
   "@fps_cap": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "audio_blocked": "Manche Apps haben Audio-Aufnahme blockiert",
@@ -39,7 +41,9 @@
   "bitrateLabel": "Bitrate: {n} Mbit/s",
   "@bitrateLabel": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "codecLabel": "Codec",
@@ -52,7 +56,9 @@
   "countdownSec": "{n} s",
   "@countdownSec": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "appearanceLabel": "Darstellung",
@@ -87,5 +93,17 @@
   "guideBatteryTitle": "Akku und Hintergrund",
   "guideBatteryBody": "Manche Oberflächen (Xiaomi, Samsung) beenden Aufnahmen im Hintergrund zum Akkusparen. Öffne die Akku-Einstellungen, suche DotRec und erlaube Hintergrundaktivität.",
   "guideTileTitle": "Kachel",
-  "guideTileBody": "1. Schnelleinstellungen öffnen und Bearbeiten tippen. 2. Die Kachel „Aufnahme“ in den aktiven Bereich ziehen. Ab Android 13 geht es auch über die Schaltfläche unten."
+  "guideTileBody": "1. Schnelleinstellungen öffnen und Bearbeiten tippen. 2. Die Kachel „Aufnahme“ in den aktiven Bereich ziehen. Ab Android 13 geht es auch über die Schaltfläche unten.",
+  "linkTitle": "Übertragung auf PC",
+  "linkMethod": "Methode",
+  "linkWifiPin": "WLAN-Kopplungscode",
+  "linkPinHint": "Auf dem PC eingeben. Code 2 Min. gültig",
+  "linkStreamQuality": "Stream-Qualität",
+  "linkAudioToPc": "Audio auf PC",
+  "linkBlankScreen": "Telefondisplay ausschalten",
+  "linkParallelRecord": "Parallel auf Telefon aufnehmen",
+  "linkStartStream": "Stream starten",
+  "linkStopStream": "Stream beenden",
+  "linkWaiting": "Warten auf PC...",
+  "linkConnected": "Verbunden"
 }

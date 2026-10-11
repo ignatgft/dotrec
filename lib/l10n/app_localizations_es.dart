@@ -237,4 +237,40 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get guideTileBody =>
       '1. Abre los ajustes rápidos y pulsa Editar. 2. Arrastra el mosaico «Grabar» a la zona activa. En Android 13+ usa el botón de abajo.';
+
+  @override
+  String get linkTitle => 'Transmitir a PC';
+
+  @override
+  String get linkMethod => 'Método';
+
+  @override
+  String get linkWifiPin => 'Código de emparejamiento Wi-Fi';
+
+  @override
+  String get linkPinHint => 'Ingresar en PC. Válido por 2 minutos';
+
+  @override
+  String get linkStreamQuality => 'Calidad de transmisión';
+
+  @override
+  String get linkAudioToPc => 'Audio en PC';
+
+  @override
+  String get linkBlankScreen => 'Apagar pantalla del teléfono';
+
+  @override
+  String get linkParallelRecord => 'Grabar en teléfono en paralelo';
+
+  @override
+  String get linkStartStream => 'Iniciar transmisión';
+
+  @override
+  String get linkStopStream => 'Detener transmisión';
+
+  @override
+  String get linkWaiting => 'Esperando a PC...';
+
+  @override
+  String get linkConnected => 'Conectado';
 }

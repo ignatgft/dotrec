@@ -282,6 +282,12 @@ class RecorderService : Service() {
         }
         segmentStart = SystemClock.elapsedRealtime()
         Log.d(TAG, "capture started ${cfg.w}x${cfg.h}@${cfg.fps} ${cfg.bitrateBps}bps ${cfg.mime} sysAudio=$sysAudio")
+        app.dotrec.link.LinkServer.onKeyframeRequested = {
+            codec?.requestKeyframe()
+        }
+        app.dotrec.link.LinkServer.onBitrateChanged = { newBps ->
+            codec?.setBitrate(newBps)
+        }
         runCatching { RecorderStateStore.set(RecorderState.Recording(0)) }
         runCatching { RecordWidgetProvider.updateAll(this) }
         if ((settings["overlayPill"] as? Boolean) == true) {
@@ -534,6 +540,8 @@ class RecorderService : Service() {
         codec = null
         session = null
         pendingData = null
+        app.dotrec.link.LinkServer.onKeyframeRequested = null
+        app.dotrec.link.LinkServer.onBitrateChanged = null
     }
 
     private fun finishService() {

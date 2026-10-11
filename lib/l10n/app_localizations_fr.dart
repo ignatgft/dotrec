@@ -238,4 +238,40 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get guideTileBody =>
       '1. Ouvrez les paramètres rapides et touchez Modifier. 2. Glissez la tuile «Enregistrer» dans la zone active. Sur Android 13+, utilisez le bouton ci-dessous.';
+
+  @override
+  String get linkTitle => 'Diffuser vers le PC';
+
+  @override
+  String get linkMethod => 'Méthode';
+
+  @override
+  String get linkWifiPin => 'Code de jumelage Wi-Fi';
+
+  @override
+  String get linkPinHint => 'Entrez sur le PC. Valide 2 minutes';
+
+  @override
+  String get linkStreamQuality => 'Qualité du flux';
+
+  @override
+  String get linkAudioToPc => 'Audio vers le PC';
+
+  @override
+  String get linkBlankScreen => 'Éteindre l écran du téléphone';
+
+  @override
+  String get linkParallelRecord => 'Enregistrer en parallèle sur téléphone';
+
+  @override
+  String get linkStartStream => 'Démarrer la diffusion';
+
+  @override
+  String get linkStopStream => 'Arrêter la diffusion';
+
+  @override
+  String get linkWaiting => 'En attente du PC...';
+
+  @override
+  String get linkConnected => 'Connecté';
 }
