@@ -55,13 +55,32 @@ void main(List<String> args) async {
   // Start Browser Source Server (WebCodecs hardware player)
   stdout.writeln('[3/4] Запуск локального сервера Browser Source...');
   await browserServer.start(port: 48212, linkClient: linkClient);
-  stdout.writeln('  [✓] Сервер активен: ${browserServer.url}');
-  stdout.writeln('      (Используйте этот URL в OBS Studio как Browser Source)');
+  stdout.writeln('  [✓] Студийный плеер: ${browserServer.url}');
+  stdout.writeln('  [✓] Чистый поток для OBS Studio: ${browserServer.obsUrl}');
+  stdout.writeln('      (Используйте этот URL в OBS Studio как Browser Source: 1080x2400)');
 
   // Stream video frames to recorder if recording is active
   linkClient.videoStream.listen((frame) {
     if (isRecording) {
       recordingService.writeVideoFrame(frame, linkClient.spsPps);
+    }
+  });
+
+  // Автоматическое обнаружение и переподключение при подключении телефона
+  bool isForwarded = false;
+  adb.devicesStream.listen((devList) async {
+    final ready = devList.where((d) => d.state == AdbState.ready).firstOrNull;
+    if (ready != null && (!isForwarded || linkClient.status == LinkClientStatus.disconnected)) {
+      final ok = await adb.forwardPort(ready.serial, 48211, 48211);
+      if (ok) {
+        isForwarded = true;
+        if (linkClient.status == LinkClientStatus.disconnected || linkClient.status == LinkClientStatus.error) {
+          final connected = await linkClient.connect(host: '127.0.0.1', connectPort: 48211);
+          if (connected) {
+            stdout.writeln('\n  [✓] Авто-подключение к телефону (${ready.displayName}) успешно!');
+          }
+        }
+      }
     }
   });
 
@@ -71,7 +90,7 @@ void main(List<String> args) async {
     if (connected) {
       stdout.writeln('  [✓] Поток экрана телефона успешно подключен!');
     } else {
-      stdout.writeln('  [i] Ожидание старта трансляции в приложении на телефоне.');
+      stdout.writeln('  [i] Ожидание подключения устройства по USB или старта трансляции.');
     }
   });
 
@@ -165,9 +184,11 @@ void main(List<String> args) async {
         if (obsService.status == ObsStatus.connected) {
           final ok = await obsService.addBrowserSource(
             inputName: 'DotRec Phone Screen',
-            url: browserServer.url,
+            url: browserServer.obsUrl,
+            width: 1080,
+            height: 2400,
           );
-          stdout.writeln('\n[OBS] Источник ${ok ? "успешно добавлен" : "ошибка добавления"}');
+          stdout.writeln('\n[OBS] Источник ${ok ? "успешно добавлен (1080x2400)" : "ошибка добавления"}');
         } else {
           stdout.writeln('\n[OBS] Не подключено к OBS (убедитесь, что obs-websocket активен на порту 4455)');
         }

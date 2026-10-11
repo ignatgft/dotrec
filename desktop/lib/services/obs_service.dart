@@ -184,22 +184,39 @@ class ObsService {
           (_currentScene.isNotEmpty ? _currentScene : await _fetchCurrentScene());
       if (targetScene.isEmpty) return false;
 
-      final res = await sendRequest('CreateInput', {
-        'sceneName': targetScene,
-        'inputName': inputName,
-        'inputKind': 'browser_source',
-        'inputSettings': {
-          'url': url,
-          'width': width,
-          'height': height,
-          'fps': 60,
-          'reroute_audio': true,
-          'web_page_render_factor': 1.0,
-        },
-      });
+      final settings = {
+        'url': url,
+        'width': width,
+        'height': height,
+        'fps': 60,
+        'reroute_audio': true,
+        'css': 'body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }',
+        'web_page_render_factor': 1.0,
+      };
 
-      final status = res['requestStatus'] as Map<String, dynamic>?;
-      return status?['result'] == true;
+      try {
+        final res = await sendRequest('CreateInput', {
+          'sceneName': targetScene,
+          'inputName': inputName,
+          'inputKind': 'browser_source',
+          'inputSettings': settings,
+        });
+
+        final status = res['requestStatus'] as Map<String, dynamic>?;
+        if (status?['result'] == true) return true;
+      } catch (_) {}
+
+      // Если источник уже существует в OBS — обновляем его параметры
+      try {
+        final updateRes = await sendRequest('SetInputSettings', {
+          'inputName': inputName,
+          'inputSettings': settings,
+        });
+        final updateStatus = updateRes['requestStatus'] as Map<String, dynamic>?;
+        return updateStatus?['result'] == true;
+      } catch (_) {
+        return false;
+      }
     } catch (_) {
       return false;
     }
