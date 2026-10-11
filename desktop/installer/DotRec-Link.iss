@@ -14,7 +14,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\DotRec Link
+DefaultDirName={localappdata}\Programs\DotRec Link
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile={#MyDistDir}\LICENSE.txt
@@ -25,6 +25,11 @@ SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog commandline
+ShowLanguageDialog=no
+CloseApplications=no
+RestartApplications=no
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
