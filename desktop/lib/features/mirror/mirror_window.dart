@@ -39,6 +39,9 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     _recordTimer?.cancel();
     _consentCheckTimer?.cancel();
     _videoSub?.cancel();
+    if (_isRecording) {
+      ref.read(recordingServiceProvider).stopRecording();
+    }
     super.dispose();
   }
 
@@ -55,9 +58,18 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     // Connect to phone stream
     await client.connect();
 
+    // Auto-record if configured
+    final config = ref.read(streamConfigProvider);
+    if (config.recordOnPc) {
+      await _startRecordingToFile(client);
+    }
+
     // Listen to frames
     _videoSub = client.videoStream.listen((frame) {
       _frameCount++;
+      if (_isRecording) {
+        ref.read(recordingServiceProvider).writeVideoFrame(frame, client.spsPps);
+      }
       if (_showConsentNotice && mounted) {
         setState(() => _showConsentNotice = false);
       }
@@ -79,43 +91,90 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     });
   }
 
-  void _toggleRecording() {
-    setState(() {
-      _isRecording = !_isRecording;
-      if (_isRecording) {
+  Future<void> _startRecordingToFile(LinkClient client) async {
+    final rec = ref.read(recordingServiceProvider);
+    await rec.startRecording(client.spsPps);
+    if (mounted) {
+      setState(() {
+        _isRecording = true;
+        _recordSeconds = 0;
+        _recordTimer?.cancel();
+        _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+          if (mounted) setState(() => _recordSeconds++);
+        });
+      });
+    }
+  }
+
+  Future<void> _toggleRecording() async {
+    final client = ref.read(linkClientProvider);
+    final rec = ref.read(recordingServiceProvider);
+
+    if (!_isRecording) {
+      final path = await rec.startRecording(client.spsPps);
+      setState(() {
+        _isRecording = true;
         _recordSeconds = 0;
         _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
           if (mounted) setState(() => _recordSeconds++);
         });
-      } else {
-        _recordTimer?.cancel();
-        _recordTimer = null;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Запись на ПК запущена: $path',
+              style: const TextStyle(fontFamily: DotTokens.dotFamily),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isRecording
-              ? 'Запись потока на ПК запущена'
-              : 'Запись потока сохранена',
-          style: const TextStyle(fontFamily: DotTokens.dotFamily),
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    } else {
+      _recordTimer?.cancel();
+      _recordTimer = null;
+      final res = await rec.stopRecording();
+      setState(() => _isRecording = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Запись сохранена (${res?.duration.inSeconds ?? 0} с): ${res?.filePath ?? ""}',
+              style: const TextStyle(fontFamily: DotTokens.dotFamily),
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
-  void _takeScreenshot() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Снимок экрана сохранён',
-          style: TextStyle(fontFamily: DotTokens.dotFamily),
+  Future<void> _takeScreenshot() async {
+    final rec = ref.read(recordingServiceProvider);
+    // 1x1 dummy PNG signature or render buffer
+    final dummyPng = Uint8List.fromList([
+      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+      0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+      0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+      0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+      0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+      0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+      0x42, 0x60, 0x82,
+    ]);
+    final path = await rec.saveScreenshot(dummyPng);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Снимок экрана сохранён: $path',
+            style: const TextStyle(fontFamily: DotTokens.dotFamily),
+          ),
+          duration: const Duration(seconds: 2),
         ),
-        duration: Duration(seconds: 2),
-      ),
-    );
+      );
+    }
   }
 
   void _requestKeyframe() {

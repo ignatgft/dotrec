@@ -5,6 +5,7 @@ import '../models/link_stats.dart';
 import '../models/stream_preset.dart';
 import '../../services/adb_service.dart';
 import '../../services/link_client.dart';
+import '../../services/recording_service.dart';
 
 // ADB Service
 final adbServiceProvider = Provider<AdbService>((ref) {
@@ -59,6 +60,11 @@ final linkStatusProvider = StreamProvider<LinkClientStatus>((ref) {
 final linkStatsProvider = StreamProvider<LinkStats>((ref) {
   final client = ref.watch(linkClientProvider);
   return client.statsStream;
+});
+
+// Recording Service
+final recordingServiceProvider = Provider<RecordingService>((ref) {
+  return RecordingService();
 });
 
 // Desktop Navigation Tab
