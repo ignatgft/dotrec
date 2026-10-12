@@ -1,14 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:crypto/crypto.dart';
 
-enum ObsStatus {
-  disconnected,
-  connecting,
-  connected,
-  error,
-}
+enum ObsStatus { disconnected, connecting, connected, error }
 
 class ObsService {
   ObsService();
@@ -26,8 +22,11 @@ class ObsService {
   String get currentScene => _currentScene;
 
   void _setStatus(ObsStatus s) {
+    if (_status == s) return;
     _status = s;
-    _statusController.add(s);
+    if (!_statusController.isClosed) {
+      _statusController.add(s);
+    }
   }
 
   Future<bool> connect({
@@ -61,10 +60,13 @@ class ObsService {
         cancelOnError: true,
       );
 
-      return await completer.future.timeout(timeout, onTimeout: () {
-        disconnect();
-        return false;
-      });
+      return await completer.future.timeout(
+        timeout,
+        onTimeout: () {
+          disconnect();
+          return false;
+        },
+      );
     } catch (_) {
       _setStatus(ObsStatus.error);
       disconnect();
@@ -117,10 +119,12 @@ class ObsService {
       final salt = auth['salt'] as String;
 
       // obs-websocket v5 SHA256 auth
-      final passSaltHash =
-          base64Encode(sha256.convert(utf8.encode(password + salt)).bytes);
+      final passSaltHash = base64Encode(
+        sha256.convert(utf8.encode(password + salt)).bytes,
+      );
       authResponse = base64Encode(
-          sha256.convert(utf8.encode(passSaltHash + challenge)).bytes);
+        sha256.convert(utf8.encode(passSaltHash + challenge)).bytes,
+      );
     }
 
     final identify = {
@@ -180,8 +184,11 @@ class ObsService {
     int height = 2400,
   }) async {
     try {
-      final targetScene = sceneName ??
-          (_currentScene.isNotEmpty ? _currentScene : await _fetchCurrentScene());
+      final targetScene =
+          sceneName ??
+          (_currentScene.isNotEmpty
+              ? _currentScene
+              : await _fetchCurrentScene());
       if (targetScene.isEmpty) return false;
 
       final settings = {
@@ -212,7 +219,8 @@ class ObsService {
           'inputName': inputName,
           'inputSettings': settings,
         });
-        final updateStatus = updateRes['requestStatus'] as Map<String, dynamic>?;
+        final updateStatus =
+            updateRes['requestStatus'] as Map<String, dynamic>?;
         return updateStatus?['result'] == true;
       } catch (_) {
         return false;
@@ -233,8 +241,15 @@ class ObsService {
   }
 
   void disconnect() {
-    _socket?.close();
+    try {
+      _socket?.close();
+    } catch (_) {}
     _socket = null;
+    for (final completer in _pendingRequests.values) {
+      if (!completer.isCompleted) {
+        completer.completeError('OBS connection closed');
+      }
+    }
     _pendingRequests.clear();
     if (_status != ObsStatus.disconnected) {
       _setStatus(ObsStatus.disconnected);

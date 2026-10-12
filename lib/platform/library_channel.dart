@@ -39,10 +39,9 @@ class LibraryChannel {
     required String uri,
     required int startMs,
     required int endMs,
-  }) =>
-      _method.invokeMethod<String>('trim', {
-        'uri': uri,
-        'startMs': startMs,
-        'endMs': endMs,
-      });
+  }) => _method.invokeMethod<String>('trim', {
+    'uri': uri,
+    'startMs': startMs,
+    'endMs': endMs,
+  });
 }

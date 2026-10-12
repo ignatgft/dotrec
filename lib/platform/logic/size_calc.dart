@@ -44,7 +44,10 @@ abstract final class FileSizeEstimator {
 
   /// Читаемая строка для UI: «~90 МБ / мин».
   static String estimatePerMinute(int bitrateMbps) {
-    final int mb = estimateMb(bitrateMbps: bitrateMbps, durationSeconds: 60).round();
+    final int mb = estimateMb(
+      bitrateMbps: bitrateMbps,
+      durationSeconds: 60,
+    ).round();
     return '~$mb МБ / мин';
   }
 }

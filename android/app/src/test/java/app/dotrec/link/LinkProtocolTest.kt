@@ -80,4 +80,28 @@ class LinkProtocolTest {
         assertEquals(LinkProtocol.FLAG_KEYFRAME, r2.flags)
         assertEquals(200L, r2.ptsUs)
     }
+
+    @Test
+    fun testAudioFrame() {
+        val out = ByteArrayOutputStream()
+        val audioBytes = byteArrayOf(0xFF.toByte(), 0xF1.toByte(), 0x50.toByte(), 0x80.toByte())
+        val ptsUs = 33000L
+
+        LinkProtocol.writeFrame(
+            out,
+            LinkProtocol.TYPE_AUDIO,
+            0.toByte(),
+            ptsUs,
+            audioBytes,
+        )
+
+        val input = ByteArrayInputStream(out.toByteArray())
+        val frame = LinkProtocol.readFrame(input)
+
+        assertNotNull(frame)
+        assertEquals(LinkProtocol.TYPE_AUDIO, frame!!.type)
+        assertEquals(0.toByte(), frame.flags)
+        assertEquals(ptsUs, frame.ptsUs)
+        assertArrayEquals(audioBytes, frame.payload)
+    }
 }

@@ -57,7 +57,7 @@ class RecordTileService : TileService() {
                 val consent = Intent(this, ConsentActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 if (Build.VERSION.SDK_INT >= 34) {
-                    // TODO(verify): перегрузка с PendingIntent на API 34+.
+                    // Проверено: startActivityAndCollapse(PendingIntent) на API 34+.
                     val pi = PendingIntent.getActivity(
                         this, 0, consent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,

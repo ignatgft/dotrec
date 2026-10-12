@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dotrec_link_desktop/services/link_client.dart';
 import 'package:dotrec_link_desktop/services/recording_service.dart';
 
 void main() {
   group('RecordingService tests', () {
-    test('startRecording, writeVideoFrame and stopRecording write file with start codes',
-        () async {
+    test('startRecording, writeVideoFrame and stopRecording write file with start codes', () async {
       final service = RecordingService();
       final spsPps = Uint8List.fromList([0x67, 0x42, 0x00, 0x1f]); // SPS
       final filePath = await service.startRecording(spsPps);
@@ -41,7 +41,14 @@ void main() {
     test('saveScreenshot writes PNG to file', () async {
       final service = RecordingService();
       final dummyPng = Uint8List.fromList([
-        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+        0x89,
+        0x50,
+        0x4E,
+        0x47,
+        0x0D,
+        0x0A,
+        0x1A,
+        0x0A,
       ]);
       final path = await service.saveScreenshot(dummyPng);
       final file = File(path);

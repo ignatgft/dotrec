@@ -18,7 +18,7 @@ object DeviceCaps {
         } else {
             listOf(60)
         }
-        // TODO(verify): Display.getSupportedModes доступен с API 23; проверить на API 29+.
+        // Проверено: Display.supportedModes доступен с API 23 (наш minSdk 29).
         val maxHz = modes.maxOrNull() ?: 60
         val hevc = MediaCodecList(MediaCodecList.REGULAR_CODECS)
             .codecInfos

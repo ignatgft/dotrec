@@ -129,10 +129,16 @@ void main() {
   group('FileSizeEstimator', () {
     test('оценка размера в МБ и строка в минуту', () {
       // 8 Мбит/с = 1 МБ/с = 60 МБ/мин
-      expect(FileSizeEstimator.estimateMb(bitrateMbps: 8, durationSeconds: 60), 60.0);
+      expect(
+        FileSizeEstimator.estimateMb(bitrateMbps: 8, durationSeconds: 60),
+        60.0,
+      );
       expect(FileSizeEstimator.estimatePerMinute(8), '~60 МБ / мин');
       // 20 Мбит/с = 2.5 МБ/с = 150 МБ/мин
-      expect(FileSizeEstimator.estimateMb(bitrateMbps: 20, durationSeconds: 60), 150.0);
+      expect(
+        FileSizeEstimator.estimateMb(bitrateMbps: 20, durationSeconds: 60),
+        150.0,
+      );
       expect(FileSizeEstimator.estimatePerMinute(20), '~150 МБ / мин');
     });
   });

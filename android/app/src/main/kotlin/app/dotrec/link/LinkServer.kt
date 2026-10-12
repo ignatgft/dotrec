@@ -53,6 +53,7 @@ object LinkServer {
     var onBitrateChanged: ((Int) -> Unit)? = null
     var onConsentRequested: (() -> Unit)? = null
     var onBlankScreenRequested: ((Boolean) -> Unit)? = null
+    private var powerManager: android.os.PowerManager? = null
     private var thermalListener: Any? = null
 
     @Synchronized
@@ -72,6 +73,7 @@ object LinkServer {
                     }
                     pm.addThermalStatusListener(context.mainExecutor, listener)
                     thermalListener = listener
+                    powerManager = pm
                 }
             }
         }
@@ -253,9 +255,12 @@ object LinkServer {
         cachedConfig = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && thermalListener != null) {
             runCatching {
-                // remove listener
+                (thermalListener as? android.os.PowerManager.OnThermalStatusChangedListener)?.let {
+                    powerManager?.removeThermalStatusListener(it)
+                }
             }
             thermalListener = null
+            powerManager = null
         }
         runCatching { clientSocket?.close() }
         runCatching { serverSocket?.close() }

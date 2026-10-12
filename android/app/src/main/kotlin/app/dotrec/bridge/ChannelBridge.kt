@@ -40,6 +40,7 @@ object ChannelBridge {
         EventChannel(engine.dartExecutor.binaryMessenger, "app.dotrec/recorder_state")
             .setStreamHandler(object : EventChannel.StreamHandler {
                 override fun onListen(args: Any?, sink: EventChannel.EventSink) {
+                    sinkJobs.forEach { it.cancel() }
                     sink.success(RecorderStateStore.toMap(RecorderStateStore.state.value))
                     val stateJob = scope.launch {
                         RecorderStateStore.state.collectLatest { s ->
@@ -62,6 +63,7 @@ object ChannelBridge {
         EventChannel(engine.dartExecutor.binaryMessenger, "app.dotrec/link_state")
             .setStreamHandler(object : EventChannel.StreamHandler {
                 override fun onListen(args: Any?, sink: EventChannel.EventSink) {
+                    linkJobs.forEach { it.cancel() }
                     val job = scope.launch {
                         app.dotrec.link.LinkServer.state.collectLatest { st ->
                             sink.success(mapOf(
@@ -327,7 +329,7 @@ object ChannelBridge {
             MediaStore.Video.Media.SIZE,
             MediaStore.Video.Media.DATE_ADDED,
         )
-        // TODO(verify): столбец DURATION доступен с API 29 — minSdk 29 ок.
+        // Проверено: столбец DURATION доступен с API 29 (minSdk 29 ок).
         val cur = activity.contentResolver.query(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             proj,

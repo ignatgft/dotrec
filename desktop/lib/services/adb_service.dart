@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import '../core/models/device_info.dart';
 
 typedef CommandRunner = Future<ProcessResult> Function(
@@ -8,11 +9,9 @@ typedef CommandRunner = Future<ProcessResult> Function(
 );
 
 class AdbService {
-  AdbService({
-    String? adbPath,
-    CommandRunner? commandRunner,
-  })  : _adbPath = adbPath ?? _resolveDefaultAdbPath(),
-        _runner = commandRunner ?? Process.run;
+  AdbService({String? adbPath, CommandRunner? commandRunner})
+    : _adbPath = adbPath ?? _resolveDefaultAdbPath(),
+      _runner = commandRunner ?? Process.run;
 
   String _adbPath;
   final CommandRunner _runner;
@@ -23,17 +22,37 @@ class AdbService {
   Stream<List<DeviceInfo>> get devicesStream => _devicesController.stream;
 
   static String _resolveDefaultAdbPath() {
-    // Check known Android SDK locations
-    const candidates = [
-      r'D:\andoidsdk\platform-tools\adb.exe',
-      r'C:\Users\ignatgift\AppData\Local\Android\Sdk\platform-tools\adb.exe',
+    final sep = Platform.pathSeparator;
+    final exeName = Platform.isWindows ? 'adb.exe' : 'adb';
+    final localAppData = Platform.environment['LOCALAPPDATA'];
+    final home =
+        Platform.environment['USERPROFILE'] ?? Platform.environment['HOME'];
+    final androidHome =
+        Platform.environment['ANDROID_HOME'] ??
+        Platform.environment['ANDROID_SDK_ROOT'];
+
+    final candidates = [
+      if (androidHome != null) '$androidHome${sep}platform-tools$sep$exeName',
+      if (localAppData != null)
+        '$localAppData${sep}Android${sep}Sdk${sep}platform-tools$sep$exeName',
+      if (home != null)
+        '$home${sep}AppData${sep}Local${sep}Android${sep}Sdk${sep}platform-tools$sep$exeName',
+      if (home != null)
+        '$home${sep}Android${sep}Sdk${sep}platform-tools$sep$exeName',
+      if (home != null)
+        '$home${sep}Library${sep}Android${sep}sdk${sep}platform-tools$sep$exeName',
+      if (Platform.isWindows) ...[
+        r'D:\andoidsdk\platform-tools\adb.exe',
+        r'C:\Android\Sdk\platform-tools\adb.exe',
+        r'D:\Android\Sdk\platform-tools\adb.exe',
+      ],
     ];
     for (final c in candidates) {
       if (File(c).existsSync()) {
         return c;
       }
     }
-    return 'adb';
+    return exeName;
   }
 
   void updateAdbPath(String path) {
@@ -107,18 +126,19 @@ class AdbService {
       }
 
       final isWifi = serial.contains(':');
-      final transport =
-          isWifi ? DeviceTransport.wifi : DeviceTransport.usb;
+      final transport = isWifi ? DeviceTransport.wifi : DeviceTransport.usb;
 
-      devices.add(DeviceInfo(
-        serial: serial,
-        model: model.isNotEmpty ? model : serial,
-        androidVersion: '', // populated asynchronously if ready
-        transport: transport,
-        state: state,
-        product: product,
-        device: device,
-      ));
+      devices.add(
+        DeviceInfo(
+          serial: serial,
+          model: model.isNotEmpty ? model : serial,
+          androidVersion: '', // populated asynchronously if ready
+          transport: transport,
+          state: state,
+          product: product,
+          device: device,
+        ),
+      );
     }
 
     return devices;
@@ -126,8 +146,13 @@ class AdbService {
 
   Future<String> getAndroidVersion(String serial) async {
     try {
-      final res = await _runner(
-          _adbPath, ['-s', serial, 'shell', 'getprop', 'ro.build.version.release']);
+      final res = await _runner(_adbPath, [
+        '-s',
+        serial,
+        'shell',
+        'getprop',
+        'ro.build.version.release',
+      ]);
       if (res.exitCode == 0) {
         return res.stdout.toString().trim();
       }
@@ -213,6 +238,7 @@ class AdbService {
           updated.add(dev);
         }
       }
+      if (_devicesController.isClosed) return;
       _devicesController.add(updated);
     });
   }

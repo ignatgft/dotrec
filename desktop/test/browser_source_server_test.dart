@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dotrec_link_desktop/services/browser_source_server.dart';
 
@@ -14,8 +15,9 @@ void main() {
       final client = HttpClient();
 
       // 1. Request with invalid token -> 401
-      final unauthReq =
-          await client.getUrl(Uri.parse('http://127.0.0.1:$port/?token=wrong'));
+      final unauthReq = await client.getUrl(
+        Uri.parse('http://127.0.0.1:$port/?token=wrong'),
+      );
       final unauthResp = await unauthReq.close();
       expect(unauthResp.statusCode, HttpStatus.unauthorized);
 
@@ -23,9 +25,21 @@ void main() {
       final okReq = await client.getUrl(Uri.parse(server.url));
       final okResp = await okReq.close();
       expect(okResp.statusCode, HttpStatus.ok);
-      final body = await okResp.transform(const SystemEncoding().decoder).join();
-      expect(body, contains('DotRec Link OBS Source'));
+      final body = await okResp
+          .transform(const SystemEncoding().decoder)
+          .join();
+      expect(body, contains('DOTREC LINK'));
       expect(body, contains('VideoDecoder'));
+
+      // 3. Request OBS clean source -> 200 OK
+      final obsReq = await client.getUrl(Uri.parse(server.obsUrl));
+      final obsResp = await obsReq.close();
+      expect(obsResp.statusCode, HttpStatus.ok);
+      final obsBody = await obsResp
+          .transform(const SystemEncoding().decoder)
+          .join();
+      expect(obsBody, contains('DotRec Link OBS Clean Source'));
+      expect(obsBody, contains('VideoDecoder'));
 
       client.close();
       await server.stop();
@@ -37,7 +51,8 @@ void main() {
       final port = await server.start(port: 0);
 
       final ws = await WebSocket.connect(
-          'ws://127.0.0.1:$port/ws?token=${server.token}');
+        'ws://127.0.0.1:$port/ws?token=${server.token}',
+      );
       expect(ws.readyState, WebSocket.open);
 
       await ws.close();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/models/stream_preset.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
@@ -12,11 +13,8 @@ class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
 
   void _startMirroring(BuildContext context, WidgetRef ref) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const MirrorWindow(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const MirrorWindow()));
   }
 
   @override
@@ -46,8 +44,8 @@ class MainScreen extends ConsumerWidget {
                     color: isDeviceReady
                         ? const Color(0xFF00C853)
                         : (device != null
-                            ? const Color(0xFFFFB300)
-                            : context.dot.fgMuted),
+                              ? const Color(0xFFFFB300)
+                              : context.dot.fgMuted),
                   ),
                 ),
                 const SizedBox(width: DotTokens.md),
@@ -69,8 +67,8 @@ class MainScreen extends ConsumerWidget {
                       Text(
                         device != null
                             ? (isDeviceReady
-                                ? 'Готов к зеркалированию через USB'
-                                : 'Требуется авторизация или настройка')
+                                  ? 'Готов к зеркалированию через USB'
+                                  : 'Требуется авторизация или настройка')
                             : 'Подключите телефон по USB-кабелю или перейдите во вкладку «Подключение»',
                         style: TextStyle(
                           fontSize: 12,
@@ -90,8 +88,9 @@ class MainScreen extends ConsumerWidget {
                       foregroundColor: context.dot.fg,
                       side: BorderSide(color: context.dot.line),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusButton),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusButton,
+                        ),
                       ),
                     ),
                     child: const Text('Подключить'),
@@ -109,10 +108,7 @@ class MainScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Параметры потока',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.lg),
 
@@ -135,8 +131,8 @@ class MainScreen extends ConsumerWidget {
                         selected: config.resolution,
                         labelOf: (r) => r.label,
                         onSelected: (r) {
-                          ref.read(streamConfigProvider.notifier).state =
-                              config.copyWith(resolution: r);
+                          ref.read(streamConfigProvider.notifier).state = config
+                              .copyWith(resolution: r);
                         },
                       ),
                     ),
@@ -164,8 +160,8 @@ class MainScreen extends ConsumerWidget {
                         selected: config.fps,
                         labelOf: (f) => f.label,
                         onSelected: (f) {
-                          ref.read(streamConfigProvider.notifier).state =
-                              config.copyWith(fps: f);
+                          ref.read(streamConfigProvider.notifier).state = config
+                              .copyWith(fps: f);
                         },
                       ),
                     ),
@@ -193,8 +189,8 @@ class MainScreen extends ConsumerWidget {
                         selected: config.bitrate,
                         labelOf: (b) => b.label,
                         onSelected: (b) {
-                          ref.read(streamConfigProvider.notifier).state =
-                              config.copyWith(bitrate: b);
+                          ref.read(streamConfigProvider.notifier).state = config
+                              .copyWith(bitrate: b);
                         },
                       ),
                     ),
@@ -213,10 +209,7 @@ class MainScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Опции трансляции',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.md),
                 DotSwitch(
@@ -225,8 +218,8 @@ class MainScreen extends ConsumerWidget {
                   subtitle:
                       'Автоматически сохранять поток в файл MP4 на компьютере',
                   onChanged: (val) {
-                    ref.read(streamConfigProvider.notifier).state =
-                        config.copyWith(recordOnPc: val);
+                    ref.read(streamConfigProvider.notifier).state = config
+                        .copyWith(recordOnPc: val);
                   },
                 ),
                 Divider(color: context.dot.line, height: DotTokens.lg),
@@ -235,18 +228,19 @@ class MainScreen extends ConsumerWidget {
                   label: 'Звук с телефона',
                   subtitle: 'Передавать системный звук и микрофон на ПК',
                   onChanged: (val) {
-                    ref.read(streamConfigProvider.notifier).state =
-                        config.copyWith(phoneAudio: val);
+                    ref.read(streamConfigProvider.notifier).state = config
+                        .copyWith(phoneAudio: val);
                   },
                 ),
                 Divider(color: context.dot.line, height: DotTokens.lg),
                 DotSwitch(
                   value: config.blankScreen,
                   label: 'Гасить экран телефона',
-                  subtitle: 'Экономит батарею и предотвращает нагрев устройства',
+                  subtitle:
+                      'Экономит батарею и предотвращает нагрев устройства',
                   onChanged: (val) {
-                    ref.read(streamConfigProvider.notifier).state =
-                        config.copyWith(blankScreen: val);
+                    ref.read(streamConfigProvider.notifier).state = config
+                        .copyWith(blankScreen: val);
                   },
                 ),
               ],

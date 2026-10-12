@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+
 import '../tool/package_windows.dart' as packager;
 
 void main() {
@@ -30,8 +32,9 @@ void main() {
       expect(File('${distDir.path}/config.default.json').existsSync(), isTrue);
       expect(File('${distDir.path}/DotRec-Link.exe').existsSync(), isTrue);
       expect(
-          File('${distDir.path}/assets/fonts/Doto-Variable.ttf').existsSync(),
-          isTrue);
+        File('${distDir.path}/assets/fonts/Doto-Variable.ttf').existsSync(),
+        isTrue,
+      );
     });
   });
 }

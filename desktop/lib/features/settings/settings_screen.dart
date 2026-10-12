@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_card.dart';
@@ -28,10 +29,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Оформление и оверлей зеркала',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.md),
                 Row(
@@ -67,7 +65,8 @@ class SettingsScreen extends ConsumerWidget {
                   label: 'Отображать счетчик FPS',
                   subtitle: 'Показывать текущую частоту кадров в HUD зеркала',
                   value: settings.showFpsOverlay,
-                  onChanged: (v) => settingsNotifier.setOverlayVisibility(fps: v),
+                  onChanged: (v) =>
+                      settingsNotifier.setOverlayVisibility(fps: v),
                 ),
                 const SizedBox(height: DotTokens.sm),
                 DotSwitch(
@@ -98,16 +97,12 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Системный трей и автозапуск',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.md),
                 DotSwitch(
                   label: 'Сворачивать в трей при закрытии',
-                  subtitle:
-                      'При нажатии на крестик окно сворачивается в область уведомлений',
+                  subtitle: 'При нажатии на крестик окно сворачивается в область уведомлений',
                   value: settings.minimizeToTray,
                   onChanged: settingsNotifier.setMinimizeToTray,
                 ),
@@ -122,8 +117,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: DotTokens.sm),
                 DotSwitch(
                   label: 'Автозапуск при старте Windows',
-                  subtitle:
-                      'Запускать DotRec Link в фоновом режиме при входе в систему',
+                  subtitle: 'Запускать DotRec Link в фоновом режиме при входе в систему',
                   value: settings.launchOnStartup,
                   onChanged: settingsNotifier.setLaunchOnStartup,
                 ),
@@ -140,10 +134,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Потоковая передача и сеть',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.md),
                 DotSwitch(
@@ -152,8 +143,9 @@ class SettingsScreen extends ConsumerWidget {
                       'Сброс очереди кадров для получения задержки менее 35 мс',
                   value: settings.lowLatencyBuffer,
                   onChanged: (v) {
-                    settingsNotifier
-                        .update((s) => s.copyWith(lowLatencyBuffer: v));
+                    settingsNotifier.update(
+                      (s) => s.copyWith(lowLatencyBuffer: v),
+                    );
                   },
                 ),
                 const SizedBox(height: DotTokens.sm),
@@ -162,15 +154,15 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: 'Использовать GPU Direct3D11VA / внешнюю текстуру',
                   value: settings.hardwareAcceleration,
                   onChanged: (v) {
-                    settingsNotifier
-                        .update((s) => s.copyWith(hardwareAcceleration: v));
+                    settingsNotifier.update(
+                      (s) => s.copyWith(hardwareAcceleration: v),
+                    );
                   },
                 ),
                 const SizedBox(height: DotTokens.sm),
                 DotSwitch(
                   label: 'Автопереподключение к телефону',
-                  subtitle:
-                      'Автоматически восстанавливать связь при переподключении USB',
+                  subtitle: 'Автоматически восстанавливать связь при переподключении USB',
                   value: settings.autoReconnect,
                   onChanged: settingsNotifier.setAutoReconnect,
                 ),
@@ -231,23 +223,19 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Запись и хранение',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.md),
                 Text(
                   'Папка сохранения видео:',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.dot.fgMuted,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                 ),
                 const SizedBox(height: DotTokens.xs),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: context.dot.surfaceRaised,
                     borderRadius: BorderRadius.circular(6),
@@ -270,15 +258,14 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: DotTokens.md),
                 Text(
                   'Папка сохранения снимков экрана:',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.dot.fgMuted,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                 ),
                 const SizedBox(height: DotTokens.xs),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: context.dot.surfaceRaised,
                     borderRadius: BorderRadius.circular(6),
@@ -311,10 +298,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Горячие клавиши',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: DotTokens.md),
                 ...HotkeyAction.values.map((action) {
@@ -368,10 +352,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: DotTokens.md),
                 Text(
                   'Путь к исполняемому файлу ADB:',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.dot.fgMuted,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                 ),
                 const SizedBox(height: DotTokens.xs),
                 Text(
@@ -397,10 +378,7 @@ class SettingsScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          description,
-          style: const TextStyle(fontSize: 13),
-        ),
+        Text(description, style: const TextStyle(fontSize: 13)),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(

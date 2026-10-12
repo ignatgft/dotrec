@@ -49,10 +49,13 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
     final AsyncValue<RecordSettings> cfgAsync = ref.watch(settingsProvider);
     final RecordSettings cfg = cfgAsync.valueOrNull ?? const RecordSettings();
 
-    final bool isConnected = link.status == 'connected' || link.status == 'streaming';
+    final bool isConnected =
+        link.status == 'connected' || link.status == 'streaming';
     final bool isStreaming = rec is Recording || rec is Starting;
 
-    final String clientLabel = link.clientName.isNotEmpty ? link.clientName : 'DESKTOP-4K2';
+    final String clientLabel = link.clientName.isNotEmpty
+        ? link.clientName
+        : 'DESKTOP-4K2';
     final String statusSubtitle = isConnected
         ? '${t.linkConnected} · ${_mode.toUpperCase()} ${link.latencyMs} мс'
         : t.linkWaiting;
@@ -90,10 +93,7 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
           children: [
             Text(
               t.linkTitle,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: DotTokens.md),
             // Карточка статуса подключения
@@ -126,10 +126,7 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
                   const SizedBox(height: DotTokens.xs),
                   Text(
                     statusSubtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: context.dot.fgMuted,
-                    ),
+                    style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                   ),
                 ],
               ),
@@ -149,10 +146,7 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      t.linkWifiPin,
-                      style: const TextStyle(fontSize: 13),
-                    ),
+                    Text(t.linkWifiPin, style: const TextStyle(fontSize: 13)),
                     const SizedBox(height: DotTokens.sm),
                     Center(
                       child: Text(
@@ -220,7 +214,9 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
             FilledButton(
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
-                backgroundColor: isStreaming ? context.dot.record : context.dot.fg,
+                backgroundColor: isStreaming
+                    ? context.dot.record
+                    : context.dot.fg,
                 foregroundColor: context.dot.bg,
               ),
               onPressed: () {
@@ -231,17 +227,22 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
                   // Начать трансляцию экрана
                   final targetFps = _quality == '720·30' ? 30 : 60;
                   final targetRes = _quality == '720·30' ? 720 : 1080;
-                  ch.start(cfg.copyWith(
-                    resolution: targetRes,
-                    fps: targetFps,
-                    systemAudio: _audioToPc,
-                    codec: 'h264',
-                  ));
+                  ch.start(
+                    cfg.copyWith(
+                      resolution: targetRes,
+                      fps: targetFps,
+                      systemAudio: _audioToPc,
+                      codec: 'h264',
+                    ),
+                  );
                 }
               },
               child: Text(
                 isStreaming ? t.linkStopStream : t.linkStartStream,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

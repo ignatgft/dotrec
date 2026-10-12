@@ -49,13 +49,15 @@ object VideoTrimmer {
 
             val buffer = ByteBuffer.allocateDirect(BUFFER_SIZE)
             val info = MediaCodec.BufferInfo()
+            val startSyncTimePerTrack = HashMap<Int, Long>()
+            val lastPtsPerTrack = HashMap<Int, Long>()
 
             while (true) {
                 val trackIndex = extractor.sampleTrackIndex
                 if (trackIndex < 0) break
 
                 val sampleTime = extractor.sampleTime
-                if (sampleTime > endUs && extractor.sampleFlags and MediaExtractor.SAMPLE_FLAG_SYNC == 0) {
+                if (sampleTime > endUs && (extractor.sampleFlags and MediaExtractor.SAMPLE_FLAG_SYNC) == 0) {
                     // Достигли конца интервала
                     break
                 }
@@ -66,9 +68,15 @@ object VideoTrimmer {
                     val sampleSize = extractor.readSampleData(buffer, 0)
                     if (sampleSize < 0) break
 
+                    val trackStart = startSyncTimePerTrack.getOrPut(muxerTrack) { sampleTime }
+                    val calculatedPts = Math.max(0L, sampleTime - trackStart)
+                    val prevPts = lastPtsPerTrack[muxerTrack] ?: -1L
+                    val safePts = if (calculatedPts <= prevPts) prevPts + 1000L else calculatedPts
+                    lastPtsPerTrack[muxerTrack] = safePts
+
                     info.offset = 0
                     info.size = sampleSize
-                    info.presentationTimeUs = Math.max(0L, sampleTime - startUs)
+                    info.presentationTimeUs = safePts
                     info.flags = extractor.sampleFlags
 
                     muxer.writeSampleData(muxerTrack, buffer, info)

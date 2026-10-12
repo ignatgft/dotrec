@@ -104,11 +104,7 @@ class HomeScreen extends ConsumerWidget {
                       builder: (_) => const PhoneLinkScreen(),
                     ),
                   ),
-                  icon: Icon(
-                    Icons.devices,
-                    size: 22,
-                    color: context.dot.fg,
-                  ),
+                  icon: Icon(Icons.devices, size: 22, color: context.dot.fg),
                 ),
                 IconButton(
                   tooltip: t.guides,
@@ -205,13 +201,11 @@ class HomeScreen extends ConsumerWidget {
                   IconButton.filled(
                     tooltip: s is Paused ? t.resume : t.pause,
                     onPressed: () {
-                      final RecorderChannelReader r = RecorderChannelReader(
-                        ref,
-                      );
+                      final actions = ref.read(recorderActionsProvider);
                       if (s is Paused) {
-                        r.resume();
+                        actions.resume();
                       } else {
-                        r.pause();
+                        actions.pause();
                       }
                     },
                     icon: Icon(s is Paused ? Icons.play_arrow : Icons.pause),
@@ -224,11 +218,11 @@ class HomeScreen extends ConsumerWidget {
                       ? s.secondsLeft
                       : cfg.countdownSec,
                   onTap: () {
-                    final RecorderChannelReader r = RecorderChannelReader(ref);
+                    final actions = ref.read(recorderActionsProvider);
                     if (s is Recording || s is Paused) {
-                      r.stop();
+                      actions.stop();
                     } else if (s is Idle || s is Failed || s is Saved) {
-                      r.start(cfg);
+                      actions.start(cfg);
                     }
                   },
                 ),
@@ -344,15 +338,4 @@ class HomeScreen extends ConsumerWidget {
     'not_running' => t.errorLabel,
     _ => '${t.errorLabel}: $code',
   };
-}
-
-/// Тонкая обёртка, чтобы UI не трогал MethodChannel напрямую.
-class RecorderChannelReader {
-  RecorderChannelReader(this.ref);
-  final WidgetRef ref;
-
-  void start(RecordSettings s) => ref.read(recorderChannelProvider).start(s);
-  void stop() => ref.read(recorderChannelProvider).stop();
-  void pause() => ref.read(recorderChannelProvider).pause();
-  void resume() => ref.read(recorderChannelProvider).resume();
 }

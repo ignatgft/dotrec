@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dotrec_link_desktop/services/obs_service.dart';
 
@@ -12,13 +13,12 @@ void main() {
 
       server.transform(WebSocketTransformer()).listen((ws) {
         // Send op 0 Hello (no auth required for test)
-        ws.add(jsonEncode({
-          'op': 0,
-          'd': {
-            'obsWebSocketVersion': '5.0.0',
-            'rpcVersion': 1,
-          },
-        }));
+        ws.add(
+          jsonEncode({
+            'op': 0,
+            'd': {'obsWebSocketVersion': '5.0.0', 'rpcVersion': 1},
+          }),
+        );
 
         ws.listen((rawMsg) {
           final json = jsonDecode(rawMsg.toString()) as Map<String, dynamic>;
@@ -27,37 +27,43 @@ void main() {
 
           if (op == 1) {
             // Identify -> respond with op 2 Identified
-            ws.add(jsonEncode({
-              'op': 2,
-              'd': {'negotiatedRpcVersion': 1},
-            }));
+            ws.add(
+              jsonEncode({
+                'op': 2,
+                'd': {'negotiatedRpcVersion': 1},
+              }),
+            );
           } else if (op == 6) {
             // Request
             final reqType = d['requestType'] as String?;
             final reqId = d['requestId'] as String?;
 
             if (reqType == 'GetCurrentProgramScene') {
-              ws.add(jsonEncode({
-                'op': 7,
-                'd': {
-                  'requestType': 'GetCurrentProgramScene',
-                  'requestId': reqId,
-                  'requestStatus': {'result': true, 'code': 100},
-                  'responseData': {'sceneName': 'Scene 1'},
-                },
-              }));
+              ws.add(
+                jsonEncode({
+                  'op': 7,
+                  'd': {
+                    'requestType': 'GetCurrentProgramScene',
+                    'requestId': reqId,
+                    'requestStatus': {'result': true, 'code': 100},
+                    'responseData': {'sceneName': 'Scene 1'},
+                  },
+                }),
+              );
             } else if (reqType == 'CreateInput') {
               final reqData = d['requestData'] as Map<String, dynamic>?;
               expect(reqData?['inputKind'], 'browser_source');
               expect(reqData?['inputName'], 'DotRec Screen');
-              ws.add(jsonEncode({
-                'op': 7,
-                'd': {
-                  'requestType': 'CreateInput',
-                  'requestId': reqId,
-                  'requestStatus': {'result': true, 'code': 100},
-                },
-              }));
+              ws.add(
+                jsonEncode({
+                  'op': 7,
+                  'd': {
+                    'requestType': 'CreateInput',
+                    'requestId': reqId,
+                    'requestStatus': {'result': true, 'code': 100},
+                  },
+                }),
+              );
             }
           }
         });

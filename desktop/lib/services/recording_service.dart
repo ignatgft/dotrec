@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:intl/intl.dart';
+
 import 'link_client.dart';
 
 class RecordingResult {
@@ -31,24 +33,38 @@ class RecordingService {
 
   static const List<int> annexBStartCode = [0x00, 0x00, 0x00, 0x01];
 
-  Directory getSaveDirectory() {
-    final home = Platform.environment['USERPROFILE'] ??
+  Directory getSaveDirectory([String? customPath]) {
+    if (customPath != null && customPath.isNotEmpty) {
+      final dir = Directory(customPath);
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+      return dir;
+    }
+    final home =
+        Platform.environment['USERPROFILE'] ??
         Platform.environment['HOME'] ??
         '.';
-    final dir = Directory('$home\\Videos\\DotRec');
+    final sep = Platform.pathSeparator;
+    final dir = Directory('$home${sep}Videos${sep}DotRec');
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
     return dir;
   }
 
-  Future<String> startRecording(Uint8List? initialSpsPps) async {
+  Future<String> startRecording(
+    Uint8List? initialSpsPps, [
+    String? customDir,
+  ]) async {
     await stopRecording();
 
-    final dir = getSaveDirectory();
+    final dir = getSaveDirectory(customDir);
     final now = DateTime.now();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(now);
-    final file = File('${dir.path}\\DotRec_Stream_$timestamp.mp4');
+    final sep = Platform.pathSeparator;
+    final file = File('${dir.path}${sep}DotRec_Stream_$timestamp.mp4');
+    file.createSync(recursive: true);
 
     _currentFile = file;
     _fileSink = file.openWrite();
@@ -94,15 +110,26 @@ class RecordingService {
 
   void writeAudioFrame(Uint8List audioData) {
     final sink = _fileSink;
-    if (sink == null) return;
+    if (sink == null || audioData.isEmpty) return;
     sink.add(audioData);
     _bytesWritten += audioData.length;
   }
 
   static bool hasStartCode(Uint8List data) {
-    if (data.length < 4) return false;
-    return (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 1) ||
-        (data[0] == 0 && data[1] == 0 && data[2] == 1);
+    if (data.length < 3) {
+      return false;
+    }
+    if (data[0] == 0 && data[1] == 0 && data[2] == 1) {
+      return true;
+    }
+    if (data.length >= 4 &&
+        data[0] == 0 &&
+        data[1] == 0 &&
+        data[2] == 0 &&
+        data[3] == 1) {
+      return true;
+    }
+    return false;
   }
 
   Future<RecordingResult?> stopRecording() async {
@@ -114,8 +141,10 @@ class RecordingService {
       return null;
     }
 
-    await sink.flush();
-    await sink.close();
+    try {
+      await sink.flush();
+      await sink.close();
+    } catch (_) {}
 
     final duration = DateTime.now().difference(start);
     final result = RecordingResult(
@@ -133,17 +162,32 @@ class RecordingService {
     return result;
   }
 
-  Future<String> saveScreenshot(Uint8List pngBytes) async {
-    final home = Platform.environment['USERPROFILE'] ??
+  Directory getScreenshotDirectory([String? customPath]) {
+    if (customPath != null && customPath.isNotEmpty) {
+      final dir = Directory(customPath);
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+      return dir;
+    }
+    final home =
+        Platform.environment['USERPROFILE'] ??
         Platform.environment['HOME'] ??
         '.';
-    final dir = Directory('$home\\Pictures\\DotRec');
+    final sep = Platform.pathSeparator;
+    final dir = Directory('$home${sep}Pictures${sep}DotRec');
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
+    return dir;
+  }
+
+  Future<String> saveScreenshot(Uint8List pngBytes, [String? customDir]) async {
+    final dir = getScreenshotDirectory(customDir);
     final now = DateTime.now();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(now);
-    final file = File('${dir.path}\\DotRec_Screenshot_$timestamp.png');
+    final sep = Platform.pathSeparator;
+    final file = File('${dir.path}${sep}DotRec_Screenshot_$timestamp.png');
     await file.writeAsBytes(pngBytes, flush: true);
     return file.path;
   }

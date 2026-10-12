@@ -64,8 +64,7 @@ class RecorderChannel {
   Future<void> startLinkServer({String mode = 'usb'}) =>
       _method.invokeMethod<void>('startLinkServer', {'mode': mode});
 
-  Future<void> stopLinkServer() =>
-      _method.invokeMethod<void>('stopLinkServer');
+  Future<void> stopLinkServer() => _method.invokeMethod<void>('stopLinkServer');
 
   Future<Map<String, dynamic>> getLinkState() async {
     final Map<Object?, Object?>? m = await _method

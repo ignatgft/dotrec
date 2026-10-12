@@ -8,18 +8,21 @@ import 'package:dotrec_link_desktop/features/main/main_screen.dart';
 
 void main() {
   group('Desktop UI Components and Theme tests', () {
-    testWidgets('MainScreen renders stream parameters and toggles correctly',
-        (tester) async {
+    testWidgets('MainScreen renders stream parameters and toggles correctly', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            selectedDeviceProvider.overrideWith((ref) => const DeviceInfo(
-                  serial: '28271JEHN01358',
-                  model: 'Pixel 8',
-                  androidVersion: '15',
-                  transport: DeviceTransport.usb,
-                  state: AdbState.ready,
-                )),
+            selectedDeviceProvider.overrideWith(
+              (ref) => const DeviceInfo(
+                serial: '28271JEHN01358',
+                model: 'Pixel 8',
+                androidVersion: '15',
+                transport: DeviceTransport.usb,
+                state: AdbState.ready,
+              ),
+            ),
           ],
           child: MaterialApp(
             theme: DotTheme.dark(),

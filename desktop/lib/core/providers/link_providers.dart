@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/app_settings.dart';
 import '../models/device_info.dart';
 import '../models/link_stats.dart';
@@ -159,8 +160,8 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
 final appSettingsProvider =
     StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
-  return SettingsNotifier();
-});
+      return SettingsNotifier();
+    });
 
 // Desktop Navigation Tab
 enum DesktopTab {

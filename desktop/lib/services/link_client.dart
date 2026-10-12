@@ -2,15 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import '../core/models/link_stats.dart';
 
-enum LinkClientStatus {
-  disconnected,
-  connecting,
-  handshake,
-  streaming,
-  error,
-}
+enum LinkClientStatus { disconnected, connecting, handshake, streaming, error }
 
 class LinkVideoFrame {
   const LinkVideoFrame({
@@ -21,6 +16,13 @@ class LinkVideoFrame {
 
   final Uint8List data;
   final bool isKeyframe;
+  final int ptsUs;
+}
+
+class LinkAudioFrame {
+  const LinkAudioFrame({required this.data, required this.ptsUs});
+
+  final Uint8List data;
   final int ptsUs;
 }
 
@@ -53,6 +55,9 @@ class LinkClient {
 
   final _videoFrameController = StreamController<LinkVideoFrame>.broadcast();
   Stream<LinkVideoFrame> get videoStream => _videoFrameController.stream;
+
+  final _audioFrameController = StreamController<LinkAudioFrame>.broadcast();
+  Stream<LinkAudioFrame> get audioStream => _audioFrameController.stream;
 
   // Telemetry trackers
   int _framesInSec = 0;
@@ -253,11 +258,15 @@ class LinkClient {
     } else if (type == typeVideo) {
       _framesInSec++;
       final isKeyframe = (flags & flagKeyframe) != 0;
-      _videoFrameController.add(LinkVideoFrame(
-        data: payload,
-        isKeyframe: isKeyframe,
-        ptsUs: ptsUs,
-      ));
+      if (!_videoFrameController.isClosed) {
+        _videoFrameController.add(
+          LinkVideoFrame(data: payload, isKeyframe: isKeyframe, ptsUs: ptsUs),
+        );
+      }
+    } else if (type == typeAudio) {
+      if (!_audioFrameController.isClosed) {
+        _audioFrameController.add(LinkAudioFrame(data: payload, ptsUs: ptsUs));
+      }
     } else if (type == typeStats) {
       try {
         final str = utf8.decode(payload);
@@ -320,5 +329,6 @@ class LinkClient {
     _statusController.close();
     _statsController.close();
     _videoFrameController.close();
+    _audioFrameController.close();
   }
 }

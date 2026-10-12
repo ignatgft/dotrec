@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/models/device_info.dart';
 import '../../core/models/link_stats.dart';
 import '../../core/providers/link_providers.dart';
@@ -26,6 +28,7 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
   Timer? _consentCheckTimer;
   int _frameCount = 0;
   StreamSubscription<LinkVideoFrame>? _videoSub;
+  StreamSubscription<LinkAudioFrame>? _audioSub;
 
   @override
   void initState() {
@@ -39,6 +42,7 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     _recordTimer?.cancel();
     _consentCheckTimer?.cancel();
     _videoSub?.cancel();
+    _audioSub?.cancel();
     if (_isRecording) {
       ref.read(recordingServiceProvider).stopRecording();
     }
@@ -68,10 +72,18 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     _videoSub = client.videoStream.listen((frame) {
       _frameCount++;
       if (_isRecording) {
-        ref.read(recordingServiceProvider).writeVideoFrame(frame, client.spsPps);
+        ref
+            .read(recordingServiceProvider)
+            .writeVideoFrame(frame, client.spsPps);
       }
       if (_showConsentNotice && mounted) {
         setState(() => _showConsentNotice = false);
+      }
+    });
+
+    _audioSub = client.audioStream.listen((frame) {
+      if (_isRecording) {
+        ref.read(recordingServiceProvider).writeAudioFrame(frame.data);
       }
     });
 
@@ -153,15 +165,73 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     final rec = ref.read(recordingServiceProvider);
     // 1x1 dummy PNG signature or render buffer
     final dummyPng = Uint8List.fromList([
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-      0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-      0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-      0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-      0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-      0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-      0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-      0x42, 0x60, 0x82,
+      0x89,
+      0x50,
+      0x4E,
+      0x47,
+      0x0D,
+      0x0A,
+      0x1A,
+      0x0A,
+      0x00,
+      0x00,
+      0x00,
+      0x0D,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x08,
+      0x06,
+      0x00,
+      0x00,
+      0x00,
+      0x1F,
+      0x15,
+      0xC4,
+      0x89,
+      0x00,
+      0x00,
+      0x00,
+      0x0A,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x78,
+      0x9C,
+      0x63,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x05,
+      0x00,
+      0x01,
+      0x0D,
+      0x0A,
+      0x2D,
+      0xB4,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4E,
+      0x44,
+      0xAE,
+      0x42,
+      0x60,
+      0x82,
     ]);
     final path = await rec.saveScreenshot(dummyPng);
     if (mounted) {
@@ -262,8 +332,7 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                     margin: const EdgeInsets.all(DotTokens.xl),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1F1F1F),
-                      borderRadius:
-                          BorderRadius.circular(DotTokens.radiusCard),
+                      borderRadius: BorderRadius.circular(DotTokens.radiusCard),
                       border: Border.all(
                         color: const Color(0xFFFFB300),
                         width: 1.5,
@@ -303,7 +372,8 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                             foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  DotTokens.radiusButton),
+                                DotTokens.radiusButton,
+                              ),
                             ),
                           ),
                           child: const Text('Открыть запрос на телефоне'),
@@ -332,8 +402,9 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                         ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.75),
-                          borderRadius:
-                              BorderRadius.circular(DotTokens.radiusChip),
+                          borderRadius: BorderRadius.circular(
+                            DotTokens.radiusChip,
+                          ),
                           border: Border.all(
                             color: const Color(0xFF2B2B2B),
                             width: 1,
@@ -349,8 +420,8 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                                 color: _isRecording
                                     ? DotTokens.accentRed
                                     : (status == LinkClientStatus.streaming
-                                        ? const Color(0xFF00C853)
-                                        : const Color(0xFFFFB300)),
+                                          ? const Color(0xFF00C853)
+                                          : const Color(0xFFFFB300)),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -369,10 +440,18 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                               builder: (context) {
                                 final settings = ref.watch(appSettingsProvider);
                                 final parts = <String>[];
-                                if (settings.showFpsOverlay) parts.add('${stats.fps.toInt()} FPS');
-                                if (settings.showLatencyOverlay) parts.add('${stats.latencyMs} МС');
-                                if (settings.showBitrateOverlay) parts.add('${stats.bitrateMbps} МБИТ/С');
-                                if (parts.isEmpty) return const SizedBox.shrink();
+                                if (settings.showFpsOverlay) {
+                                  parts.add('${stats.fps.toInt()} FPS');
+                                }
+                                if (settings.showLatencyOverlay) {
+                                  parts.add('${stats.latencyMs} МС');
+                                }
+                                if (settings.showBitrateOverlay) {
+                                  parts.add('${stats.bitrateMbps} МБИТ/С');
+                                }
+                                if (parts.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
                                 return Row(
                                   children: [
                                     const SizedBox(width: 12),
@@ -402,9 +481,12 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: DotTokens.accentRed.withValues(alpha: 0.2),
-                                borderRadius:
-                                    BorderRadius.circular(DotTokens.radiusChip),
+                                color: DotTokens.accentRed.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  DotTokens.radiusChip,
+                                ),
                                 border: Border.all(
                                   color: DotTokens.accentRed,
                                   width: 1,
@@ -449,8 +531,9 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF151515).withValues(alpha: 0.9),
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusCard),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusCard,
+                        ),
                         border: Border.all(
                           color: const Color(0xFF2B2B2B),
                           width: 1,
@@ -467,8 +550,10 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                         children: [
                           // Screenshot
                           IconButton(
-                            icon: const Icon(Icons.camera_alt_outlined,
-                                color: Colors.white),
+                            icon: const Icon(
+                              Icons.camera_alt_outlined,
+                              color: Colors.white,
+                            ),
                             tooltip: 'Скриншот (Ctrl+Shift+S)',
                             onPressed: _takeScreenshot,
                           ),
@@ -493,8 +578,10 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
 
                           // Keyframe
                           IconButton(
-                            icon: const Icon(Icons.refresh,
-                                color: Colors.white),
+                            icon: const Icon(
+                              Icons.refresh,
+                              color: Colors.white,
+                            ),
                             tooltip: 'Запросить ключевой кадр (Ctrl+K)',
                             onPressed: _requestKeyframe,
                           ),
@@ -534,18 +621,12 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
       children: [
         // Texture / Render surface representation
         Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF101010),
-          ),
+          decoration: const BoxDecoration(color: Color(0xFF101010)),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.sensors,
-                  size: 48,
-                  color: Color(0xFF00C853),
-                ),
+                const Icon(Icons.sensors, size: 48, color: Color(0xFF00C853)),
                 const SizedBox(height: 12),
                 const Text(
                   'Трансляция активна',
@@ -589,14 +670,20 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
         break;
       case LinkClientStatus.error:
         msg = 'Ошибка подключения к устройству';
-        icon = const Icon(Icons.error_outline,
-            size: 48, color: DotTokens.accentRed);
+        icon = const Icon(
+          Icons.error_outline,
+          size: 48,
+          color: DotTokens.accentRed,
+        );
         break;
       case LinkClientStatus.disconnected:
       default:
         msg = 'Поток отключен';
-        icon = const Icon(Icons.videocam_off_outlined,
-            size: 48, color: Color(0xFF8C8C8C));
+        icon = const Icon(
+          Icons.videocam_off_outlined,
+          size: 48,
+          color: Color(0xFF8C8C8C),
+        );
         break;
     }
 
@@ -606,13 +693,7 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
         children: [
           icon,
           const SizedBox(height: 16),
-          Text(
-            msg,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
-          ),
+          Text(msg, style: const TextStyle(color: Colors.white, fontSize: 14)),
         ],
       ),
     );

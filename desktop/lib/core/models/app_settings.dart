@@ -82,24 +82,24 @@ class AppSettings {
   }
 
   Map<String, dynamic> toJson() => {
-        'themeMode': themeMode.name,
-        'minimizeToTray': minimizeToTray,
-        'launchOnStartup': launchOnStartup,
-        'trayNotifications': trayNotifications,
-        'autoReconnect': autoReconnect,
-        'recordingsPath': recordingsPath,
-        'screenshotsPath': screenshotsPath,
-        'obsAutoConnect': obsAutoConnect,
-        'obsHost': obsHost,
-        'obsWebSocketPort': obsWebSocketPort,
-        'browserSourcePort': browserSourcePort,
-        'linkServerPort': linkServerPort,
-        'showFpsOverlay': showFpsOverlay,
-        'showBitrateOverlay': showBitrateOverlay,
-        'showLatencyOverlay': showLatencyOverlay,
-        'lowLatencyBuffer': lowLatencyBuffer,
-        'hardwareAcceleration': hardwareAcceleration,
-      };
+    'themeMode': themeMode.name,
+    'minimizeToTray': minimizeToTray,
+    'launchOnStartup': launchOnStartup,
+    'trayNotifications': trayNotifications,
+    'autoReconnect': autoReconnect,
+    'recordingsPath': recordingsPath,
+    'screenshotsPath': screenshotsPath,
+    'obsAutoConnect': obsAutoConnect,
+    'obsHost': obsHost,
+    'obsWebSocketPort': obsWebSocketPort,
+    'browserSourcePort': browserSourcePort,
+    'linkServerPort': linkServerPort,
+    'showFpsOverlay': showFpsOverlay,
+    'showBitrateOverlay': showBitrateOverlay,
+    'showLatencyOverlay': showLatencyOverlay,
+    'lowLatencyBuffer': lowLatencyBuffer,
+    'hardwareAcceleration': hardwareAcceleration,
+  };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     ThemeMode mode = ThemeMode.dark;

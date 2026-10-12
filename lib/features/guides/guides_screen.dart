@@ -14,7 +14,7 @@ class GuidesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations t = AppLocalizations.of(context)!;
-    final RecorderChannelReader r = RecorderChannelReader(ref);
+    final RecorderActions actions = ref.read(recorderActionsProvider);
     return Scaffold(
       appBar: AppBar(title: Text(t.guidesTitle)),
       body: ListView(
@@ -25,32 +25,32 @@ class GuidesScreen extends ConsumerWidget {
             title: t.guideMicTitle,
             body: t.guideMicBody,
             actionLabel: t.openSettings,
-            onAction: () => r.openAppSettings(),
+            onAction: () => actions.openAppSettings(),
           ),
           _GuideCard(
             title: t.guideNotifTitle,
             body: t.guideNotifBody,
             actionLabel: t.openSettings,
-            onAction: () => r.openAppSettings(),
+            onAction: () => actions.openAppSettings(),
           ),
           _GuideCard(
             title: t.guideOverlayTitle,
             body: t.guideOverlayBody,
             actionLabel: t.openPermission,
-            onAction: () => r.openOverlaySettings(),
+            onAction: () => actions.openOverlaySettings(),
           ),
           _GuideCard(
             title: t.guideBatteryTitle,
             body: t.guideBatteryBody,
             actionLabel: t.openSettings,
-            onAction: () => r.openBatterySettings(),
+            onAction: () => actions.openBatterySettings(),
           ),
           _GuideCard(
             title: t.guideTileTitle,
             body: t.guideTileBody,
             actionLabel: t.addTileBtn,
             onAction: () async {
-              final bool ok = await r.requestAddTile();
+              final bool ok = await actions.requestAddTile();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(ok ? t.tileAdded : t.tileUnavailable)),
@@ -62,19 +62,6 @@ class GuidesScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-class RecorderChannelReader {
-  RecorderChannelReader(this.ref);
-  final WidgetRef ref;
-
-  void openAppSettings() => ref.read(recorderChannelProvider).openAppSettings();
-  void openOverlaySettings() =>
-      ref.read(recorderChannelProvider).openOverlaySettings();
-  void openBatterySettings() =>
-      ref.read(recorderChannelProvider).openBatterySettings();
-  Future<bool> requestAddTile() =>
-      ref.read(recorderChannelProvider).requestAddTile();
 }
 
 class _GuideCard extends StatelessWidget {

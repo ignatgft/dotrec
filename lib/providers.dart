@@ -22,13 +22,14 @@ final StreamProvider<RecorderState> recorderStateProvider =
     });
 
 /// Состояние сервера DotRec Link (USB / Wi-Fi).
-final StreamProvider<LinkState> linkStateProvider =
-    StreamProvider<LinkState>((Ref ref) {
-      return ref
-          .watch(recorderChannelProvider)
-          .linkState
-          .map((Map<String, dynamic> m) => LinkState.fromMap(m));
-    });
+final StreamProvider<LinkState> linkStateProvider = StreamProvider<LinkState>((
+  Ref ref,
+) {
+  return ref
+      .watch(recorderChannelProvider)
+      .linkState
+      .map((Map<String, dynamic> m) => LinkState.fromMap(m));
+});
 
 /// Настройки: источник правды — Kotlin SettingsStore, Dart читает/пишет через канал.
 class SettingsNotifier extends AsyncNotifier<RecordSettings> {
@@ -106,3 +107,26 @@ class AppLocaleNotifier extends AsyncNotifier<String> {
 
 final AsyncNotifierProvider<AppLocaleNotifier, String> appLocaleProvider =
     AsyncNotifierProvider<AppLocaleNotifier, String>(AppLocaleNotifier.new);
+
+/// Действия с рекордером для UI-слоя.
+class RecorderActions {
+  const RecorderActions(this._ref);
+  final Ref _ref;
+
+  RecorderChannel get _channel => _ref.read(recorderChannelProvider);
+
+  Future<void> start(RecordSettings s) => _channel.start(s);
+  Future<void> stop() => _channel.stop();
+  Future<void> pause() => _channel.pause();
+  Future<void> resume() => _channel.resume();
+  Future<void> openAppSettings() => _channel.openAppSettings();
+  Future<void> openOverlaySettings() => _channel.openOverlaySettings();
+  Future<void> openBatterySettings() => _channel.openBatterySettings();
+  Future<bool> requestAddTile() => _channel.requestAddTile();
+  Future<void> startLinkServer({String mode = 'usb'}) =>
+      _channel.startLinkServer(mode: mode);
+  Future<void> stopLinkServer() => _channel.stopLinkServer();
+}
+
+final Provider<RecorderActions> recorderActionsProvider =
+    Provider<RecorderActions>((Ref ref) => RecorderActions(ref));

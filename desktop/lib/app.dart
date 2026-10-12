@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'core/providers/link_providers.dart';
 import 'core/theme/dot_theme.dart';
 import 'core/theme/tokens.dart';
@@ -42,40 +43,23 @@ class DesktopHomeShell extends ConsumerWidget {
           control: true,
           shift: true,
         ): () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const MirrorWindow(),
-            ),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute<void>(builder: (_) => const MirrorWindow()));
         },
-        const SingleActivator(
-          LogicalKeyboardKey.comma,
-          control: true,
-        ): () {
+        const SingleActivator(LogicalKeyboardKey.comma, control: true): () {
           ref.read(activeTabProvider.notifier).state = DesktopTab.settings;
         },
-        const SingleActivator(
-          LogicalKeyboardKey.digit1,
-          control: true,
-        ): () {
+        const SingleActivator(LogicalKeyboardKey.digit1, control: true): () {
           ref.read(activeTabProvider.notifier).state = DesktopTab.mirror;
         },
-        const SingleActivator(
-          LogicalKeyboardKey.digit2,
-          control: true,
-        ): () {
+        const SingleActivator(LogicalKeyboardKey.digit2, control: true): () {
           ref.read(activeTabProvider.notifier).state = DesktopTab.connection;
         },
-        const SingleActivator(
-          LogicalKeyboardKey.digit3,
-          control: true,
-        ): () {
+        const SingleActivator(LogicalKeyboardKey.digit3, control: true): () {
           ref.read(activeTabProvider.notifier).state = DesktopTab.obs;
         },
-        const SingleActivator(
-          LogicalKeyboardKey.digit4,
-          control: true,
-        ): () {
+        const SingleActivator(LogicalKeyboardKey.digit4, control: true): () {
           ref.read(activeTabProvider.notifier).state = DesktopTab.settings;
         },
       },
@@ -128,8 +112,9 @@ class DesktopHomeShell extends ConsumerWidget {
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: context.dot.surfaceRaised,
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusChip),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusChip,
+                        ),
                       ),
                       child: Row(
                         children: DesktopTab.values.map((tab) {
@@ -145,10 +130,12 @@ class DesktopHomeShell extends ConsumerWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    isSel ? context.dot.fg : Colors.transparent,
+                                color: isSel
+                                    ? context.dot.fg
+                                    : Colors.transparent,
                                 borderRadius: BorderRadius.circular(
-                                    DotTokens.radiusChip - 2),
+                                  DotTokens.radiusChip - 2,
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -195,8 +182,8 @@ class DesktopHomeShell extends ConsumerWidget {
                       onPressed: () {
                         ref.read(themeModeProvider.notifier).state =
                             ref.read(themeModeProvider) == ThemeMode.dark
-                                ? ThemeMode.light
-                                : ThemeMode.dark;
+                            ? ThemeMode.light
+                            : ThemeMode.dark;
                       },
                     ),
                   ],

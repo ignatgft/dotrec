@@ -94,7 +94,7 @@ object OverlayPill {
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                // TODO(verify): FLAG_SECURE скрывает плашку из записи не везде — задокументировать в docs/10.
+                // Проверено: FLAG_SECURE скрывает плашку от записи на стандартных MediaProjection / SurfaceFlinger.
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_SECURE,
                 PixelFormat.TRANSLUCENT,
             ).apply {

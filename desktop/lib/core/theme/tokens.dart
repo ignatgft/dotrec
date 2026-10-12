@@ -98,6 +98,5 @@ class DotColors extends ThemeExtension<DotColors> {
 }
 
 extension DotContext on BuildContext {
-  DotColors get dot =>
-      Theme.of(this).extension<DotColors>() ?? DotColors.dark;
+  DotColors get dot => Theme.of(this).extension<DotColors>() ?? DotColors.dark;
 }

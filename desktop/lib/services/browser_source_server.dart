@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+
 import '../core/models/device_info.dart';
 import 'adb_service.dart';
 import 'link_client.dart';
@@ -27,10 +28,8 @@ class BrowserSourceServer {
   bool get isRunning => _server != null;
   int get port => _port;
   String get token => _token;
-  String get url =>
-      isRunning ? 'http://127.0.0.1:$_port/?token=$_token' : '';
-  String get obsUrl =>
-      isRunning ? 'http://127.0.0.1:$_port/obs' : '';
+  String get url => isRunning ? 'http://127.0.0.1:$_port/?token=$_token' : '';
+  String get obsUrl => isRunning ? 'http://127.0.0.1:$_port/obs' : '';
 
   static String _generateToken() {
     final r = Random.secure();
@@ -100,19 +99,25 @@ class BrowserSourceServer {
     }
 
     // Раздача локального шрифта Doto-Variable.ttf
-    if (path == '/assets/fonts/Doto-Variable.ttf' || path.endsWith('Doto-Variable.ttf')) {
-      const candidates = [
+    if (path == '/assets/fonts/Doto-Variable.ttf' ||
+        path.endsWith('Doto-Variable.ttf')) {
+      final appDir = File(Platform.resolvedExecutable).parent.path;
+      final candidates = [
         r'desktop\assets\fonts\Doto-Variable.ttf',
         r'assets\fonts\Doto-Variable.ttf',
         r'..\desktop\assets\fonts\Doto-Variable.ttf',
-        r'D:\dev\recorder\desktop\assets\fonts\Doto-Variable.ttf',
+        '$appDir\\assets\\fonts\\Doto-Variable.ttf',
+        '$appDir\\desktop\\assets\\fonts\\Doto-Variable.ttf',
       ];
       for (final c in candidates) {
         final f = File(c);
         if (f.existsSync()) {
           request.response.statusCode = HttpStatus.ok;
           request.response.headers.contentType = ContentType('font', 'ttf');
-          request.response.headers.set('Cache-Control', 'public, max-age=31536000');
+          request.response.headers.set(
+            'Cache-Control',
+            'public, max-age=31536000',
+          );
           await request.response.addStream(f.openRead());
           await request.response.close();
           return;
@@ -122,12 +127,15 @@ class BrowserSourceServer {
 
     // API: Статус устройства и потока
     if (path == '/api/status') {
-      final devices = await (_adbService?.getDevices() ?? Future.value(<DeviceInfo>[]));
-      final readyDev = devices.where((d) => d.state == AdbState.ready).firstOrNull ??
+      final devices =
+          await (_adbService?.getDevices() ?? Future.value(<DeviceInfo>[]));
+      final readyDev =
+          devices.where((d) => d.state == AdbState.ready).firstOrNull ??
           devices.firstOrNull;
       final stats = _linkClient?.currentStats;
       final data = {
-        'connected': _linkClient?.status == LinkClientStatus.streaming ||
+        'connected':
+            _linkClient?.status == LinkClientStatus.streaming ||
             _linkClient?.status == LinkClientStatus.handshake ||
             _linkClient?.status == LinkClientStatus.connecting,
         'statusName': _linkClient?.status.name ?? 'disconnected',
@@ -138,16 +146,20 @@ class BrowserSourceServer {
         'height': stats?.videoHeight ?? 2400,
         'isRecording': isRecording,
         'device': {
-          'serial': readyDev?.serial ?? '0014915CH001853',
-          'model': (readyDev?.displayName != null && readyDev!.displayName.isNotEmpty)
+          'serial':
+              readyDev?.serial ??
+              (devices.isEmpty ? 'DISCONNECTED' : 'STANDBY'),
+          'model':
+              (readyDev?.displayName != null &&
+                  readyDev!.displayName.isNotEmpty)
               ? readyDev.displayName
-              : 'Nothing Phone (2a) Plus (A059)',
-          'state': readyDev?.state.name ?? 'ready',
+              : (readyDev != null
+                    ? readyDev.model
+                    : 'Нет подключенного устройства'),
+          'state': readyDev?.state.name ?? 'noCable',
           'isReady': readyDev?.state == AdbState.ready,
         },
-        'obs': {
-          'connected': _obsService?.status == ObsStatus.connected,
-        }
+        'obs': {'connected': _obsService?.status == ObsStatus.connected},
       };
       request.response.statusCode = HttpStatus.ok;
       request.response.headers.contentType = ContentType.json;
@@ -198,12 +210,15 @@ class BrowserSourceServer {
 
     // API: Переподключение USB
     if (path == '/api/reconnect') {
-      final devices = await (_adbService?.getDevices() ?? Future.value(<DeviceInfo>[]));
+      final devices =
+          await (_adbService?.getDevices() ?? Future.value(<DeviceInfo>[]));
       final ready = devices.where((d) => d.state == AdbState.ready).firstOrNull;
       if (ready != null) {
         await _adbService?.forwardPort(ready.serial, 48211, 48211);
       }
-      final ok = await (_linkClient?.connect(host: '127.0.0.1', connectPort: 48211) ?? Future.value(false));
+      final ok =
+          await (_linkClient?.connect(host: '127.0.0.1', connectPort: 48211) ??
+              Future.value(false));
       request.response.statusCode = HttpStatus.ok;
       request.response.headers.contentType = ContentType.json;
       request.response.write(jsonEncode({'status': ok ? 'ok' : 'error'}));
@@ -229,10 +244,12 @@ class BrowserSourceServer {
       }
       request.response.statusCode = HttpStatus.ok;
       request.response.headers.contentType = ContentType.json;
-      request.response.write(jsonEncode({
-        'status': ok ? 'ok' : 'error',
-        'obsConnected': _obsService?.status == ObsStatus.connected,
-      }));
+      request.response.write(
+        jsonEncode({
+          'status': ok ? 'ok' : 'error',
+          'obsConnected': _obsService?.status == ObsStatus.connected,
+        }),
+      );
       await request.response.close();
       return;
     }
@@ -240,7 +257,9 @@ class BrowserSourceServer {
     // API: Старт / Стоп локальной записи потока
     if (path == '/api/record/toggle') {
       if (!isRecording && _recordingService != null) {
-        final path = await _recordingService!.startRecording(_linkClient?.spsPps);
+        final path = await _recordingService!.startRecording(
+          _linkClient?.spsPps,
+        );
         isRecording = true;
         request.response.statusCode = HttpStatus.ok;
         request.response.headers.contentType = ContentType.json;
@@ -250,11 +269,13 @@ class BrowserSourceServer {
         isRecording = false;
         request.response.statusCode = HttpStatus.ok;
         request.response.headers.contentType = ContentType.json;
-        request.response.write(jsonEncode({
-          'isRecording': false,
-          'path': res?.filePath,
-          'bytes': res?.bytesWritten ?? 0,
-        }));
+        request.response.write(
+          jsonEncode({
+            'isRecording': false,
+            'path': res?.filePath,
+            'bytes': res?.bytesWritten ?? 0,
+          }),
+        );
       } else {
         request.response.statusCode = HttpStatus.ok;
         request.response.headers.contentType = ContentType.json;
@@ -301,7 +322,8 @@ class BrowserSourceServer {
 
     // Автоматическое определение OBS Studio vs Обычный браузер
     final ua = request.headers.value('user-agent')?.toLowerCase() ?? '';
-    final isObs = path == '/obs' ||
+    final isObs =
+        path == '/obs' ||
         ua.contains('obs') ||
         request.uri.queryParameters['clean'] == '1' ||
         request.uri.queryParameters['clean'] == 'true' ||
@@ -330,19 +352,10 @@ class BrowserSourceServer {
   }
 
   void _sendAdbKey(String keycode) {
-    const adbCandidates = [
-      r'D:\andoidsdk\platform-tools\adb.exe',
-      r'C:\Users\ignatgift\AppData\Local\Android\Sdk\platform-tools\adb.exe',
-      'adb',
-    ];
-    for (final a in adbCandidates) {
-      if (File(a).existsSync() || a == 'adb') {
-        try {
-          Process.runSync(a, ['shell', 'input', 'keyevent', keycode]);
-          break;
-        } catch (_) {}
-      }
-    }
+    final adb = _adbService?.adbPath ?? 'adb';
+    try {
+      Process.runSync(adb, ['shell', 'input', 'keyevent', keycode]);
+    } catch (_) {}
   }
 
   void broadcastVideoFrame(LinkVideoFrame frame) {
@@ -1474,9 +1487,9 @@ class BrowserSourceServer {
         <div class="setting-item">
           <div class="setting-info">
             <span class="setting-label">Папка сохранения видеозаписей</span>
-            <span class="setting-sub doto">D:/dev/recorder/recordings</span>
+            <span class="setting-sub doto">Videos/DotRec</span>
           </div>
-          <button class="action-btn" style="flex:unset; padding:6px 14px" onclick="showToast('Папка по умолчанию: recordings')">
+          <button class="action-btn" style="flex:unset; padding:6px 14px" onclick="showToast('Папка по умолчанию: Videos/DotRec')">
             Обзор
           </button>
         </div>
@@ -1484,9 +1497,9 @@ class BrowserSourceServer {
         <div class="setting-item">
           <div class="setting-info">
             <span class="setting-label">Папка снимков экрана</span>
-            <span class="setting-sub doto">D:/dev/recorder/recordings/screenshots</span>
+            <span class="setting-sub doto">Pictures/DotRec</span>
           </div>
-          <button class="action-btn" style="flex:unset; padding:6px 14px" onclick="showToast('Папка по умолчанию: screenshots')">
+          <button class="action-btn" style="flex:unset; padding:6px 14px" onclick="showToast('Папка по умолчанию: Pictures/DotRec')">
             Обзор
           </button>
         </div>

@@ -44,10 +44,7 @@ void main() {
     test('setWindowVisible toggles state and emits action', () async {
       final expectation = expectLater(
         tray.actionStream,
-        emitsInOrder([
-          TrayAction.hideWindow,
-          TrayAction.showWindow,
-        ]),
+        emitsInOrder([TrayAction.hideWindow, TrayAction.showWindow]),
       );
 
       tray.setWindowVisible(false);
@@ -80,9 +77,11 @@ void main() {
     test('notify emits TrayNotification with correct data', () async {
       final expectation = expectLater(
         tray.notificationStream,
-        emits(predicate<TrayNotification>(
-          (n) => n.title == 'Тест' && n.message == 'Сообщение в трее',
-        )),
+        emits(
+          predicate<TrayNotification>(
+            (n) => n.title == 'Тест' && n.message == 'Сообщение в трее',
+          ),
+        ),
       );
 
       tray.notify('Тест', 'Сообщение в трее');

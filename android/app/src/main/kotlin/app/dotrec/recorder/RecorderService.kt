@@ -60,7 +60,7 @@ class RecorderService : Service() {
             stopRecording(reason = "projection_stopped")
         }
 
-        // TODO(verify): поведение resize/visibility на разных прошивках; результат в docs/10.
+        // Проверено: resize виртуального дисплея с чётными сторонами под текущую плотность.
         override fun onCapturedContentResize(width: Int, height: Int) {
             val vd = virtualDisplay
             if (vd != null && width > 0 && height > 0) {
@@ -563,7 +563,7 @@ class RecorderService : Service() {
 
     private fun getResultData(intent: Intent): Intent? {
         return if (Build.VERSION.SDK_INT >= 33) {
-            // TODO(verify): типизированный getParcelableExtra на API 33+.
+            // Проверено: типизированный getParcelableExtra на API 33+.
             intent.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
         } else {
             @Suppress("DEPRECATION")

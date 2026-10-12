@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/models/device_info.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
@@ -24,8 +25,9 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ConnectionMode _mode = ConnectionMode.usb;
   final TextEditingController _pinController = TextEditingController();
-  final TextEditingController _ipController =
-      TextEditingController(text: '192.168.1.');
+  final TextEditingController _ipController = TextEditingController(
+    text: '192.168.1.',
+  );
   bool _isConnectingWifi = false;
   String? _wifiError;
 
@@ -50,7 +52,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final pin = _pinController.text.trim();
     final ip = _ipController.text.trim();
     if (pin.length != 6) {
-      setState(() => _wifiError = 'Введите 6-значный PIN-код с экрана телефона');
+      setState(
+        () => _wifiError = 'Введите 6-значный PIN-код с экрана телефона',
+      );
       return;
     }
     setState(() {
@@ -59,16 +63,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     });
 
     final client = ref.read(linkClientProvider);
-    final ok = await client.connect(
-      host: ip,
-      pin: pin,
-    );
+    final ok = await client.connect(host: ip, pin: pin);
 
     if (mounted) {
       setState(() {
         _isConnectingWifi = false;
         if (!ok) {
-          _wifiError = 'Не удалось подключиться к $ip:$pin. Проверьте сеть и PIN.';
+          _wifiError =
+              'Не удалось подключиться к $ip:$pin. Проверьте сеть и PIN.';
         }
       });
       if (ok) {
@@ -161,23 +163,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               isDeviceReady
                                   ? Icons.verified_user_outlined
                                   : (device != null
-                                      ? Icons.warning_amber_outlined
-                                      : Icons.remove_circle_outline),
+                                        ? Icons.warning_amber_outlined
+                                        : Icons.remove_circle_outline),
                               size: 16,
                               color: isDeviceReady
                                   ? const Color(0xFF00C853)
                                   : (device != null
-                                      ? const Color(0xFFFFB300)
-                                      : context.dot.fgMuted),
+                                        ? const Color(0xFFFFB300)
+                                        : context.dot.fgMuted),
                             ),
                             const SizedBox(width: 6),
                             Text(
                               device != null
                                   ? (device.state == AdbState.ready
-                                      ? 'Авторизован'
-                                      : (device.state == AdbState.unauthorized
-                                          ? 'Unauthorized'
-                                          : 'Offline'))
+                                        ? 'Авторизован'
+                                        : (device.state == AdbState.unauthorized
+                                              ? 'Unauthorized'
+                                              : 'Offline'))
                                   : 'Ожидание',
                               style: const TextStyle(
                                 fontSize: 13,
@@ -240,8 +242,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               context,
               step: '1',
               title: 'Включите отладку по USB на телефоне',
-              body:
-                  'Настройки → О телефоне → нажимайте на «Номер сборки» 7 раз. Затем перейдите в Настройки → Для разработчиков и включите переключатель «Отладка по USB».',
+              body: 'Настройки → О телефоне → нажимайте на «Номер сборки» 7 раз. Затем перейдите в Настройки → Для разработчиков и включите переключатель «Отладка по USB».',
               done: isDeviceReady,
             ),
 
@@ -252,8 +253,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               context,
               step: '2',
               title: 'Подключите телефон кабелем USB-C',
-              body:
-                  'Используйте качественный кабель передачи данных. В появившейся шторке на телефоне выберите режим подключения «Передача файлов» (MTP) вместо «Только зарядка».',
+              body: 'Используйте качественный кабель передачи данных. В появившейся шторке на телефоне выберите режим подключения «Передача файлов» (MTP) вместо «Только зарядка».',
               done: device != null,
             ),
 
@@ -264,8 +264,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               context,
               step: '3',
               title: 'Разрешите отладку с этого компьютера',
-              body:
-                  'На телефоне появится системный запрос «Разрешить отладку по USB?». Обязательно отметьте флажок «Всегда разрешать с этого компьютера» и нажмите «ОК».',
+              body: 'На телефоне появится системный запрос «Разрешить отладку по USB?». Обязательно отметьте флажок «Всегда разрешать с этого компьютера» и нажмите «ОК».',
               done: isDeviceReady,
               warning: device?.state == AdbState.unauthorized
                   ? 'Внимание: телефон подключен, но не авторизован! Подтвердите запрос на экране смартфона.'
@@ -287,8 +286,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       foregroundColor: context.dot.fg,
                       side: BorderSide(color: context.dot.line),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusButton),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusButton,
+                        ),
                       ),
                     ),
                   ),
@@ -305,8 +305,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         backgroundColor: context.dot.fg,
                         foregroundColor: context.dot.bg,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(DotTokens.radiusButton),
+                          borderRadius: BorderRadius.circular(
+                            DotTokens.radiusButton,
+                          ),
                         ),
                       ),
                     ),
@@ -322,18 +323,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   const Text(
                     'Сопряжение по Wi-Fi (PIN-код)',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: DotTokens.sm),
                   Text(
                     'Убедитесь, что ПК и смартфон подключены к одной локальной Wi-Fi сети. В приложении DotRec на телефоне выберите «Передача на ПК» → «Wi-Fi» и введите отображаемый 6-значный код.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: context.dot.fgMuted,
-                    ),
+                    style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                   ),
                   const SizedBox(height: DotTokens.lg),
 
@@ -343,8 +338,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       labelText: 'IP-адрес телефона в локальной сети',
                       hintText: '192.168.1.100',
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusChip),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusChip,
+                        ),
                       ),
                     ),
                   ),
@@ -364,8 +360,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       labelText: '6-значный PIN-код сопряжения (живёт 2 мин)',
                       hintText: '123456',
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusChip),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusChip,
+                        ),
                       ),
                     ),
                   ),
@@ -392,8 +389,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         backgroundColor: context.dot.fg,
                         foregroundColor: context.dot.bg,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(DotTokens.radiusButton),
+                          borderRadius: BorderRadius.circular(
+                            DotTokens.radiusButton,
+                          ),
                         ),
                       ),
                       child: _isConnectingWifi

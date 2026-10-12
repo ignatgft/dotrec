@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -26,39 +27,20 @@ class HotkeyService {
   Stream<HotkeyAction> get actionStream => _actionController.stream;
 
   final Map<SingleActivator, HotkeyAction> _bindings = {
-    const SingleActivator(
-      LogicalKeyboardKey.keyM,
-      control: true,
-      shift: true,
-    ): HotkeyAction.toggleMirror,
-    const SingleActivator(
-      LogicalKeyboardKey.keyR,
-      control: true,
-      shift: true,
-    ): HotkeyAction.toggleRecording,
-    const SingleActivator(
-      LogicalKeyboardKey.keyS,
-      control: true,
-      shift: true,
-    ): HotkeyAction.captureScreenshot,
-    const SingleActivator(
-      LogicalKeyboardKey.keyK,
-      control: true,
-    ): HotkeyAction.requestKeyframe,
-    const SingleActivator(
-      LogicalKeyboardKey.comma,
-      control: true,
-    ): HotkeyAction.openSettings,
-    const SingleActivator(
-      LogicalKeyboardKey.f10,
-    ): HotkeyAction.toggleFrameless,
-    const SingleActivator(
-      LogicalKeyboardKey.escape,
-    ): HotkeyAction.closeWindow,
-    const SingleActivator(
-      LogicalKeyboardKey.keyQ,
-      control: true,
-    ): HotkeyAction.quitApp,
+    const SingleActivator(LogicalKeyboardKey.keyM, control: true, shift: true):
+        HotkeyAction.toggleMirror,
+    const SingleActivator(LogicalKeyboardKey.keyR, control: true, shift: true):
+        HotkeyAction.toggleRecording,
+    const SingleActivator(LogicalKeyboardKey.keyS, control: true, shift: true):
+        HotkeyAction.captureScreenshot,
+    const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+        HotkeyAction.requestKeyframe,
+    const SingleActivator(LogicalKeyboardKey.comma, control: true):
+        HotkeyAction.openSettings,
+    const SingleActivator(LogicalKeyboardKey.f10): HotkeyAction.toggleFrameless,
+    const SingleActivator(LogicalKeyboardKey.escape): HotkeyAction.closeWindow,
+    const SingleActivator(LogicalKeyboardKey.keyQ, control: true):
+        HotkeyAction.quitApp,
   };
 
   Map<SingleActivator, HotkeyAction> get bindings =>

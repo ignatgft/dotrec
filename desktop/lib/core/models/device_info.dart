@@ -1,14 +1,6 @@
-enum DeviceTransport {
-  usb,
-  wifi,
-}
+enum DeviceTransport { usb, wifi }
 
-enum AdbState {
-  noCable,
-  unauthorized,
-  offline,
-  ready,
-}
+enum AdbState { noCable, unauthorized, offline, ready }
 
 class DeviceInfo {
   const DeviceInfo({

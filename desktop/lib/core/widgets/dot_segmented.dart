@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/tokens.dart';
 
 class DotSegmented<T> extends StatelessWidget {
@@ -49,8 +50,8 @@ class DotSegmented<T> extends StatelessWidget {
                     color: !enabled
                         ? context.dot.fgMuted.withValues(alpha: 0.4)
                         : isSel
-                            ? context.dot.bg
-                            : context.dot.fg,
+                        ? context.dot.bg
+                        : context.dot.fg,
                   ),
                 ),
               ),

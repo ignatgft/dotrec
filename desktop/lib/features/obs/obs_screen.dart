@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_card.dart';
@@ -14,10 +15,12 @@ class ObsScreen extends ConsumerStatefulWidget {
 }
 
 class _ObsScreenState extends ConsumerState<ObsScreen> {
-  final TextEditingController _obsPortController =
-      TextEditingController(text: '4455');
-  final TextEditingController _obsPasswordController =
-      TextEditingController(text: '');
+  final TextEditingController _obsPortController = TextEditingController(
+    text: '4455',
+  );
+  final TextEditingController _obsPasswordController = TextEditingController(
+    text: '',
+  );
   bool _isConnecting = false;
 
   @override
@@ -51,10 +54,7 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
     final port = int.tryParse(_obsPortController.text.trim()) ?? 4455;
     final password = _obsPasswordController.text;
 
-    final ok = await obs.connect(
-      port: port,
-      password: password,
-    );
+    final ok = await obs.connect(port: port, password: password);
 
     if (mounted) {
       setState(() => _isConnecting = false);
@@ -158,10 +158,7 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                 const SizedBox(height: DotTokens.sm),
                 Text(
                   'Вставьте данный адрес в источник «Браузер» в OBS Studio. Видео транслируется аппаратно через WebCodecs без потери качества и с минимальной задержкой (~30 мс).',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.dot.fgMuted,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                 ),
                 const SizedBox(height: DotTokens.lg),
                 Container(
@@ -229,8 +226,9 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                         color: isConnected
                             ? const Color(0xFF00C853).withValues(alpha: 0.15)
                             : context.dot.surfaceRaised,
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusChip),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusChip,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -242,8 +240,8 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                               color: isConnected
                                   ? const Color(0xFF00C853)
                                   : (obsStatus == ObsStatus.connecting
-                                      ? const Color(0xFFFFB300)
-                                      : context.dot.fgMuted),
+                                        ? const Color(0xFFFFB300)
+                                        : context.dot.fgMuted),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -251,8 +249,8 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                             isConnected
                                 ? 'Подключено · ${obs.currentScene}'
                                 : (obsStatus == ObsStatus.connecting
-                                    ? 'Подключение...'
-                                    : 'Отключено'),
+                                      ? 'Подключение...'
+                                      : 'Отключено'),
                             style: TextStyle(
                               fontFamily: DotTokens.dotFamily,
                               fontSize: 11,
@@ -270,10 +268,7 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                 const SizedBox(height: DotTokens.sm),
                 Text(
                   'Прямое управление OBS Studio: автоматическое добавление источника в активную сцену, переключение сцен и старт записи.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.dot.fgMuted,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.dot.fgMuted),
                 ),
                 const SizedBox(height: DotTokens.lg),
                 Row(
@@ -285,8 +280,9 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                         decoration: InputDecoration(
                           labelText: 'Порт WebSocket',
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(DotTokens.radiusChip),
+                            borderRadius: BorderRadius.circular(
+                              DotTokens.radiusChip,
+                            ),
                           ),
                         ),
                       ),
@@ -300,8 +296,9 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                         decoration: InputDecoration(
                           labelText: 'Пароль сервера OBS (если задан)',
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(DotTokens.radiusChip),
+                            borderRadius: BorderRadius.circular(
+                              DotTokens.radiusChip,
+                            ),
                           ),
                         ),
                       ),
@@ -313,23 +310,24 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed:
-                            _isConnecting ? null : _toggleObsConnection,
+                        onPressed: _isConnecting ? null : _toggleObsConnection,
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           foregroundColor: context.dot.fg,
                           side: BorderSide(color: context.dot.line),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(DotTokens.radiusButton),
+                            borderRadius: BorderRadius.circular(
+                              DotTokens.radiusButton,
+                            ),
                           ),
                         ),
                         child: _isConnecting
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Text(
                                 isConnected
@@ -349,8 +347,9 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                           backgroundColor: context.dot.fg,
                           foregroundColor: context.dot.bg,
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(DotTokens.radiusButton),
+                            borderRadius: BorderRadius.circular(
+                              DotTokens.radiusButton,
+                            ),
                           ),
                         ),
                       ),
@@ -362,16 +361,20 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                   const SizedBox(height: DotTokens.md),
                   OutlinedButton.icon(
                     onPressed: _toggleObsRecord,
-                    icon: const Icon(Icons.fiber_manual_record,
-                        size: 16, color: DotTokens.accentRed),
+                    icon: const Icon(
+                      Icons.fiber_manual_record,
+                      size: 16,
+                      color: DotTokens.accentRed,
+                    ),
                     label: const Text('Переключить запись в OBS Studio'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       foregroundColor: context.dot.fg,
                       side: BorderSide(color: context.dot.line),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(DotTokens.radiusButton),
+                        borderRadius: BorderRadius.circular(
+                          DotTokens.radiusButton,
+                        ),
                       ),
                     ),
                   ),
