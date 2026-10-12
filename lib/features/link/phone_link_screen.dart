@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/dot_icons.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_segmented.dart';
 import '../../core/widgets/dot_widgets.dart';
@@ -79,7 +81,15 @@ class _PhoneLinkScreenState extends ConsumerState<PhoneLinkScreen> {
             const Spacer(),
             IconButton(
               tooltip: t.settings,
-              icon: const Icon(Icons.settings_outlined),
+              icon: SvgPicture.asset(
+                DotIcons.settings,
+                width: 22,
+                height: 22,
+                colorFilter: ColorFilter.mode(
+                  context.dot.fg,
+                  BlendMode.srcIn,
+                ),
+              ),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
               ),

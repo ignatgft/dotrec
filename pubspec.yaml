@@ -1,7 +1,7 @@
 name: dotrec
 description: "DotRec — бесплатная, удобная и приватная запись экрана Android в стиле Nothing OS. Без рекламы, водяных знаков и сети."
 publish_to: 'none'
-version: 1.0.0+6
+version: 1.1.0+7
 
 environment:
   sdk: ^3.13.5

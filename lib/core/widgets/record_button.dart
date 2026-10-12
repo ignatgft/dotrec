@@ -3,7 +3,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../dot_icons.dart';
 import '../theme/tokens.dart';
 
 /// Состояния кнопки записи (см. docs/06 §3).
@@ -159,10 +161,14 @@ class _RecordButtonState extends State<RecordButton>
                 shape: BoxShape.circle,
               ),
             ),
-            Icon(
-              Icons.pause,
-              color: dot.onFg == dot.record ? Colors.white : dot.fg,
-              size: 32,
+            SvgPicture.asset(
+              DotIcons.pause,
+              colorFilter: ColorFilter.mode(
+                dot.onFg == dot.record ? Colors.white : dot.fg,
+                BlendMode.srcIn,
+              ),
+              width: 32,
+              height: 32,
             ),
           ],
         );

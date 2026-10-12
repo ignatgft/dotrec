@@ -104,7 +104,15 @@ class HomeScreen extends ConsumerWidget {
                       builder: (_) => const PhoneLinkScreen(),
                     ),
                   ),
-                  icon: Icon(Icons.devices, size: 22, color: context.dot.fg),
+                  icon: SvgPicture.asset(
+                    DotIcons.mirror,
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(
+                      context.dot.fg,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
                 IconButton(
                   tooltip: t.guides,
@@ -208,7 +216,15 @@ class HomeScreen extends ConsumerWidget {
                         actions.pause();
                       }
                     },
-                    icon: Icon(s is Paused ? Icons.play_arrow : Icons.pause),
+                    icon: SvgPicture.asset(
+                      s is Paused ? DotIcons.play : DotIcons.pause,
+                      width: 22,
+                      height: 22,
+                      colorFilter: ColorFilter.mode(
+                        context.dot.fg,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                   ),
                 if (s is Recording || s is Paused)
                   const SizedBox(width: DotTokens.lg),
