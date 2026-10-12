@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../dot_link_icons.dart';
 import '../models/app_settings.dart';
 import '../models/device_info.dart';
 import '../models/link_stats.dart';
@@ -165,14 +166,14 @@ final appSettingsProvider =
 
 // Desktop Navigation Tab
 enum DesktopTab {
-  mirror('Зеркало', Icons.screen_share_outlined),
-  connection('Подключение', Icons.usb_outlined),
-  obs('OBS', Icons.videocam_outlined),
-  settings('Настройки', Icons.settings_outlined);
+  mirror('Зеркало', DotLinkIcons.mirror),
+  connection('Подключение', DotLinkIcons.usb),
+  obs('OBS Studio', DotLinkIcons.obs),
+  settings('Настройки', DotLinkIcons.settings);
 
-  const DesktopTab(this.label, this.icon);
+  const DesktopTab(this.label, this.iconAsset);
   final String label;
-  final IconData icon;
+  final String iconAsset;
 }
 
 final activeTabProvider = StateProvider<DesktopTab>((ref) {

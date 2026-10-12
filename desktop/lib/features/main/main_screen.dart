@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/dot_link_icons.dart';
 import '../../core/models/stream_preset.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
@@ -39,14 +41,28 @@ class MainScreen extends ConsumerWidget {
                 Container(
                   width: 10,
                   height: 10,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDeviceReady
-                        ? const Color(0xFF00C853)
-                        : (device != null
-                              ? const Color(0xFFFFB300)
-                              : context.dot.fgMuted),
-                  ),
+                  decoration: isDeviceReady
+                      ? BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: context.dot.fg,
+                        )
+                      : (device != null
+                          ? BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: context.dot.fg,
+                                width: 2,
+                              ),
+                              color: Colors.transparent,
+                            )
+                          : BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: context.dot.fgMuted,
+                                width: 1.5,
+                              ),
+                              color: Colors.transparent,
+                            )),
                 ),
                 const SizedBox(width: DotTokens.md),
                 Expanded(
@@ -93,7 +109,22 @@ class MainScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    child: const Text('Подключить'),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          DotLinkIcons.usb,
+                          width: 16,
+                          height: 16,
+                          colorFilter: ColorFilter.mode(
+                            context.dot.fg,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Подключить'),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -265,6 +296,16 @@ class MainScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SvgPicture.asset(
+                    DotLinkIcons.mirror,
+                    width: 20,
+                    height: 20,
+                    colorFilter: ColorFilter.mode(
+                      context.dot.bg,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   const Text(
                     'Зеркалировать',
                     style: TextStyle(

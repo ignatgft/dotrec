@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/dot_link_icons.dart';
 import '../../core/models/device_info.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
@@ -119,16 +121,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
+                            SvgPicture.asset(
                               device != null
-                                  ? Icons.check_circle_outline
-                                  : Icons.highlight_off,
-                              size: 16,
-                              color: device != null
-                                  ? const Color(0xFF00C853)
-                                  : context.dot.fgMuted,
+                                  ? DotLinkIcons.check
+                                  : DotLinkIcons.close,
+                              width: 16,
+                              height: 16,
+                              colorFilter: ColorFilter.mode(
+                                device != null
+                                    ? context.dot.fg
+                                    : context.dot.fgMuted,
+                                BlendMode.srcIn,
+                              ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Text(
                               device != null ? 'Подключен' : 'Не найден',
                               style: const TextStyle(
@@ -159,20 +165,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
+                            SvgPicture.asset(
                               isDeviceReady
-                                  ? Icons.verified_user_outlined
+                                  ? DotLinkIcons.check
                                   : (device != null
-                                        ? Icons.warning_amber_outlined
-                                        : Icons.remove_circle_outline),
-                              size: 16,
-                              color: isDeviceReady
-                                  ? const Color(0xFF00C853)
-                                  : (device != null
-                                        ? const Color(0xFFFFB300)
-                                        : context.dot.fgMuted),
+                                        ? DotLinkIcons.warning
+                                        : DotLinkIcons.close),
+                              width: 16,
+                              height: 16,
+                              colorFilter: ColorFilter.mode(
+                                isDeviceReady
+                                    ? context.dot.fg
+                                    : context.dot.fgMuted,
+                                BlendMode.srcIn,
+                              ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Text(
                               device != null
                                   ? (device.state == AdbState.ready
@@ -209,16 +217,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
-                              isDeviceReady
-                                  ? Icons.smartphone
-                                  : Icons.phonelink_erase,
-                              size: 16,
-                              color: isDeviceReady
-                                  ? const Color(0xFF00C853)
-                                  : context.dot.fgMuted,
+                            SvgPicture.asset(
+                              DotLinkIcons.phone,
+                              width: 16,
+                              height: 16,
+                              colorFilter: ColorFilter.mode(
+                                isDeviceReady
+                                    ? context.dot.fg
+                                    : context.dot.fgMuted,
+                                BlendMode.srcIn,
+                              ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Text(
                               isDeviceReady ? 'Готов к передаче' : 'Ожидание',
                               style: const TextStyle(
@@ -279,7 +289,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: _refreshAdb,
-                    icon: const Icon(Icons.refresh, size: 18),
+                    icon: SvgPicture.asset(
+                      DotLinkIcons.refresh,
+                      width: 18,
+                      height: 18,
+                      colorFilter: ColorFilter.mode(
+                        context.dot.fg,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                     label: const Text('Обновить список устройств'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -298,7 +316,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _launchAppOnPhone(device.serial),
-                      icon: const Icon(Icons.open_in_new, size: 18),
+                      icon: SvgPicture.asset(
+                        DotLinkIcons.open,
+                        width: 18,
+                        height: 18,
+                        colorFilter: ColorFilter.mode(
+                          context.dot.bg,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       label: const Text('Запустить DotRec на телефоне'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -437,9 +463,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: done
-                      ? const Color(0xFF00C853)
-                      : context.dot.surfaceRaised,
+                  color: done ? context.dot.fg : context.dot.surfaceRaised,
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -447,7 +471,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   style: TextStyle(
                     fontFamily: DotTokens.dotFamily,
                     fontWeight: FontWeight.bold,
-                    color: done ? Colors.white : context.dot.fg,
+                    color: done ? context.dot.bg : context.dot.fg,
                   ),
                 ),
               ),

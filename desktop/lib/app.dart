@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import 'core/dot_link_icons.dart';
 import 'core/providers/link_providers.dart';
 import 'core/theme/dot_theme.dart';
 import 'core/theme/tokens.dart';
+import 'core/widgets/dot_icon_button.dart';
 import 'features/connection/onboarding_screen.dart';
 import 'features/main/main_screen.dart';
 import 'features/mirror/mirror_window.dart';
@@ -80,7 +83,7 @@ class DesktopHomeShell extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    // Brand Logo
+                    // Brand Logo & Version Chip
                     Row(
                       children: [
                         Container(
@@ -102,6 +105,32 @@ class DesktopHomeShell extends ConsumerWidget {
                             color: context.dot.fg,
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.dot.surfaceRaised,
+                            borderRadius: BorderRadius.circular(
+                              DotTokens.radiusChip,
+                            ),
+                            border: Border.all(
+                              color: context.dot.line,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            'v1.1.0-beta',
+                            style: TextStyle(
+                              fontFamily: DotTokens.dotFamily,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: context.dot.fgMuted,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
@@ -119,47 +148,63 @@ class DesktopHomeShell extends ConsumerWidget {
                       child: Row(
                         children: DesktopTab.values.map((tab) {
                           final isSel = tab == currentTab;
-                          return GestureDetector(
-                            onTap: () {
-                              ref.read(activeTabProvider.notifier).state = tab;
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 140),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSel
-                                    ? context.dot.fg
-                                    : Colors.transparent,
+                          return Semantics(
+                            button: true,
+                            label: tab.label,
+                            selected: isSel,
+                            child: Tooltip(
+                              message: tab.label,
+                              child: InkWell(
+                                onTap: () {
+                                  ref.read(activeTabProvider.notifier).state =
+                                      tab;
+                                },
                                 borderRadius: BorderRadius.circular(
                                   DotTokens.radiusChip - 2,
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    tab.icon,
-                                    size: 15,
-                                    color: isSel
-                                        ? context.dot.bg
-                                        : context.dot.fgMuted,
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 140),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 6,
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    tab.label,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isSel
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                      color: isSel
-                                          ? context.dot.bg
-                                          : context.dot.fg,
+                                  decoration: BoxDecoration(
+                                    color: isSel
+                                        ? context.dot.fg
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(
+                                      DotTokens.radiusChip - 2,
                                     ),
                                   ),
-                                ],
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        tab.iconAsset,
+                                        width: 16,
+                                        height: 16,
+                                        colorFilter: ColorFilter.mode(
+                                          isSel
+                                              ? context.dot.bg
+                                              : context.dot.fgMuted,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        tab.label,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: isSel
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                          color: isSel
+                                              ? context.dot.bg
+                                              : context.dot.fg,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           );
@@ -170,20 +215,16 @@ class DesktopHomeShell extends ConsumerWidget {
                     const Spacer(),
 
                     // Quick Theme Toggle
-                    IconButton(
-                      icon: Icon(
-                        ref.watch(themeModeProvider) == ThemeMode.dark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        size: 18,
-                        color: context.dot.fg,
-                      ),
-                      tooltip: 'Переключить тему',
+                    DotIconButton(
+                      asset: DotLinkIcons.theme,
+                      tooltip: 'Переключить тему оформления',
+                      size: 36,
+                      iconSize: 18,
                       onPressed: () {
                         ref.read(themeModeProvider.notifier).state =
                             ref.read(themeModeProvider) == ThemeMode.dark
-                            ? ThemeMode.light
-                            : ThemeMode.dark;
+                                ? ThemeMode.light
+                                : ThemeMode.dark;
                       },
                     ),
                   ],

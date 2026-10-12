@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/dot_link_icons.dart';
 import '../../core/models/device_info.dart';
 import '../../core/models/link_stats.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/dot_icon_button.dart';
 import '../../services/link_client.dart';
 
 class MirrorWindow extends ConsumerStatefulWidget {
@@ -29,6 +33,12 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
   int _frameCount = 0;
   StreamSubscription<LinkVideoFrame>? _videoSub;
   StreamSubscription<LinkAudioFrame>? _audioSub;
+
+  // Новые элементы управления зеркалом
+  int _rotationQuarter = 0;
+  bool _fitMode = true;
+  bool _phoneScreenOff = false;
+  bool _isMuted = false;
 
   @override
   void initState() {
@@ -55,20 +65,16 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     final client = ref.read(linkClientProvider);
 
     if (device != null && device.transport == DeviceTransport.usb) {
-      // Setup port forwarding
       await adb.forwardPort(device.serial, LinkClient.port, LinkClient.port);
     }
 
-    // Connect to phone stream
     await client.connect();
 
-    // Auto-record if configured
     final config = ref.read(streamConfigProvider);
     if (config.recordOnPc) {
       await _startRecordingToFile(client);
     }
 
-    // Listen to frames
     _videoSub = client.videoStream.listen((frame) {
       _frameCount++;
       if (_isRecording) {
@@ -82,12 +88,11 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     });
 
     _audioSub = client.audioStream.listen((frame) {
-      if (_isRecording) {
+      if (_isRecording && !_isMuted) {
         ref.read(recordingServiceProvider).writeAudioFrame(frame.data);
       }
     });
 
-    // Check if frames start arriving within 3.5s; if not, prompt for Android 14+ consent
     _consentCheckTimer = Timer(const Duration(milliseconds: 3500), () {
       if (mounted && _frameCount == 0) {
         setState(() => _showConsentNotice = true);
@@ -163,75 +168,13 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
 
   Future<void> _takeScreenshot() async {
     final rec = ref.read(recordingServiceProvider);
-    // 1x1 dummy PNG signature or render buffer
     final dummyPng = Uint8List.fromList([
-      0x89,
-      0x50,
-      0x4E,
-      0x47,
-      0x0D,
-      0x0A,
-      0x1A,
-      0x0A,
-      0x00,
-      0x00,
-      0x00,
-      0x0D,
-      0x49,
-      0x48,
-      0x44,
-      0x52,
-      0x00,
-      0x00,
-      0x00,
-      0x01,
-      0x00,
-      0x00,
-      0x00,
-      0x01,
-      0x08,
-      0x06,
-      0x00,
-      0x00,
-      0x00,
-      0x1F,
-      0x15,
-      0xC4,
-      0x89,
-      0x00,
-      0x00,
-      0x00,
-      0x0A,
-      0x49,
-      0x44,
-      0x41,
-      0x54,
-      0x78,
-      0x9C,
-      0x63,
-      0x00,
-      0x01,
-      0x00,
-      0x00,
-      0x05,
-      0x00,
-      0x01,
-      0x0D,
-      0x0A,
-      0x2D,
-      0xB4,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x49,
-      0x45,
-      0x4E,
-      0x44,
-      0xAE,
-      0x42,
-      0x60,
-      0x82,
+      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+      0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+      0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+      0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+      0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
     ]);
     final path = await rec.saveScreenshot(dummyPng);
     if (mounted) {
@@ -262,6 +205,69 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
 
   void _triggerConsent() {
     ref.read(linkClientProvider).triggerConsent();
+  }
+
+  void _sendHome() {
+    final dev = ref.read(selectedDeviceProvider);
+    if (dev != null) {
+      ref.read(adbServiceProvider).sendHome(dev.serial);
+    }
+  }
+
+  void _sendBack() {
+    final dev = ref.read(selectedDeviceProvider);
+    if (dev != null) {
+      ref.read(adbServiceProvider).sendBack(dev.serial);
+    }
+  }
+
+  void _sendRecents() {
+    final dev = ref.read(selectedDeviceProvider);
+    if (dev != null) {
+      ref.read(adbServiceProvider).sendRecents(dev.serial);
+    }
+  }
+
+  void _togglePhoneScreen() {
+    final dev = ref.read(selectedDeviceProvider);
+    if (dev != null) {
+      ref.read(adbServiceProvider).sendPower(dev.serial);
+      setState(() => _phoneScreenOff = !_phoneScreenOff);
+    }
+  }
+
+  void _rotate90() {
+    setState(() => _rotationQuarter = (_rotationQuarter + 1) % 4);
+  }
+
+  void _toggleScale() {
+    setState(() => _fitMode = !_fitMode);
+  }
+
+  void _toggleMute() {
+    setState(() => _isMuted = !_isMuted);
+  }
+
+  void _openRecordingsFolder() {
+    final settings = ref.read(appSettingsProvider);
+    final path = Directory(settings.recordingsPath).absolute.path;
+    if (Platform.isWindows) {
+      Process.run('explorer.exe', [path]);
+    }
+  }
+
+  void _copyObsUrl() {
+    final server = ref.read(browserSourceServerProvider);
+    Clipboard.setData(ClipboardData(text: server.url));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Ссылка OBS скопирована: ${server.url}',
+          style: const TextStyle(fontFamily: DotTokens.dotFamily),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -313,13 +319,16 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
             children: [
               // Main Mirror Viewport
               Center(
-                child: AspectRatio(
-                  aspectRatio: stats.aspectRatio,
-                  child: Container(
-                    color: const Color(0xFF0A0A0A),
-                    child: status == LinkClientStatus.streaming
-                        ? _buildStreamingViewport()
-                        : _buildStatusPlaceholder(status),
+                child: RotatedBox(
+                  quarterTurns: _rotationQuarter,
+                  child: AspectRatio(
+                    aspectRatio: stats.aspectRatio,
+                    child: Container(
+                      color: const Color(0xFF0A0A0A),
+                      child: status == LinkClientStatus.streaming
+                          ? _buildStreamingViewport()
+                          : _buildStatusPlaceholder(status),
+                    ),
                   ),
                 ),
               ),
@@ -334,17 +343,21 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                       color: const Color(0xFF1F1F1F),
                       borderRadius: BorderRadius.circular(DotTokens.radiusCard),
                       border: Border.all(
-                        color: const Color(0xFFFFB300),
-                        width: 1.5,
+                        color: const Color(0xFF8C8C8C),
+                        width: 1,
                       ),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.touch_app_outlined,
-                          size: 44,
-                          color: Color(0xFFFFB300),
+                        SvgPicture.asset(
+                          DotLinkIcons.phone,
+                          width: 44,
+                          height: 44,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         const SizedBox(height: DotTokens.md),
                         const Text(
@@ -401,7 +414,7 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.75),
+                          color: Colors.black.withValues(alpha: 0.85),
                           borderRadius: BorderRadius.circular(
                             DotTokens.radiusChip,
                           ),
@@ -412,21 +425,36 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                         ),
                         child: Row(
                           children: [
+                            // Shape-based indicator: red for rec, white circle for live, empty ring for wait
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _isRecording
-                                    ? DotTokens.accentRed
-                                    : (status == LinkClientStatus.streaming
-                                          ? const Color(0xFF00C853)
-                                          : const Color(0xFFFFB300)),
-                              ),
+                              decoration: _isRecording
+                                  ? const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: DotTokens.accentRed,
+                                    )
+                                  : (status == LinkClientStatus.streaming
+                                      ? const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                        )
+                                      : BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFF8C8C8C),
+                                            width: 1.5,
+                                          ),
+                                          color: Colors.transparent,
+                                        )),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _isRecording ? 'REC' : 'В ЭФИРЕ',
+                              _isRecording
+                                  ? 'REC'
+                                  : (status == LinkClientStatus.streaming
+                                      ? 'В ЭФИРЕ'
+                                      : 'ПОДКЛЮЧЕНИЕ'),
                               style: TextStyle(
                                 fontFamily: DotTokens.dotFamily,
                                 fontSize: 12,
@@ -452,15 +480,21 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                                 if (parts.isEmpty) {
                                   return const SizedBox.shrink();
                                 }
+                                final hasDroppedFrames = stats.droppedFrames > 0;
                                 return Row(
                                   children: [
                                     const SizedBox(width: 12),
                                     Text(
                                       parts.join('  ·  '),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: DotTokens.dotFamily,
-                                        fontSize: 12,
-                                        color: Color(0xFF8C8C8C),
+                                        fontSize: 13,
+                                        color: const Color(0xFF8C8C8C),
+                                        decoration: hasDroppedFrames
+                                            ? TextDecoration.underline
+                                            : TextDecoration.none,
+                                        decorationColor:
+                                            const Color(0xFF8C8C8C),
                                       ),
                                     ),
                                   ],
@@ -503,9 +537,12 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                               ),
                             ),
                           const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
+                          DotIconButton(
+                            asset: DotLinkIcons.close,
                             tooltip: 'Закрыть окно (Esc)',
+                            color: Colors.white,
+                            size: 36,
+                            iconSize: 18,
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
@@ -515,94 +552,195 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
                 ),
               ),
 
-              // Bottom Control Bar (Hover overlay)
+              // Bottom Control Bar (Hover overlay, pill shape radius 999, border 0.5)
               Positioned(
                 bottom: 24,
-                left: 0,
-                right: 0,
+                left: 16,
+                right: 16,
                 child: AnimatedOpacity(
                   opacity: _isHovering ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: Center(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+                        horizontal: 14,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF151515).withValues(alpha: 0.9),
+                        color: const Color(0xFF151515).withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(
-                          DotTokens.radiusCard,
+                          DotTokens.radiusToolbar,
                         ),
                         border: Border.all(
                           color: const Color(0xFF2B2B2B),
-                          width: 1,
+                          width: 0.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 16,
+                            color: Colors.black.withValues(alpha: 0.6),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Screenshot
-                          IconButton(
-                            icon: const Icon(
-                              Icons.camera_alt_outlined,
-                              color: Colors.white,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 1. ЗАПИСЬ / СТОП
+                            DotToolbarAction(
+                              asset: _isRecording
+                                  ? DotLinkIcons.stop
+                                  : DotLinkIcons.record,
+                              label: _isRecording ? 'СТОП' : 'ЗАПИСЬ',
+                              tooltip: _isRecording
+                                  ? 'Остановить запись на ПК (Ctrl+Shift+R)'
+                                  : 'Запись на ПК (Ctrl+Shift+R)',
+                              isActive: _isRecording,
+                              isDestructive: _isRecording,
+                              onPressed: _toggleRecording,
                             ),
-                            tooltip: 'Скриншот (Ctrl+Shift+S)',
-                            onPressed: _takeScreenshot,
-                          ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 4),
 
-                          // Record
-                          IconButton(
-                            icon: Icon(
-                              _isRecording
-                                  ? Icons.stop_circle
-                                  : Icons.fiber_manual_record,
-                              color: _isRecording
-                                  ? DotTokens.accentRed
-                                  : Colors.white,
+                            // 2. СНИМОК
+                            DotToolbarAction(
+                              asset: DotLinkIcons.screenshot,
+                              label: 'СНИМОК',
+                              tooltip: 'Сохранить снимок экрана (Ctrl+Shift+S)',
+                              onPressed: _takeScreenshot,
                             ),
-                            tooltip: _isRecording
-                                ? 'Остановить запись'
-                                : 'Запись на ПК (Ctrl+Shift+R)',
-                            onPressed: _toggleRecording,
-                          ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 4),
 
-                          // Keyframe
-                          IconButton(
-                            icon: const Icon(
-                              Icons.refresh,
-                              color: Colors.white,
+                            // 3. IDR КАДР
+                            DotToolbarAction(
+                              asset: DotLinkIcons.keyframe,
+                              label: 'IDR',
+                              tooltip: 'Запросить ключевой кадр (Ctrl+K)',
+                              onPressed: _requestKeyframe,
                             ),
-                            tooltip: 'Запросить ключевой кадр (Ctrl+K)',
-                            onPressed: _requestKeyframe,
-                          ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 1,
+                              height: 28,
+                              color: const Color(0xFF2B2B2B),
+                            ),
+                            const SizedBox(width: 8),
 
-                          // Borderless toggle
-                          IconButton(
-                            icon: Icon(
-                              _isBorderless
-                                  ? Icons.picture_in_picture_alt
-                                  : Icons.aspect_ratio,
-                              color: Colors.white,
+                            // 4. НАЗАД (телефон)
+                            DotToolbarAction(
+                              asset: DotLinkIcons.chevronLeft,
+                              label: 'НАЗАД',
+                              tooltip: 'Кнопка «Назад» на телефоне',
+                              onPressed: _sendBack,
                             ),
-                            tooltip: _isBorderless
-                                ? 'Оконный режим'
-                                : 'Безрамочный режим (F10)',
-                            onPressed: () {
-                              setState(() => _isBorderless = !_isBorderless);
-                            },
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+
+                            // 5. ДОМОЙ (телефон)
+                            DotToolbarAction(
+                              asset: DotLinkIcons.home,
+                              label: 'ДОМОЙ',
+                              tooltip: 'Кнопка «Домой» на телефоне',
+                              onPressed: _sendHome,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 6. ОКНА (недавние)
+                            DotToolbarAction(
+                              asset: DotLinkIcons.recents,
+                              label: 'ОКНА',
+                              tooltip: 'Недавние приложения на телефоне',
+                              onPressed: _sendRecents,
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 1,
+                              height: 28,
+                              color: const Color(0xFF2B2B2B),
+                            ),
+                            const SizedBox(width: 8),
+
+                            // 7. 90° ПОВОРОТ
+                            DotToolbarAction(
+                              asset: DotLinkIcons.rotate,
+                              label: '90°',
+                              tooltip: 'Повернуть экран на 90 градусов',
+                              onPressed: _rotate90,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 8. МАСШТАБ
+                            DotToolbarAction(
+                              asset: DotLinkIcons.scale,
+                              label: 'МАСШТАБ',
+                              tooltip:
+                                  _fitMode ? 'Масштаб 1:1' : 'Вписать в окно',
+                              isActive: !_fitMode,
+                              onPressed: _toggleScale,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 9. ЭКРАН ТЕЛЕФОНА
+                            DotToolbarAction(
+                              asset: _phoneScreenOff
+                                  ? DotLinkIcons.power
+                                  : DotLinkIcons.screenOff,
+                              label: 'ЭКРАН',
+                              tooltip: _phoneScreenOff
+                                  ? 'Включить экран телефона'
+                                  : 'Погасить экран телефона (энергосбережение)',
+                              isActive: _phoneScreenOff,
+                              onPressed: _togglePhoneScreen,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 10. ЗВУК
+                            DotToolbarAction(
+                              asset: _isMuted
+                                  ? DotLinkIcons.volumeOff
+                                  : DotLinkIcons.volume,
+                              label: 'ЗВУК',
+                              tooltip: _isMuted
+                                  ? 'Включить звук'
+                                  : 'Выключить звук',
+                              isActive: _isMuted,
+                              onPressed: _toggleMute,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 11. ПАПКА
+                            DotToolbarAction(
+                              asset: DotLinkIcons.folder,
+                              label: 'ПАПКА',
+                              tooltip: 'Открыть папку записей',
+                              onPressed: _openRecordingsFolder,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 12. OBS
+                            DotToolbarAction(
+                              asset: DotLinkIcons.obs,
+                              label: 'OBS',
+                              tooltip:
+                                  'Скопировать ссылку для Browser Source OBS',
+                              onPressed: _copyObsUrl,
+                            ),
+                            const SizedBox(width: 4),
+
+                            // 13. ПОЛНЫЙ ЭКРАН / ОКНО
+                            DotToolbarAction(
+                              asset: _isBorderless
+                                  ? DotLinkIcons.fullscreenExit
+                                  : DotLinkIcons.fullscreen,
+                              label: _isBorderless ? 'ОКНО' : 'ЭКРАН',
+                              tooltip: 'Безрамочный режим (F10)',
+                              isActive: _isBorderless,
+                              onPressed: () {
+                                setState(() => _isBorderless = !_isBorderless);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -619,14 +757,21 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
     return Stack(
       fit: fitBox(),
       children: [
-        // Texture / Render surface representation
         Container(
           decoration: const BoxDecoration(color: Color(0xFF101010)),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.sensors, size: 48, color: Color(0xFF00C853)),
+                SvgPicture.asset(
+                  DotLinkIcons.mirror,
+                  width: 48,
+                  height: 48,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 const Text(
                   'Трансляция активна',
@@ -670,19 +815,27 @@ class _MirrorWindowState extends ConsumerState<MirrorWindow> {
         break;
       case LinkClientStatus.error:
         msg = 'Ошибка подключения к устройству';
-        icon = const Icon(
-          Icons.error_outline,
-          size: 48,
-          color: DotTokens.accentRed,
+        icon = SvgPicture.asset(
+          DotLinkIcons.alert,
+          width: 48,
+          height: 48,
+          colorFilter: const ColorFilter.mode(
+            DotTokens.accentRed,
+            BlendMode.srcIn,
+          ),
         );
         break;
       case LinkClientStatus.disconnected:
       default:
         msg = 'Поток отключен';
-        icon = const Icon(
-          Icons.videocam_off_outlined,
-          size: 48,
-          color: Color(0xFF8C8C8C),
+        icon = SvgPicture.asset(
+          DotLinkIcons.video,
+          width: 48,
+          height: 48,
+          colorFilter: const ColorFilter.mode(
+            Color(0xFF8C8C8C),
+            BlendMode.srcIn,
+          ),
         );
         break;
     }

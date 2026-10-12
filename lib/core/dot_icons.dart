@@ -1,20 +1,44 @@
 // Пути к SVG-иконкам DotRec (24×24, stroke 1.8, currentColor).
 // Источник: dotrec-icons/flutter/assets/icons. Рендер через flutter_svg.
 abstract final class DotIcons {
+  static const String alert = 'assets/icons/alert.svg';
   static const String bolt = 'assets/icons/bolt.svg';
   static const String check = 'assets/icons/check.svg';
   static const String chevronLeft = 'assets/icons/chevron_left.svg';
   static const String chevronRight = 'assets/icons/chevron_right.svg';
   static const String close = 'assets/icons/close.svg';
+  static const String copy = 'assets/icons/copy.svg';
   static const String cut = 'assets/icons/cut.svg';
+  static const String download = 'assets/icons/download.svg';
+  static const String folder = 'assets/icons/folder.svg';
+  static const String fps = 'assets/icons/fps.svg';
+  static const String fullscreen = 'assets/icons/fullscreen.svg';
+  static const String fullscreenExit = 'assets/icons/fullscreen_exit.svg';
+  static const String home = 'assets/icons/home.svg';
   static const String info = 'assets/icons/info.svg';
+  static const String keyframe = 'assets/icons/keyframe.svg';
   static const String library = 'assets/icons/library.svg';
+  static const String maximize = 'assets/icons/maximize.svg';
   static const String mic = 'assets/icons/mic.svg';
   static const String micOff = 'assets/icons/mic_off.svg';
+  static const String minimize = 'assets/icons/minimize.svg';
+  static const String mirror = 'assets/icons/mirror.svg';
+  static const String mouse = 'assets/icons/mouse.svg';
+  static const String obs = 'assets/icons/obs.svg';
   static const String open = 'assets/icons/open.svg';
   static const String pause = 'assets/icons/pause.svg';
+  static const String phone = 'assets/icons/phone.svg';
+  static const String pin = 'assets/icons/pin.svg';
   static const String play = 'assets/icons/play.svg';
+  static const String power = 'assets/icons/power.svg';
+  static const String recents = 'assets/icons/recents.svg';
   static const String record = 'assets/icons/record.svg';
+  static const String refresh = 'assets/icons/refresh.svg';
+  static const String restore = 'assets/icons/restore.svg';
+  static const String rotate = 'assets/icons/rotate.svg';
+  static const String scale = 'assets/icons/scale.svg';
+  static const String screenOff = 'assets/icons/screen_off.svg';
+  static const String screenshot = 'assets/icons/screenshot.svg';
   static const String settings = 'assets/icons/settings.svg';
   static const String share = 'assets/icons/share.svg';
   static const String stop = 'assets/icons/stop.svg';
@@ -22,7 +46,10 @@ abstract final class DotIcons {
   static const String timer = 'assets/icons/timer.svg';
   static const String touches = 'assets/icons/touches.svg';
   static const String trash = 'assets/icons/trash.svg';
+  static const String usb = 'assets/icons/usb.svg';
   static const String video = 'assets/icons/video.svg';
   static const String volume = 'assets/icons/volume.svg';
   static const String volumeOff = 'assets/icons/volume_off.svg';
+  static const String warning = 'assets/icons/warning.svg';
+  static const String wifi = 'assets/icons/wifi.svg';
 }

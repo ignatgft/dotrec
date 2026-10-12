@@ -5,6 +5,7 @@ abstract final class DotTokens {
   static const double radiusChip = 12;
   static const double radiusCard = 16;
   static const double radiusButton = 12;
+  static const double radiusToolbar = 999;
 
   // Отступы
   static const double xs = 4;
@@ -52,12 +53,12 @@ class DotColors extends ThemeExtension<DotColors> {
   );
 
   static const DotColors light = DotColors(
-    bg: Color(0xFFF5F5F7),
+    bg: Color(0xFFF1F1F1),
     surface: Color(0xFFFFFFFF),
-    surfaceRaised: Color(0xFFEBEBEF),
-    line: Color(0xFFE0E0E6),
-    fg: Color(0xFF000000),
-    fgMuted: Color(0xFF6B6B76),
+    surfaceRaised: Color(0xFFE5E5E5),
+    line: Color(0xFFDCDCDC),
+    fg: Color(0xFF101010),
+    fgMuted: Color(0xFF6B6B6B),
     record: DotTokens.accentRed,
   );
 

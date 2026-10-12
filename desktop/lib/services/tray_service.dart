@@ -4,13 +4,19 @@ import 'package:flutter/foundation.dart';
 
 /// Статус состояния в системном трее.
 enum TrayStatus {
-  idle('DotRec Link — готов к подключению'),
-  streaming('DotRec Link — трансляция активна'),
-  recording('DotRec Link — запись на ПК'),
-  error('DotRec Link — ошибка подключения');
+  idle('DotRec Link — готов к подключению', 'tray_idle.ico'),
+  streaming('DotRec Link — трансляция активна', 'tray_live.ico'),
+  recording('DotRec Link — запись на ПК', 'tray_rec.ico'),
+  error('DotRec Link — ошибка подключения', 'tray_idle.ico');
 
-  const TrayStatus(this.tooltip);
+  const TrayStatus(this.tooltip, this.iconFileName);
   final String tooltip;
+  final String iconFileName;
+
+  String getIconPath({bool isDarkTaskbar = true}) {
+    final folder = isDarkTaskbar ? 'for-dark-taskbar' : 'for-light-taskbar';
+    return 'assets/tray/$folder/$iconFileName';
+  }
 }
 
 /// Действия из контекстного меню системного трея.

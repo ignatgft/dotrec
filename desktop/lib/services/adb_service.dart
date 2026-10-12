@@ -225,6 +225,27 @@ class AdbService {
     }
   }
 
+  Future<bool> sendKeyEvent(String serial, int keyCode) async {
+    try {
+      final res = await _runner(_adbPath, [
+        '-s',
+        serial,
+        'shell',
+        'input',
+        'keyevent',
+        '$keyCode',
+      ]);
+      return res.exitCode == 0;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> sendHome(String serial) => sendKeyEvent(serial, 3);
+  Future<bool> sendBack(String serial) => sendKeyEvent(serial, 4);
+  Future<bool> sendPower(String serial) => sendKeyEvent(serial, 26);
+  Future<bool> sendRecents(String serial) => sendKeyEvent(serial, 187);
+
   void startPolling({Duration interval = const Duration(seconds: 2)}) {
     _pollTimer?.cancel();
     _pollTimer = Timer.periodic(interval, (_) async {

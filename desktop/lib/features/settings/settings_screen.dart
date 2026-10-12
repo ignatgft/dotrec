@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/dot_link_icons.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_card.dart';
@@ -243,7 +245,15 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.folder_outlined, size: 16),
+                      SvgPicture.asset(
+                        DotLinkIcons.folder,
+                        width: 16,
+                        height: 16,
+                        colorFilter: ColorFilter.mode(
+                          context.dot.fg,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         settings.recordingsPath,
@@ -273,7 +283,15 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.image_outlined, size: 16),
+                      SvgPicture.asset(
+                        DotLinkIcons.screenshot,
+                        width: 16,
+                        height: 16,
+                        colorFilter: ColorFilter.mode(
+                          context.dot.fg,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         settings.screenshotsPath,

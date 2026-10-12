@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/dot_link_icons.dart';
 import '../../core/providers/link_providers.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/dot_card.dart';
@@ -142,11 +144,19 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.language, size: 20),
-                    SizedBox(width: DotTokens.sm),
-                    Text(
+                    SvgPicture.asset(
+                      DotLinkIcons.obs,
+                      width: 20,
+                      height: 20,
+                      colorFilter: ColorFilter.mode(
+                        context.dot.fg,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    const SizedBox(width: DotTokens.sm),
+                    const Text(
                       'Browser Source (Локальный сервер)',
                       style: TextStyle(
                         fontSize: 16,
@@ -183,7 +193,15 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.copy, size: 18),
+                        icon: SvgPicture.asset(
+                          DotLinkIcons.copy,
+                          width: 18,
+                          height: 18,
+                          colorFilter: ColorFilter.mode(
+                            context.dot.fg,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                         tooltip: 'Скопировать URL',
                         onPressed: () => _copyUrl(sourceUrl),
                       ),
@@ -204,11 +222,19 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.settings_input_component, size: 20),
-                        SizedBox(width: DotTokens.sm),
-                        Text(
+                        SvgPicture.asset(
+                          DotLinkIcons.settings,
+                          width: 20,
+                          height: 20,
+                          colorFilter: ColorFilter.mode(
+                            context.dot.fg,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        const SizedBox(width: DotTokens.sm),
+                        const Text(
                           'obs-websocket (v5 API)',
                           style: TextStyle(
                             fontSize: 16,
@@ -223,28 +249,41 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isConnected
-                            ? const Color(0xFF00C853).withValues(alpha: 0.15)
-                            : context.dot.surfaceRaised,
+                        color: context.dot.surfaceRaised,
                         borderRadius: BorderRadius.circular(
                           DotTokens.radiusChip,
                         ),
+                        border: Border.all(color: context.dot.line),
                       ),
                       child: Row(
                         children: [
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isConnected
-                                  ? const Color(0xFF00C853)
-                                  : (obsStatus == ObsStatus.connecting
-                                        ? const Color(0xFFFFB300)
-                                        : context.dot.fgMuted),
-                            ),
+                            decoration: isConnected
+                                ? BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: context.dot.fg,
+                                  )
+                                : (obsStatus == ObsStatus.connecting
+                                      ? BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: context.dot.fg,
+                                            width: 1.5,
+                                          ),
+                                          color: Colors.transparent,
+                                        )
+                                      : BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: context.dot.fgMuted,
+                                            width: 1.5,
+                                          ),
+                                          color: Colors.transparent,
+                                        )),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Text(
                             isConnected
                                 ? 'Подключено · ${obs.currentScene}'
@@ -253,10 +292,10 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                                       : 'Отключено'),
                             style: TextStyle(
                               fontFamily: DotTokens.dotFamily,
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: isConnected
-                                  ? const Color(0xFF00C853)
+                                  ? context.dot.fg
                                   : context.dot.fgMuted,
                             ),
                           ),
@@ -340,7 +379,15 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () => _addSourceToObs(sourceUrl),
-                        icon: const Icon(Icons.add_to_queue, size: 18),
+                        icon: SvgPicture.asset(
+                          DotLinkIcons.open,
+                          width: 18,
+                          height: 18,
+                          colorFilter: ColorFilter.mode(
+                            context.dot.bg,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                         label: const Text('Добавить в OBS в 1 клик'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -361,10 +408,14 @@ class _ObsScreenState extends ConsumerState<ObsScreen> {
                   const SizedBox(height: DotTokens.md),
                   OutlinedButton.icon(
                     onPressed: _toggleObsRecord,
-                    icon: const Icon(
-                      Icons.fiber_manual_record,
-                      size: 16,
-                      color: DotTokens.accentRed,
+                    icon: SvgPicture.asset(
+                      DotLinkIcons.record,
+                      width: 16,
+                      height: 16,
+                      colorFilter: const ColorFilter.mode(
+                        DotTokens.accentRed,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     label: const Text('Переключить запись в OBS Studio'),
                     style: OutlinedButton.styleFrom(

@@ -39,11 +39,20 @@ void main(List<String> args) {
     }
   }
 
-  // 2. Copy font assets
-  final fontFile = File('${projectDir.path}/assets/fonts/Doto-Variable.ttf');
-  if (fontFile.existsSync()) {
-    fontFile.copySync('${assetsDir.path}/Doto-Variable.ttf');
-    stdout.writeln('  [✓] Bundled Doto font asset');
+  // 2. Copy all desktop assets (fonts, icons, tray)
+  final srcAssets = Directory('${projectDir.path}/assets');
+  if (srcAssets.existsSync()) {
+    for (final entity in srcAssets.listSync(recursive: true)) {
+      final rel = entity.path.substring(srcAssets.path.length + 1);
+      final destPath = '${distDir.path}/assets/$rel';
+      if (entity is Directory) {
+        Directory(destPath).createSync(recursive: true);
+      } else if (entity is File) {
+        File(destPath).parent.createSync(recursive: true);
+        entity.copySync(destPath);
+      }
+    }
+    stdout.writeln('  [✓] Bundled desktop assets (fonts, 51 SVG icons, tray icons)');
   }
 
   // 3. Write README.txt

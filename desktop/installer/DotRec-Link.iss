@@ -1,6 +1,6 @@
 ; Inno Setup Script for DotRec Link Desktop
 #define MyAppName "DotRec Link"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0-beta"
 #define MyAppPublisher "ignatgft"
 #define MyAppURL "https://github.com/ignatgft/dotrec"
 #define MyAppExeName "DotRec-Link.exe"
@@ -19,7 +19,10 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile={#MyDistDir}\LICENSE.txt
 OutputDir=..\build\dist
-OutputBaseFilename=DotRec-Link-Setup-v1.0.0
+OutputBaseFilename=DotRec-Link-Setup-v1.1.0-beta
+SetupIconFile=app_icon.ico
+WizardImageFile=wizard_large.bmp,wizard_large@2x.bmp
+WizardSmallImageFile=wizard_small.bmp,wizard_small@2x.bmp
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

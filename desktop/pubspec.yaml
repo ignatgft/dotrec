@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.6.1
+  flutter_svg: ^2.1.0
   intl: ^0.20.2
 
 dev_dependencies:
@@ -20,6 +21,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icons/
+    - assets/tray/
   fonts:
     - family: Doto
       fonts:
