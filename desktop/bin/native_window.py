@@ -34,13 +34,18 @@ def start_backend_if_needed():
         os.path.join(app_dir, 'dotrec-link.exe'),
         os.path.join(os.getcwd(), 'DotRec-Link.exe'),
         os.path.join(os.getcwd(), 'dotrec-link.exe'),
+        os.path.join(app_dir, '..', 'build', 'dist', 'DotRec-Link-v1.1.0-windows-x64', 'DotRec-Link.exe'),
+        os.path.join(app_dir, '..', 'build', 'dist', 'DotRec-Link-v1.1.0-windows-x64', 'dotrec-link.exe'),
         os.path.join(app_dir, '..', 'build', 'dist', 'DotRec-Link-v1.0.0-windows-x64', 'DotRec-Link.exe'),
         os.path.join(app_dir, '..', 'build', 'dist', 'DotRec-Link-v1.0.0-windows-x64', 'dotrec-link.exe'),
     ]
+    creationflags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+    env = os.environ.copy()
+    env['DOTREC_PARENT_WINDOW'] = '1'
+
     for c in candidates:
         if os.path.exists(c):
-            creationflags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
-            return subprocess.Popen([c], cwd=app_dir, creationflags=creationflags)
+            return subprocess.Popen([c, '--no-window'], cwd=os.path.dirname(c), creationflags=creationflags, env=env)
     
     # Fallback in dev workspace
     dart_script = os.path.join(app_dir, 'dotrec_link.dart')
@@ -48,11 +53,27 @@ def start_backend_if_needed():
         dart_exe = r'D:\flutter\bin\cache\dart-sdk\bin\dart.exe'
         if not os.path.exists(dart_exe):
             dart_exe = 'dart'
-        return subprocess.Popen([dart_exe, 'run', dart_script], cwd=os.path.dirname(os.path.dirname(dart_script)), creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        return subprocess.Popen([dart_exe, 'run', dart_script, '--no-window'], cwd=os.path.dirname(os.path.dirname(dart_script)), creationflags=creationflags, env=env)
     
     return None
 
+_mutex_handle = None
+
+def acquire_single_instance():
+    global _mutex_handle
+    if sys.platform == 'win32':
+        try:
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            _mutex_handle = kernel32.CreateMutexW(None, False, "DotRecLinkAppSingleInstanceMutex")
+            last_err = kernel32.GetLastError()
+            if last_err == 183:  # ERROR_ALREADY_EXISTS
+                sys.exit(0)
+        except Exception:
+            pass
+
 def main():
+    acquire_single_instance()
     target_url = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:48212'
     
     backend_proc = start_backend_if_needed()

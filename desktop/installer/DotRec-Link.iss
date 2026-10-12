@@ -4,7 +4,7 @@
 #define MyAppPublisher "ignatgft"
 #define MyAppURL "https://github.com/ignatgft/dotrec"
 #define MyAppExeName "DotRec-Link.exe"
-#define MyDistDir "..\build\dist\DotRec-Link-v1.0.0-windows-x64"
+#define MyDistDir "..\build\dist\DotRec-Link-v1.1.0-windows-x64"
 
 [Setup]
 AppId={{5E21F648-93FA-427E-971B-391487677DA8}

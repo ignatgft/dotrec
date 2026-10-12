@@ -11,7 +11,7 @@ void main() {
       // Execute packaging tool
       packager.main([]);
 
-      final distDir = Directory('build/dist/DotRec-Link-v1.0.0-windows-x64');
+      final distDir = Directory('build/dist/DotRec-Link-v1.1.0-windows-x64');
       expect(distDir.existsSync(), isTrue);
 
       final manifestFile = File('${distDir.path}/manifest.json');
@@ -20,7 +20,7 @@ void main() {
       final manifestJson =
           jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
       expect(manifestJson['package'], equals('DotRec-Link-Desktop'));
-      expect(manifestJson['version'], equals('1.0.0+1'));
+      expect(manifestJson['version'], equals('1.1.0-beta'));
       expect(manifestJson['target'], equals('windows-x64'));
 
       final files = manifestJson['files'] as List;

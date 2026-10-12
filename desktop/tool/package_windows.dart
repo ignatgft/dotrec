@@ -11,7 +11,7 @@ void main(List<String> args) {
       ? Directory.current
       : Directory('${Directory.current.path}/desktop');
 
-  final distDir = Directory('${projectDir.path}/build/dist/DotRec-Link-v1.0.0-windows-x64');
+  final distDir = Directory('${projectDir.path}/build/dist/DotRec-Link-v1.1.0-windows-x64');
   distDir.createSync(recursive: true);
 
   final assetsDir = Directory('${distDir.path}/assets/fonts');
@@ -39,6 +39,24 @@ void main(List<String> args) {
     }
   }
 
+  // 1.1 Compile DotRec-Link-App.exe using PyInstaller
+  final rootDir = projectDir.parent;
+  final specFile = File('${rootDir.path}/DotRec-Link-App.spec');
+  if (specFile.existsSync()) {
+    stdout.writeln('  [*] Compiling DotRec-Link-App.exe with PyInstaller...');
+    final pyRes = Process.runSync('pyinstaller', [
+      specFile.path,
+      '--distpath', distDir.path,
+      '--workpath', '${projectDir.path}/build/pyinstaller_work',
+      '-y',
+    ], workingDirectory: rootDir.path);
+    if (pyRes.exitCode == 0 && File('${distDir.path}/DotRec-Link-App.exe').existsSync()) {
+      stdout.writeln('  [✓] Compiled DotRec-Link-App.exe native WebView2 shell');
+    } else {
+      stdout.writeln('  [!] PyInstaller error: ${pyRes.stderr}');
+    }
+  }
+
   // 2. Copy all desktop assets (fonts, icons, tray)
   final srcAssets = Directory('${projectDir.path}/assets');
   if (srcAssets.existsSync()) {
@@ -58,21 +76,20 @@ void main(List<String> args) {
   // 3. Write README.txt
   final readmeFile = File('${distDir.path}/README.txt');
   readmeFile.writeAsStringSync('''
-DotRec Link Desktop Client v1.0.0 (Windows x64)
-==============================================
+DotRec Link Desktop Client v1.1.0-beta (Windows x64)
+===================================================
 Официальный компаньон для USB/Wi-Fi зеркалирования экрана и интеграции с OBS Studio.
 
 1. БЫСТРЫЙ СТАРТ:
    - Подключите телефон по USB и включите «Отладка по USB» в параметрах разработчика.
-   - Запустите DotRec-Link.exe. Приложение автоматически выполнит `adb forward tcp:48211 tcp:48211`.
+   - Запустите DotRec-Link-App.exe.
    - В приложении на телефоне перейдите в «Передача на ПК» и нажмите «Начать трансляцию».
-   - Нажмите M для открытия окна зеркала.
 
 2. ИНТЕГРАЦИЯ С OBS STUDIO:
-   - Вариант А (Browser Source): вставьте URL http://127.0.0.1:48212/?token=... в Browser Source OBS.
+   - Вариант А (Browser Source): вставьте URL http://127.0.0.1:48212/obs в Browser Source OBS.
      Задержка ~30-40 мс с аппаратным ускорением WebCodecs.
-   - Вариант Б (obs-websocket): нажмите O в консоли или «Добавить в OBS» в UI. Источник создастся автоматически!
-   - Вариант В (Window Capture): нажмите F10 в окне зеркала для безрамочного режима и захватите окно в OBS.
+   - Вариант Б (obs-websocket): нажмите «Добавить в OBS» в UI. Источник создастся автоматически!
+   - Вариант В (Window Capture): захватите окно зеркала в OBS.
 
 3. ГОРЯЧИЕ КЛАВИШИ:
    - M : Открыть окно зеркала
@@ -97,7 +114,7 @@ DotRec Link Desktop Client v1.0.0 (Windows x64)
   // 5. Write default configuration config.default.json
   final configFile = File('${distDir.path}/config.default.json');
   final configData = {
-    'version': '1.0.0',
+    'version': '1.1.0-beta',
     'themeMode': 'dark',
     'minimizeToTray': true,
     'launchOnStartup': false,
@@ -129,7 +146,7 @@ DotRec Link Desktop Client v1.0.0 (Windows x64)
 
   final manifest = {
     'package': 'DotRec-Link-Desktop',
-    'version': '1.0.0+1',
+    'version': '1.1.0-beta',
     'target': 'windows-x64',
     'builtAt': DateTime.now().toUtc().toIso8601String(),
     'files': manifestFiles,
@@ -157,11 +174,22 @@ DotRec Link Desktop Client v1.0.0 (Windows x64)
     if (issFile.existsSync()) {
       final res = Process.runSync(isccExe, [issFile.path]);
       if (res.exitCode == 0) {
-        stdout.writeln('  [✓] Compiled DotRec-Link-Setup-v1.0.0.exe Windows Installer');
+        stdout.writeln('  [✓] Compiled DotRec-Link-Setup-v1.1.0-beta.exe Windows Installer');
       } else {
         stdout.writeln('  [!] ISCC warning: ${res.stderr}');
       }
     }
+  }
+
+  // 8. Create ZIP archive
+  final zipTarget = '${projectDir.path}/build/dist/DotRec-Link-v1.1.0-beta-windows-x64.zip';
+  final zipRes = Process.runSync('powershell', [
+    '-NoProfile',
+    '-Command',
+    'Compress-Archive -Path "${distDir.path}\\*" -DestinationPath "$zipTarget" -Force',
+  ]);
+  if (zipRes.exitCode == 0 && File(zipTarget).existsSync()) {
+    stdout.writeln('  [✓] Created DotRec-Link-v1.1.0-beta-windows-x64.zip portable archive');
   }
 
   stopwatch.stop();

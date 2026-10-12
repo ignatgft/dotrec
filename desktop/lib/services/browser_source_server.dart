@@ -98,23 +98,32 @@ class BrowserSourceServer {
       return;
     }
 
-    // Раздача локального шрифта Doto-Variable.ttf
-    if (path == '/assets/fonts/Doto-Variable.ttf' ||
-        path.endsWith('Doto-Variable.ttf')) {
+    // Раздача статических файлов (шрифты, SVG иконки, графика)
+    if (path.startsWith('/assets/')) {
       final appDir = File(Platform.resolvedExecutable).parent.path;
       final sep = Platform.pathSeparator;
+      final relPath = path.substring('/assets/'.length).replaceAll('/', sep);
       final candidates = [
-        'desktop${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
-        'assets${sep}fonts${sep}Doto-Variable.ttf',
-        '..${sep}desktop${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
-        '$appDir${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
-        '$appDir${sep}desktop${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
+        'desktop${sep}assets$sep$relPath',
+        'assets$sep$relPath',
+        '$appDir${sep}assets$sep$relPath',
+        '$appDir${sep}desktop${sep}assets$sep$relPath',
       ];
       for (final c in candidates) {
         final f = File(c);
         if (f.existsSync()) {
           request.response.statusCode = HttpStatus.ok;
-          request.response.headers.contentType = ContentType('font', 'ttf');
+          if (path.endsWith('.svg')) {
+            request.response.headers.contentType = ContentType('image', 'svg+xml');
+          } else if (path.endsWith('.ttf')) {
+            request.response.headers.contentType = ContentType('font', 'ttf');
+          } else if (path.endsWith('.ico')) {
+            request.response.headers.contentType = ContentType('image', 'x-icon');
+          } else if (path.endsWith('.png')) {
+            request.response.headers.contentType = ContentType('image', 'png');
+          } else if (path.endsWith('.bmp')) {
+            request.response.headers.contentType = ContentType('image', 'bmp');
+          }
           request.response.headers.set(
             'Cache-Control',
             'public, max-age=31536000',
@@ -537,7 +546,7 @@ class BrowserSourceServer {
       background-size: 24px 24px;
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Space Grotesk', sans-serif;
-      overflow: hidden;
+      overflow: hidden !important;
       display: flex;
       flex-direction: column;
       user-select: none;
@@ -679,7 +688,7 @@ class BrowserSourceServer {
     #main-content {
       flex: 1;
       position: relative;
-      overflow: hidden;
+      overflow: hidden !important;
       display: flex;
     }
 
@@ -688,7 +697,9 @@ class BrowserSourceServer {
       width: 100%;
       height: 100%;
       overflow-y: auto;
+      overflow-x: hidden !important;
       padding: 24px;
+      box-sizing: border-box;
     }
     .screen-tab.active {
       display: flex;
@@ -703,6 +714,8 @@ class BrowserSourceServer {
       justify-content: center;
       padding: 12px;
       position: relative;
+      overflow: hidden !important;
+      box-sizing: border-box;
     }
 
     .phone-stage {
@@ -788,15 +801,22 @@ class BrowserSourceServer {
       transform: translateX(-50%);
       background: var(--dock-bg);
       backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: 32px;
-      padding: 6px 14px;
+      border: 0.5px solid var(--card-border);
+      border-radius: 999px;
+      padding: 6px 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       z-index: 50;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      max-width: calc(100vw - 32px);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
       transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #mirror-dock::-webkit-scrollbar {
+      display: none;
     }
     #mirror-dock.hidden {
       opacity: 0;
@@ -808,17 +828,24 @@ class BrowserSourceServer {
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-sub);
-      padding: 8px 14px;
-      border-radius: 20px;
+      padding: 6px 12px;
+      border-radius: 999px;
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: all 0.15s ease;
+    }
+    .dock-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      flex-shrink: 0;
     }
     .dock-btn:hover {
       background: var(--pill-bg);
@@ -1221,7 +1248,7 @@ class BrowserSourceServer {
     <div class="brand-section">
       <div class="red-dot"></div>
       <span class="brand-title">DOTREC LINK</span>
-      <span class="brand-version doto">v1.0.0</span>
+      <span class="brand-version doto">v1.1.0-beta</span>
     </div>
 
     <!-- ВКЛАДКИ -->
@@ -1276,29 +1303,37 @@ class BrowserSourceServer {
 
       <!-- ПЛАВАЮЩИЙ ДОК -->
       <div id="mirror-dock">
-        <button class="dock-btn" id="btn-dock-rec" onclick="toggleRecording()">
-          🔴 Запись
+        <button class="dock-btn" id="btn-dock-rec" onclick="toggleRecording()" title="Начать / остановить запись">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3,12a9,9 0 1,0 18,0a9,9 0 1,0 -18,0z"/></g><g fill="currentColor" stroke="none"><path d="M7.5,12a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0z"/></g></svg>
+          <span>Запись</span>
         </button>
-        <button class="dock-btn" onclick="takeSnapshot()">
-          📸 Снимок
+        <button class="dock-btn" onclick="takeSnapshot()" title="Сохранить скриншот">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6,7H18A3,3 0 0 1 21,10V17A3,3 0 0 1 18,20H6A3,3 0 0 1 3,17V10A3,3 0 0 1 6,7Z"/><path d="M8.5,13.5a3.5,3.5 0 1,0 7,0a3.5,3.5 0 1,0 -7,0z"/><path d="M8,7L9.5,4.5L14.5,4.5L16,7"/></g></svg>
+          <span>Снимок</span>
         </button>
-        <button class="dock-btn" onclick="requestKeyframe()">
-          ⚡ IDR Кадр
+        <button class="dock-btn" onclick="requestKeyframe()" title="Запрос ключевого кадра (IDR)">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12,3L21,12L12,21L3,12Z"/></g><g fill="currentColor" stroke="none"><path d="M9.8,12a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0z"/></g></svg>
+          <span>IDR</span>
         </button>
-        <button class="dock-btn" onclick="sendPhoneKey('home')">
-          📱 Домой
+        <button class="dock-btn" onclick="sendPhoneKey('home')" title="Кнопка Домой">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4,11L12,4L20,11"/><path d="M6,10L6,20L18,20L18,10"/></g></svg>
+          <span>Домой</span>
         </button>
-        <button class="dock-btn" onclick="sendPhoneKey('back')">
-          ◀ Назад
+        <button class="dock-btn" onclick="sendPhoneKey('back')" title="Кнопка Назад">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15,5L8,12L15,19"/></g></svg>
+          <span>Назад</span>
         </button>
-        <button class="dock-btn" onclick="rotateCanvas()">
-          🔄 90°
+        <button class="dock-btn" onclick="rotateCanvas()" title="Поворот на 90°">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.128,6.858A8,8 0 1 1 6.858,5.872"/><path d="M3.509,6.462L6.858,5.872L5.695,9.067"/></g></svg>
+          <span>90°</span>
         </button>
-        <button class="dock-btn" onclick="toggleFit()">
-          📐 Масштаб
+        <button class="dock-btn" onclick="toggleFit()" title="Масштабирование">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4,10.5a6.5,6.5 0 1,0 13,0a6.5,6.5 0 1,0 -13,0z"/><path d="M15.3,15.3L20,20"/><path d="M8,10.5L13,10.5"/><path d="M10.5,8L10.5,13"/></g></svg>
+          <span>Масштаб</span>
         </button>
-        <button class="dock-btn" onclick="switchTab(2)">
-          📺 OBS
+        <button class="dock-btn" onclick="switchTab(2)" title="Настройки OBS Studio">
+          <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.214,8.17A5,5 0 0 1 15.214,15.83"/><path d="M8.786,15.83A5,5 0 0 1 8.786,8.17"/><path d="M17.785,5.106A9,9 0 0 1 17.785,18.894"/><path d="M6.215,18.894A9,9 0 0 1 6.215,5.106"/></g><g fill="currentColor" stroke="none"><path d="M10,12a2,2 0 1,0 4,0a2,2 0 1,0 -4,0z"/></g></svg>
+          <span>OBS</span>
         </button>
       </div>
     </section>
@@ -1655,11 +1690,11 @@ class BrowserSourceServer {
         isRecording = res.isRecording;
         if (isRecording) {
           btnRec.classList.add('rec-active');
-          btnRec.textContent = '⏹ СТОП';
+          btnRec.innerHTML = '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></g></svg><span>Стоп</span>';
           showToast('🔴 Запись экрана начата!');
         } else {
           btnRec.classList.remove('rec-active');
-          btnRec.textContent = '🔴 ЗАПИСЬ';
+          btnRec.innerHTML = '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3,12a9,9 0 1,0 18,0a9,9 0 1,0 -18,0z"/></g><g fill="currentColor" stroke="none"><path d="M7.5,12a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0z"/></g></svg><span>Запись</span>';
           showToast(`✓ Запись сохранена: \${res.path || ''}`);
         }
       });

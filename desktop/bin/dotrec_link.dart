@@ -13,7 +13,7 @@ import 'package:dotrec_link_desktop/services/recording_service.dart';
 void main(List<String> args) async {
   stdout.writeln(r'''
 ============================================================
-  ● DOTREC LINK v1.0.0 (Windows x64)
+  ● DOTREC LINK v1.1.0-beta (Windows x64)
   USB / Wi-Fi Screen Mirroring & OBS Studio Companion
   Nothing OS Aesthetic · Ultra Low Latency (~34ms)
 ============================================================
@@ -137,9 +137,16 @@ void main(List<String> args) async {
   );
 
   // Launch standalone window via Edge app mode or default browser
-  final appUrl = browserServer.url;
-  stdout.writeln('\n[ОКНО] Открытие окна DotRec Link на рабочем столе...');
-  _launchAppWindow(appUrl);
+  final noWindow = args.contains('--no-window') ||
+      Platform.environment['DOTREC_PARENT_WINDOW'] == '1';
+
+  if (!noWindow) {
+    final appUrl = browserServer.url;
+    stdout.writeln('\n[ОКНО] Открытие окна DotRec Link на рабочем столе...');
+    _launchAppWindow(appUrl);
+  } else {
+    stdout.writeln('\n[СЕРВЕР] Работа в фоновом режиме (окно управляется родительским процессом)...');
+  }
 
   stdout.writeln(r'''
 ------------------------------------------------------------
@@ -306,13 +313,31 @@ void main(List<String> args) async {
   exit(0);
 }
 
+bool _isAppWindowRunning() {
+  if (!Platform.isWindows) return false;
+  try {
+    final res = Process.runSync('tasklist', ['/FI', 'IMAGENAME eq DotRec-Link-App.exe']);
+    return res.stdout.toString().contains('DotRec-Link-App.exe');
+  } catch (_) {
+    return false;
+  }
+}
+
 void _launchAppWindow(String url) {
+  if (_isAppWindowRunning()) {
+    stdout.writeln('  [i] Окно DotRec Link уже запущено в системе.');
+    return;
+  }
+
   // 1. Приоритет: Нативный исполняемый файл DotRec Link App (pywebview / WebView2)
   final nativeExeCandidates = [
+    r'desktop\build\dist\DotRec-Link-v1.1.0-windows-x64\DotRec-Link-App.exe',
+    r'build\dist\DotRec-Link-v1.1.0-windows-x64\DotRec-Link-App.exe',
     r'desktop\build\dist\DotRec-Link-v1.0.0-windows-x64\DotRec-Link-App.exe',
     r'build\dist\DotRec-Link-v1.0.0-windows-x64\DotRec-Link-App.exe',
     r'DotRec-Link-App.exe',
     '${File(Platform.resolvedExecutable).parent.path}\\DotRec-Link-App.exe',
+    '${File(Platform.resolvedExecutable).parent.path}\\build\\dist\\DotRec-Link-v1.1.0-windows-x64\\DotRec-Link-App.exe',
     '${File(Platform.resolvedExecutable).parent.path}\\build\\dist\\DotRec-Link-v1.0.0-windows-x64\\DotRec-Link-App.exe',
   ];
   for (final path in nativeExeCandidates) {
