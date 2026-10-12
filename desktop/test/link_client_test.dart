@@ -162,5 +162,84 @@ void main() {
         tempDir.deleteSync(recursive: true);
       }
     });
+
+    test(
+      'LinkClient sends command frames with correct binary header',
+      () async {
+        final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+        final receivedCommands = <Map<String, dynamic>>[];
+        final buffer = <int>[];
+
+        server.listen((clientSocket) {
+          bool handshakeDone = false;
+          clientSocket.listen((data) {
+            buffer.addAll(data);
+            if (!handshakeDone) {
+              final newline = buffer.indexOf(10);
+              if (newline == -1) return;
+              final resp = jsonEncode({
+                'protocol': 'dotrec_link',
+                'version': 1,
+                'status': 'ok',
+                'device': {'model': 'TestDevice'},
+                'session': {'token': 'test_tok'},
+              });
+              clientSocket.add(utf8.encode('$resp\n'));
+              buffer.removeRange(0, newline + 1);
+              handshakeDone = true;
+            }
+
+            // Read command frames (headerSize = 14)
+            while (buffer.length >= LinkClient.headerSize) {
+              final type = buffer[0];
+              final length =
+                  (buffer[2] << 24) |
+                  (buffer[3] << 16) |
+                  (buffer[4] << 8) |
+                  buffer[5];
+              if (buffer.length < LinkClient.headerSize + length) break;
+              if (type == LinkClient.typeCommand) {
+                final payload = buffer.sublist(
+                  LinkClient.headerSize,
+                  LinkClient.headerSize + length,
+                );
+                receivedCommands.add(
+                  jsonDecode(utf8.decode(payload)) as Map<String, dynamic>,
+                );
+              }
+              buffer.removeRange(0, LinkClient.headerSize + length);
+            }
+          });
+        });
+
+        final client = LinkClient();
+        await client.connect(host: '127.0.0.1', connectPort: server.port);
+        await client.statusStream.firstWhere(
+          (s) => s == LinkClientStatus.streaming,
+        );
+
+        client.requestKeyframe();
+        client.setBitrate(20000000);
+        client.setBlankScreen(true);
+        client.startLocalRecord(true);
+        client.triggerConsent();
+
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        expect(receivedCommands.length, 5);
+        expect(receivedCommands[0]['cmd'], 'request_keyframe');
+        expect(receivedCommands[1]['cmd'], 'set_bitrate');
+        expect(receivedCommands[1]['bitrate_bps'], 20000000);
+        expect(receivedCommands[2]['cmd'], 'blank_screen');
+        expect(receivedCommands[2]['enabled'], isTrue);
+        expect(receivedCommands[3]['cmd'], 'start_local_record');
+        expect(receivedCommands[3]['enabled'], isTrue);
+        expect(receivedCommands[4]['cmd'], 'trigger_consent');
+
+        client.disconnect();
+        client.dispose();
+        await server.close();
+      },
+    );
   });
 }

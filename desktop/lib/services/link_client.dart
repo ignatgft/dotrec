@@ -295,7 +295,6 @@ class LinkClient {
 
       s.add(header.buffer.asUint8List());
       s.add(payload);
-      s.flush();
     } catch (_) {}
   }
 
@@ -309,6 +308,14 @@ class LinkClient {
 
   void triggerConsent() {
     sendCommand({'cmd': 'trigger_consent'});
+  }
+
+  void setBlankScreen(bool enabled) {
+    sendCommand({'cmd': 'blank_screen', 'enabled': enabled});
+  }
+
+  void startLocalRecord(bool enabled) {
+    sendCommand({'cmd': 'start_local_record', 'enabled': enabled});
   }
 
   void disconnect() {

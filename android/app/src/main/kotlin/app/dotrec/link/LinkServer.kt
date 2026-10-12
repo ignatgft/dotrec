@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import app.dotrec.entry.ConsentActivity
+import app.dotrec.recorder.RecorderService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -230,10 +231,18 @@ object LinkServer {
                     Log.d(TAG, "Command: set_bitrate $bps")
                     onBitrateChanged?.invoke(bps)
                 }
-                "set_blank_screen" -> {
+                "blank_screen", "set_blank_screen" -> {
                     val enabled = json.optBoolean("enabled", false)
-                    Log.d(TAG, "Command: set_blank_screen $enabled")
+                    Log.d(TAG, "Command: blank_screen $enabled")
                     onBlankScreenRequested?.invoke(enabled)
+                }
+                "start_local_record" -> {
+                    val enabled = json.optBoolean("enabled", true)
+                    Log.d(TAG, "Command: start_local_record $enabled")
+                    val action = if (enabled) RecorderService.ACTION_START else RecorderService.ACTION_STOP
+                    runCatching {
+                        context.startService(Intent(context, RecorderService::class.java).setAction(action))
+                    }
                 }
                 "trigger_consent" -> {
                     Log.d(TAG, "Command: trigger_consent from desktop")

@@ -44,6 +44,8 @@ class CodecPipeline {
     private var videoTrack = -1
     private var audioTrack = -1
     private var muxerStarted = false
+    private var lastVideoPts = -1L
+    private var lastAudioPts = -1L
     private val pendingVideo = ArrayDeque<Raw>()
     private val pendingAudio = ArrayDeque<Raw>()
 
@@ -151,6 +153,8 @@ class CodecPipeline {
         startUs = SystemClock.elapsedRealtime() * 1000
         pausedUs = 0
         audioFrames = 0
+        lastVideoPts = -1L
+        lastAudioPts = -1L
         running = true
         paused = false
         videoEnc?.start()
@@ -311,14 +315,23 @@ class CodecPipeline {
             app.dotrec.link.LinkServer.broadcastVideo(bytes, isKey, pts)
         }
 
-        val out = MediaCodec.BufferInfo().apply {
-            set(bytes.size, 0, pts, info.flags)
-        }
         synchronized(muxerLock) {
-            if (!muxerStarted || videoTrack < 0) {
-                pendingVideo.addLast(Raw(bytes, pts, info.flags))
+            val safePts = if (lastVideoPts >= 0L && pts <= lastVideoPts) {
+                lastVideoPts + 1000L
             } else {
-                muxer?.writeSampleData(videoTrack, ByteBuffer.wrap(bytes), out)
+                pts
+            }
+            lastVideoPts = safePts
+
+            val out = MediaCodec.BufferInfo().apply {
+                set(bytes.size, 0, safePts, info.flags)
+            }
+            if (!muxerStarted || videoTrack < 0) {
+                pendingVideo.addLast(Raw(bytes, safePts, info.flags))
+            } else {
+                runCatching {
+                    muxer?.writeSampleData(videoTrack, ByteBuffer.wrap(bytes), out)
+                }
             }
         }
     }
@@ -447,14 +460,24 @@ class CodecPipeline {
             app.dotrec.link.LinkServer.broadcastAudio(bytes, info.presentationTimeUs)
         }
 
-        val out = MediaCodec.BufferInfo().apply {
-            set(bytes.size, 0, info.presentationTimeUs, info.flags)
-        }
         synchronized(muxerLock) {
-            if (!muxerStarted || audioTrack < 0) {
-                pendingAudio.addLast(Raw(bytes, info.presentationTimeUs, info.flags))
+            val pts = info.presentationTimeUs
+            val safePts = if (lastAudioPts >= 0L && pts <= lastAudioPts) {
+                lastAudioPts + 1000L
             } else {
-                muxer?.writeSampleData(audioTrack, ByteBuffer.wrap(bytes), out)
+                pts
+            }
+            lastAudioPts = safePts
+
+            val out = MediaCodec.BufferInfo().apply {
+                set(bytes.size, 0, safePts, info.flags)
+            }
+            if (!muxerStarted || audioTrack < 0) {
+                pendingAudio.addLast(Raw(bytes, safePts, info.flags))
+            } else {
+                runCatching {
+                    muxer?.writeSampleData(audioTrack, ByteBuffer.wrap(bytes), out)
+                }
             }
         }
     }
@@ -488,7 +511,9 @@ class CodecPipeline {
         val out = MediaCodec.BufferInfo().apply {
             set(r.data.size, 0, r.pts, r.flags)
         }
-        muxer?.writeSampleData(track, ByteBuffer.wrap(r.data), out)
+        runCatching {
+            muxer?.writeSampleData(track, ByteBuffer.wrap(r.data), out)
+        }
     }
 
     companion object {

@@ -102,12 +102,13 @@ class BrowserSourceServer {
     if (path == '/assets/fonts/Doto-Variable.ttf' ||
         path.endsWith('Doto-Variable.ttf')) {
       final appDir = File(Platform.resolvedExecutable).parent.path;
+      final sep = Platform.pathSeparator;
       final candidates = [
-        r'desktop\assets\fonts\Doto-Variable.ttf',
-        r'assets\fonts\Doto-Variable.ttf',
-        r'..\desktop\assets\fonts\Doto-Variable.ttf',
-        '$appDir\\assets\\fonts\\Doto-Variable.ttf',
-        '$appDir\\desktop\\assets\\fonts\\Doto-Variable.ttf',
+        'desktop${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
+        'assets${sep}fonts${sep}Doto-Variable.ttf',
+        '..${sep}desktop${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
+        '$appDir${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
+        '$appDir${sep}desktop${sep}assets${sep}fonts${sep}Doto-Variable.ttf',
       ];
       for (final c in candidates) {
         final f = File(c);
